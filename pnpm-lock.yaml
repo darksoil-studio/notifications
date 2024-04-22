@@ -50,7 +50,7 @@ importers:
       '@api-viewer/docs':
         specifier: 1.0.0-pre.10
         version: 1.0.0-pre.10
-      '@holochain-open-dev/notifications':
+      '@darksoil-studio/notifications':
         specifier: workspace:*
         version: link:../ui
       '@holochain-open-dev/profiles':

@@ -1,4 +1,4 @@
-import { 
+import {
   AgentPubKey,
   EntryHash,
   NewEntryAction,
@@ -11,7 +11,7 @@ import {
   fakeDnaHash,
   AppAgentCallZomeRequest,
   AppAgentWebsocket,
-  encodeHashToBase64 
+  encodeHashToBase64
 } from '@holochain/client';
 import { encode } from '@msgpack/msgpack';
 import { Scenario } from '@holochain/tryorama';
@@ -47,6 +47,10 @@ export async function setup(scenario: Scenario) {
   // Shortcut peer discovery through gossip and register all agents in every
   // conductor of the scenario.
   await scenario.shareAllAgents();
+
+  // Prevent race condition when two zome calls are made instantly at the beginning of the lifecycle that cause a ChainHeadMoved error because they trigger 2 parallel init workflows
+  await aliceStore.client.getReadNotifications();
+  await bobStore.client.getReadNotifications();
 
   return {
     alice: {

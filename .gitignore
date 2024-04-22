@@ -27,6 +27,7 @@ storybook-static
 *.happ
 *.webhapp
 *.dna
+.hc*
 
 # cargo
 /target/
