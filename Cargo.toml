@@ -1,0 +1,18 @@
+[profile.dev]
+opt-level = "z"
+
+[profile.release]
+opt-level = "z"
+
+[workspace]
+members = ["zomes/coordinator/*", "zomes/integrity/*"]
+resolver = "2"
+
+[workspace.dependencies]
+holochain = { version = "0.3.0-beta-dev.45", default-features = false, features = [
+  "test_utils",
+] }
+hdi = "0.4.0-beta-dev.34"
+hdk = "0.3.0-beta-dev.38"
+serde = "1"
+

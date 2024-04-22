@@ -1,0 +1,24 @@
+api-demo::part(header) {
+  display: none;
+}
+api-docs::part(header) {
+  display: none;
+}
+api-demo, api-docs {
+  font-family: inherit;
+}
+
+.sl-theme-dark api-demo::part(tab-panel) {
+  background: unset !important;
+}
+
+.sl-theme-dark api-demo {
+  --ave-item-color: rgba(255, 255, 255, 0.87);
+  --ave-tab-color: rgba(255, 255, 255, 0.54);
+  --ave-secondary-color: rgba(255, 255, 255, 0.54);
+}
+.sl-theme-dark api-docs {
+  --ave-item-color: rgba(255, 255, 255, 0.87);
+  --ave-tab-color: rgba(255, 255, 255, 0.54);
+  --ave-secondary-color: rgba(255, 255, 255, 0.54);
+}
