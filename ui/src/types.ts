@@ -1,36 +1,32 @@
-import {
-  Record,
-  ActionHash,
-  DnaHash,
-  SignedActionHashed,
-  EntryHash,
-  AgentPubKey,
-  Create,
-  Update,
-  Delete,
-  CreateLink,
-  DeleteLink
-} from '@holochain/client';
 import { ActionCommittedSignal } from '@holochain-open-dev/utils';
+import {
+	ActionHash,
+	AgentPubKey,
+	Create,
+	CreateLink,
+	Delete,
+	DeleteLink,
+	DnaHash,
+	EntryHash,
+	Record,
+	SignedActionHashed,
+	Update,
+} from '@holochain/client';
 
 export type NotificationsSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
-export type EntryTypes =
-  | ({ type: 'Notification'; } & Notification);
+export type EntryTypes = { type: 'Notification' } & Notification;
 
 export type LinkTypes = string;
 
-
-
 export interface Notification {
-  notification_type: string;
+	notification_type: string;
 
-  notification_group: string | undefined;
+	notification_group: string | undefined;
 
-  persistent: boolean;
+	persistent: boolean;
 
-  recipients: Array<AgentPubKey>;
+	recipients: Array<AgentPubKey>;
 
-  content: Uint8Array;
+	content: Uint8Array;
 }
-
