@@ -2,17 +2,14 @@
 import { assert, test } from "vitest";
 
 import { runScenario, dhtSync } from '@holochain/tryorama';
-import { ActionHash, SignedActionHashed, Delete, Record } from '@holochain/client';
-import { decode } from '@msgpack/msgpack';
 import { EntryRecord } from '@holochain-open-dev/utils';
-import { cleanNodeDecoding } from '@holochain-open-dev/utils/dist/clean-node-decoding.js';
-import { toPromise } from '@holochain-open-dev/stores';
 
 import { Notification } from '../../ui/src/types.js';
 import { sampleNotification } from '../../ui/src/mocks.js';
 import { setup } from './setup.js';
+import { toPromise } from "../../ui/src/signals.js";
 
-test.only('create notifications, read it, and dismiss it', async () => {
+test('create notifications, read it, and dismiss it', async () => {
   await runScenario(async scenario => {
     const { alice, bob } = await setup(scenario);
 
@@ -24,10 +21,15 @@ test.only('create notifications, read it, and dismiss it', async () => {
 
     let unreadNotifications = await toPromise(bob.store.unreadNotifications);
     assert.equal(unreadNotifications.size, 0);
+    console.log('heyyy0')
     let readNotifications = await toPromise(bob.store.readNotifications);
+    console.log('heyyy0.1')
     assert.equal(readNotifications.size, 0);
     let dismissedNotifications = await toPromise(bob.store.dismissedNotifications);
+    console.log('heyyy0.2')
     assert.equal(dismissedNotifications.size, 0);
+
+    console.log('heyyy1')
 
     // Alice creates a Notification
     const notification1: EntryRecord<Notification> = await alice.store.client.createNotification(await sampleNotification(alice.store.client, {
@@ -38,6 +40,7 @@ test.only('create notifications, read it, and dismiss it', async () => {
       recipients: [bob.player.agentPubKey]
     }));
     assert.ok(notification2);
+    console.log('heyyy2')
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync(
@@ -53,6 +56,7 @@ test.only('create notifications, read it, and dismiss it', async () => {
     assert.equal(dismissedNotifications.size, 0);
 
     await bob.store.client.markNotificationsAsRead([notification1.actionHash]);
+    console.log('heyyy3')
 
     unreadNotifications = await toPromise(bob.store.unreadNotifications);
     assert.equal(unreadNotifications.size, 1);
@@ -63,6 +67,7 @@ test.only('create notifications, read it, and dismiss it', async () => {
 
     await bob.store.client.markNotificationsAsRead([notification2.actionHash]);
 
+    console.log('heyyy4')
     unreadNotifications = await toPromise(bob.store.unreadNotifications);
     assert.equal(unreadNotifications.size, 0);
     readNotifications = await toPromise(bob.store.readNotifications);
@@ -70,6 +75,7 @@ test.only('create notifications, read it, and dismiss it', async () => {
     dismissedNotifications = await toPromise(bob.store.dismissedNotifications);
     assert.equal(dismissedNotifications.size, 0);
 
+    console.log('heyyy5')
     // Bob deletes the Notification
     await bob.store.client.dismissNotifications([notification2.actionHash]);
 
@@ -82,6 +88,7 @@ test.only('create notifications, read it, and dismiss it', async () => {
 
     // Bob deletes the Notification
     await bob.store.client.dismissNotifications([notification1.actionHash]);
+    console.log('heyyy6')
 
     unreadNotifications = await toPromise(bob.store.unreadNotifications);
     assert.equal(unreadNotifications.size, 0);

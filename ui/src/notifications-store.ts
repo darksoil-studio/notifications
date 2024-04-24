@@ -1,21 +1,11 @@
-
-import {
-  liveLinksStore,
-  deletedLinksStore,
-  immutableEntryStore,
-  deletesForEntryStore,
-  pipe,
-  joinAsync,
-  uniquify
-} from "@holochain-open-dev/stores";
 import { slice, LazyHoloHashMap } from "@holochain-open-dev/utils";
-import { NewEntryAction, Record, ActionHash, EntryHash, AgentPubKey, encodeHashToBase64 } from '@holochain/client';
-
-import { NotificationsClient } from './notifications-client.js';
+import { ActionHash, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-export class NotificationsStore {
+import { NotificationsClient } from './notifications-client.js';
+import { AsyncComputed, deletedLinksStore, deletesForEntryStore, immutableEntryStore, liveLinksStore, uniquify } from "./signals.js";
 
+export class NotificationsStore {
 
   constructor(public client: NotificationsClient) { }
 
@@ -41,30 +31,58 @@ export class NotificationsStore {
     'ReadNotifications'
   );
 
-  readNotifications = pipe(joinAsync([this.undismissedNotifications, this.readNotificationsLinks]), ([undismissedNotificationsLinks, readNotificationsLinks]) => {
+  readNotifications = new AsyncComputed(() => {
+    const undismissedNotifications = this.undismissedNotifications.get();
+    if (undismissedNotifications.status !== 'completed') return undismissedNotifications;
+
+    const readNotificationsLinks = this.readNotificationsLinks.get();
+    if (readNotificationsLinks.status !== 'completed') return readNotificationsLinks;
+
     /** Aggregate the read notification hashes and filter them by whether they've been dismissed */
 
-    const allReadNotificationsHashes = uniquify(Array.from([] as ActionHash[]).concat(...readNotificationsLinks.map(link => decode(link.tag) as ActionHash[])));
+    const allReadNotificationsHashes = uniquify(Array.from([] as ActionHash[]).concat(...readNotificationsLinks.value.map(link => decode(link.tag) as ActionHash[])));
 
-    const undismissedNotificationsHashes = undismissedNotificationsLinks.map(l => encodeHashToBase64(l.target));
+    const undismissedNotificationsHashes = undismissedNotifications.value.map(l => encodeHashToBase64(l.target));
 
-    return allReadNotificationsHashes.filter(hash => undismissedNotificationsHashes.includes(encodeHashToBase64(hash)));
-  }, notificationsHashes => slice(this.notifications, notificationsHashes)
+    const notificationsHashes = allReadNotificationsHashes.filter(hash => undismissedNotificationsHashes.includes(encodeHashToBase64(hash)));
+    const value = slice(this.notifications, notificationsHashes);
+    return {
+      status: 'completed',
+      value
+    };
+  });
+
+  unreadNotifications = new AsyncComputed(() => {
+    const undismissedNotifications = this.undismissedNotifications.get();
+    if (undismissedNotifications.status !== 'completed') return undismissedNotifications;
+    const readNotifications = this.readNotifications.get();
+    if (readNotifications.status !== 'completed') return readNotifications;
+    const readNotificationsHashes = Array.from(readNotifications.value.keys()).map(h => encodeHashToBase64(h));
+
+    const links = undismissedNotifications.value.filter(link => !readNotificationsHashes.includes(encodeHashToBase64(link.target)));
+    const value = slice(this.notifications, uniquify(links.map(l => l.target)));
+    return {
+      status: "completed",
+      value
+    };
+  });
+
+  deletedNotificationsLinks = deletedLinksStore(
+    this.client,
+    this.client.client.myPubKey,
+    () => this.client.getDismissedNotifications(),
+    'RecipientToNotifications'
   );
 
-  unreadNotifications = pipe(joinAsync([this.undismissedNotifications, this.readNotifications]), ([undismissedNotifications, readNotifications]) => {
-    const readNotificationsHashes = Array.from(readNotifications.keys()).map(h => encodeHashToBase64(h));
+  dismissedNotifications = new AsyncComputed(() => {
+    const deletedLinks = this.deletedNotificationsLinks.get();
+    if (deletedLinks.status !== 'completed') return deletedLinks;
 
-    return undismissedNotifications.filter(link => !readNotificationsHashes.includes(encodeHashToBase64(link.target)));
-  }, links => slice(this.notifications, uniquify(links.map(l => l.target))));
+    const value = slice(this.notifications, deletedLinks.value.map(l => l[0].hashed.content.target_address));
 
-  dismissedNotifications = pipe(
-    deletedLinksStore(
-      this.client,
-      this.client.client.myPubKey,
-      () => this.client.getDismissedNotifications(),
-      'RecipientToNotifications'
-    ), links => slice(this.notifications, links.map(l => l[0].hashed.content.target_address))
-  );
-
+    return {
+      status: 'completed',
+      value
+    };
+  });
 }

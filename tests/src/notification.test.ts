@@ -5,11 +5,11 @@ import { ActionHash, SignedActionHashed, Delete, Record } from '@holochain/clien
 import { decode } from '@msgpack/msgpack';
 import { EntryRecord } from '@holochain-open-dev/utils';
 import { cleanNodeDecoding } from '@holochain-open-dev/utils/dist/clean-node-decoding.js';
-import { toPromise } from '@holochain-open-dev/stores';
 
 import { Notification } from '../../ui/src/types.js';
 import { sampleNotification } from '../../ui/src/mocks.js';
 import { setup } from './setup.js';
+import { toPromise } from "../../ui/src/signals.js";
 
 test('create Notification', async () => {
   await runScenario(async scenario => {
