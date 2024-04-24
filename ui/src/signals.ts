@@ -48,27 +48,28 @@ export type AsyncSignal<T, E = unknown> =
 	| AsyncState<T, E>
 	| AsyncComputed<T, E>;
 
+// This function would usually live in a library/framework, not application code
+// NOTE: This scheduling logic is too basic to be useful. Do not copy/paste.
+let pending = false;
+
+const w = new Signal.subtle.Watcher(() => {
+	if (!pending) {
+		pending = true;
+		queueMicrotask(() => {
+			pending = false;
+			for (const s of w.getPending()) s.get();
+			w.watch();
+		});
+	}
+});
 // An effect effect Signal which evaluates to cb, which schedules a read of
 // itself on the microtask queue whenever one of its dependencies might change
 export function effect(cb: (() => () => void) | (() => void)) {
-	// This function would usually live in a library/framework, not application code
-	// NOTE: This scheduling logic is too basic to be useful. Do not copy/paste.
-	let pending = false;
-
-	const w = new Signal.subtle.Watcher(() => {
-		if (!pending) {
-			pending = true;
-			queueMicrotask(() => {
-				pending = false;
-				for (const s of w.getPending()) s.get();
-				w.watch();
-			});
-		}
-	});
 	let destructor: void | (() => void);
 	const c = new Signal.Computed(() => {
-		destructor?.();
+		const lastDestructor = destructor;
 		destructor = cb();
+		lastDestructor?.();
 	});
 	w.watch(c);
 	c.get();
@@ -689,12 +690,13 @@ export function liveLinksStore<
 				};
 				const fetch = async () => {
 					if (!active) return;
-					const nlinks = await fetchLinks().finally(() => {
-						if (active) {
-							setTimeout(() => fetch(), pollIntervalMs);
-						}
-					});
-					maybeSet(nlinks);
+					fetchLinks()
+						.then(maybeSet)
+						.finally(() => {
+							if (active) {
+								setTimeout(() => fetch(), pollIntervalMs);
+							}
+						});
 				};
 
 				fetch().catch(error => {

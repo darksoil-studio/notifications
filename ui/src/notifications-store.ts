@@ -1,4 +1,4 @@
-import { LazyHoloHashMap, slice } from '@holochain-open-dev/utils';
+import { HoloHashMap, LazyHoloHashMap, slice } from '@holochain-open-dev/utils';
 import { ActionHash, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 

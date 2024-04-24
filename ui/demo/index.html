@@ -41,10 +41,13 @@
 			import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
 			import { AppAgentWebsocket } from '@holochain/client';
 			import { ContextProvider } from '@lit/context';
+			import { encode } from '@msgpack/msgpack';
+			import '@shoelace-style/shoelace/dist/components/button/button.js';
 			import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 			import '@shoelace-style/shoelace/dist/themes/light.css';
 			import { LitElement, css, html } from 'lit';
 
+			import '../src/elements/my-notifications.ts';
 			import '../src/elements/notifications-context.ts';
 			import { NotificationsClient, NotificationsStore } from '../src/index.ts';
 
@@ -78,7 +81,33 @@
 				renderContent() {
 					return html`
 						<notifications-context .store=${this._notificationsStore}>
-							<!-- TODO: add here the content of your application -->
+							<my-notifications></my-notifications>
+							<sl-button
+								@click=${() =>
+									this._notificationsStore.client.createNotification({
+										notification_type: '',
+										notification_group: undefined,
+										persistent: true,
+										recipients: [
+											this._notificationsStore.client.client.myPubKey,
+										],
+										content: encode({ title: 'hey!', body: "what's up?" }),
+									})}
+								>Create persistent notification</sl-button
+							>
+							<sl-button
+								@click=${() =>
+									this._notificationsStore.client.createNotification({
+										notification_type: '',
+										notification_group: undefined,
+										persistent: false,
+										recipients: [
+											this._notificationsStore.client.client.myPubKey,
+										],
+										content: encode({ title: 'hey!', body: "what's up?" }),
+									})}
+								>Create non-persistent notification</sl-button
+							>
 						</notifications-context>
 					`;
 				}

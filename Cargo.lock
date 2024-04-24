@@ -2208,9 +2208,9 @@ dependencies = [
 
 [[package]]
 name = "hdi"
-version = "0.4.0-beta-dev.35"
+version = "0.4.0-beta-dev.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "573077dc8ba0c02ec52b63505ffd09af58a4c724c3ee98a04375125109839c27"
+checksum = "efe35d8a7150f89f54d6a2c61320bfaf70af9d5d0dd5726b2ce68e802fcab2e4"
 dependencies = [
  "getrandom 0.2.14",
  "hdk_derive",
@@ -2226,9 +2226,9 @@ dependencies = [
 
 [[package]]
 name = "hdk"
-version = "0.3.0-beta-dev.39"
+version = "0.3.0-beta-dev.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bc83515fde323014ef26be88b617c0b5150426db0efac5471c9526147f5d235"
+checksum = "700ef8595eac45e31a61b1f1af054c247156fddc52dd31ba3902acd8d17c5db3"
 dependencies = [
  "getrandom 0.2.14",
  "hdi",
@@ -2354,9 +2354,9 @@ dependencies = [
 
 [[package]]
 name = "holochain"
-version = "0.3.0-beta-dev.46"
+version = "0.3.0-beta-dev.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf428d2c82e6d40f09222985c6532d08f9bd970c03c9e524fd71910b43b59521"
+checksum = "b4bb959fa5b8b9065939d024317d252373430dfa70fe6836c418468201e8b4db"
 dependencies = [
  "aitia",
  "anyhow",
@@ -2461,9 +2461,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_cascade"
-version = "0.3.0-beta-dev.45"
+version = "0.3.0-beta-dev.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0e94385cd126e22b833bce2c55734acc08cc01aebbf7ddf102a1348d09dafad"
+checksum = "be737e39dcafac62ddfd8ca79ce988742676e3c6296841900d505480826e1417"
 dependencies = [
  "async-trait",
  "derive_more",
@@ -2791,9 +2791,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_test_wasm_common"
-version = "0.3.0-beta-dev.39"
+version = "0.3.0-beta-dev.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9e50a4d610dbc0145196cb3163255e2cf17d77600a0eef4af583f9e6afeef72"
+checksum = "5fe92b88750e40a8ab15c14c55670fce756fe1e0e09dd7dbfb5040953a3301e1"
 dependencies = [
  "hdk",
  "serde",
