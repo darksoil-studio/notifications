@@ -31,7 +31,7 @@
   "dependencies": {
     "@holochain-open-dev/elements": "^0.300.0-dev.0",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#69dba6ebf0ee04985e799ccaa39ae2852ab465b7&path:ui",
-    "@holochain-open-dev/stores": "^0.300.0-dev.4",
+    "@holochain-open-dev/signals": "^0.300.0-dev.3",
     "@holochain-open-dev/utils": "^0.300.0-dev.0",
     "@holochain/client": "^0.17.0-dev.9",
     "@lit/context": "^1.0.0",
@@ -40,8 +40,7 @@
     "@msgpack/msgpack": "^2.8.0",
     "@shoelace-style/shoelace": "^2.11.0",
     "lit": "^3.0.0",
-    "lodash-es": "^4.17.21",
-    "signal-polyfill": "^0.1.0"
+    "lodash-es": "^4.17.21"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.9.4",

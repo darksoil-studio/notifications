@@ -1,0 +1,609 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "locales/locales.js",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "sourceLocale",
+          "default": "`en`",
+          "description": "The locale code that templates in this source code are written in."
+        },
+        {
+          "kind": "variable",
+          "name": "targetLocales",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  ,\n]",
+          "description": "The other locale codes that this application is localized into. Sorted\nlexicographically."
+        },
+        {
+          "kind": "variable",
+          "name": "allLocales",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  `en`,\n]",
+          "description": "All valid project locale codes. Sorted lexicographically."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "sourceLocale",
+          "declaration": {
+            "name": "sourceLocale",
+            "module": "locales/locales.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "targetLocales",
+          "declaration": {
+            "name": "targetLocales",
+            "module": "locales/locales.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "allLocales",
+          "declaration": {
+            "name": "allLocales",
+            "module": "locales/locales.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/context.ts",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "notificationsStoreContext"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "notificationsStoreContext",
+          "declaration": {
+            "name": "notificationsStoreContext",
+            "module": "src/context.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "./notifications-store.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "./notifications-client.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "./context.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "./types.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/mocks.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "NotificationsZomeMock",
+          "members": [
+            {
+              "kind": "field",
+              "name": "notifications",
+              "default": "new HoloHashMap<\n\t\tActionHash,\n\t\t{\n\t\t\tdeletes: Array<SignedActionHashed<Delete>>;\n\t\t\trevisions: Array<Record>;\n\t\t}\n\t>()",
+              "description": "Notification"
+            },
+            {
+              "kind": "field",
+              "name": "notificationsForRecipient",
+              "default": "new HoloHashMap<ActionHash, Link[]>()"
+            },
+            {
+              "kind": "method",
+              "name": "create_notification",
+              "return": {
+                "type": {
+                  "text": "Promise<Record>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notification",
+                  "type": {
+                    "text": "Notification"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "get_notification",
+              "return": {
+                "type": {
+                  "text": "Promise<Record | undefined>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "get_all_deletes_for_notification",
+              "return": {
+                "type": {
+                  "text": "Promise<Array<SignedActionHashed<Delete>> | undefined>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "get_oldest_delete_for_notification",
+              "return": {
+                "type": {
+                  "text": "Promise<SignedActionHashed<Delete> | undefined>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "delete_notification",
+              "return": {
+                "type": {
+                  "text": "Promise<ActionHash>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "original_notification_hash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "get_notifications_for_recipient",
+              "return": {
+                "type": {
+                  "text": "Promise<Array<Link>>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "recipient",
+                  "type": {
+                    "text": "AgentPubKey"
+                  }
+                }
+              ]
+            }
+          ],
+          "superclass": {
+            "name": "ZomeMock",
+            "package": "@holochain-open-dev/utils"
+          }
+        },
+        {
+          "kind": "function",
+          "name": "sampleNotification",
+          "return": {
+            "type": {
+              "text": "Promise<Notification>"
+            }
+          },
+          "parameters": [
+            {
+              "name": "client",
+              "type": {
+                "text": "NotificationsClient"
+              }
+            },
+            {
+              "name": "partialNotification",
+              "default": "{}",
+              "type": {
+                "text": "Partial<Notification>"
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NotificationsZomeMock",
+          "declaration": {
+            "name": "NotificationsZomeMock",
+            "module": "src/mocks.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "sampleNotification",
+          "declaration": {
+            "name": "sampleNotification",
+            "module": "src/mocks.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/notifications-client.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "NotificationsClient",
+          "members": [
+            {
+              "kind": "method",
+              "name": "createNotification",
+              "return": {
+                "type": {
+                  "text": "Promise<EntryRecord<Notification>>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notification",
+                  "type": {
+                    "text": "Notification"
+                  }
+                }
+              ],
+              "description": "Notification"
+            },
+            {
+              "kind": "method",
+              "name": "getNotification",
+              "return": {
+                "type": {
+                  "text": "Promise<EntryRecord<Notification> | undefined>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "markNotificationsAsRead",
+              "return": {
+                "type": {
+                  "text": "Promise<void>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationsHashes",
+                  "type": {
+                    "text": "ActionHash[]"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "dismissNotifications",
+              "return": {
+                "type": {
+                  "text": "Promise<void>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationsHashes",
+                  "type": {
+                    "text": "ActionHash[]"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getAllDeletesForNotification",
+              "return": {
+                "type": {
+                  "text": "Promise<Array<SignedActionHashed<Delete>>>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "originalNotificationHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getUndismissedNotifications",
+              "return": {
+                "type": {
+                  "text": "Promise<Array<Link>>"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getReadNotifications",
+              "return": {
+                "type": {
+                  "text": "Promise<Array<Link>>"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getDismissedNotifications",
+              "return": {
+                "type": {
+                  "text": "Promise<\n\t\tArray<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>\n\t>"
+                }
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ZomeClient",
+            "package": "@holochain-open-dev/utils"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NotificationsClient",
+          "declaration": {
+            "name": "NotificationsClient",
+            "module": "src/notifications-client.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/notifications-store.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "NotificationsStore",
+          "members": [
+            {
+              "kind": "field",
+              "name": "notifications",
+              "default": "new LazyHoloHashMap((notificationHash: ActionHash) => ({\n\t\tentry$: immutableEntrySignal(() =>\n\t\t\tthis.client.getNotification(notificationHash),\n\t\t),\n\t\tdeletes$: deletesForEntrySignal(this.client, notificationHash, () =>\n\t\t\tthis.client.getAllDeletesForNotification(notificationHash),\n\t\t),\n\t}))",
+              "description": "Notification"
+            },
+            {
+              "kind": "field",
+              "name": "undismissedNotificationsLinks$",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "readNotificationsLinks$",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "readNotifications$"
+            },
+            {
+              "kind": "field",
+              "name": "unreadNotifications$",
+              "default": "new AsyncComputed(() => {\n\t\tconst readNotifications = this.readNotifications$.get();\n\t\tconst undismissedNotifications = this.undismissedNotificationsLinks$.get();\n\n\t\tif (readNotifications.status !== 'completed') return readNotifications;\n\t\tif (undismissedNotifications.status !== 'completed')\n\t\t\treturn undismissedNotifications;\n\n\t\tconst readNotificationsHashes = Array.from(\n\t\t\treadNotifications.value.keys(),\n\t\t).map(h => encodeHashToBase64(h));\n\n\t\tconst links = undismissedNotifications.value.filter(\n\t\t\tlink =>\n\t\t\t\t!readNotificationsHashes.includes(encodeHashToBase64(link.target)),\n\t\t);\n\t\tconst value = slice(this.notifications, uniquify(links.map(l => l.target)));\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
+            },
+            {
+              "kind": "field",
+              "name": "deletedNotificationsLinks$"
+            },
+            {
+              "kind": "field",
+              "name": "dismissedNotifications$",
+              "default": "new AsyncComputed(() => {\n\t\tconst deletedLinks = this.deletedNotificationsLinks$.get();\n\t\tif (deletedLinks.status !== 'completed') return deletedLinks;\n\n\t\tconst value = slice(\n\t\t\tthis.notifications,\n\t\t\tdeletedLinks.value.map(l => l[0].hashed.content.target_address),\n\t\t);\n\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NotificationsStore",
+          "declaration": {
+            "name": "NotificationsStore",
+            "module": "src/notifications-store.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/types.ts",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/elements/my-notifications.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "MyNotifications",
+          "members": [
+            {
+              "kind": "method",
+              "name": "renderList",
+              "parameters": [
+                {
+                  "name": "hashes",
+                  "type": {
+                    "text": "Array<ActionHash>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderBadge"
+            }
+          ],
+          "mixins": [
+            {
+              "name": "SignalWatcher",
+              "package": "@holochain-open-dev/signals"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "my-notifications",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "MyNotifications",
+          "declaration": {
+            "name": "MyNotifications",
+            "module": "src/elements/my-notifications.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "my-notifications",
+          "declaration": {
+            "name": "MyNotifications",
+            "module": "src/elements/my-notifications.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/elements/notifications-context.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "NotificationsContext",
+          "members": [
+            {
+              "kind": "field",
+              "name": "store",
+              "type": {
+                "text": "NotificationsStore"
+              },
+              "attribute": "store"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "store",
+              "type": {
+                "text": "NotificationsStore"
+              },
+              "fieldName": "store"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "notifications-context",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "NotificationsContext",
+          "declaration": {
+            "name": "NotificationsContext",
+            "module": "src/elements/notifications-context.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "notifications-context",
+          "declaration": {
+            "name": "NotificationsContext",
+            "module": "src/elements/notifications-context.ts"
+          }
+        }
+      ]
+    }
+  ]
+}
