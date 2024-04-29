@@ -78,17 +78,17 @@ importers:
   tests:
     dependencies:
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-dev.3
-        version: 0.300.0-dev.3(@types/react@18.2.79)
+        specifier: ^0.300.0-dev.5
+        version: 0.300.0-dev.5(@types/react@18.2.79)
       '@holochain-open-dev/utils':
-        specifier: ^0.300.0-dev.0
-        version: 0.300.0-dev.1
+        specifier: ^0.300.0-dev.2
+        version: 0.300.0-dev.2
       '@holochain/client':
-        specifier: ^0.17.0-dev.9
-        version: 0.17.0-dev.9
+        specifier: ^0.17.0-dev.12
+        version: 0.17.0-dev.12
       '@holochain/tryorama':
-        specifier: ^v0.16.0-dev.3
-        version: 0.16.0-dev.3
+        specifier: ^v0.16.0-dev.6
+        version: 0.16.0-dev.6
       '@msgpack/msgpack':
         specifier: ^2.7.0
         version: 2.8.0
@@ -664,9 +664,6 @@ packages:
   /@holochain-open-dev/elements@0.300.0-dev.1:
     resolution: {integrity: sha512-wjwUp2j9dZAm39K5pl+2SA5PzwY7s+8eouoBjzOoWuAQhSvzdyBw8r7mdUlnQlc+U6R+nwt2mz4Hl48XEa3p0g==}
 
-  /@holochain-open-dev/signals@0.300.0-dev.3:
-    resolution: {integrity: sha512-Ju5UJkDUZhlm1VpxoBOPXk+/qhoA/WM8xHaIkAT7mWaWsKsAHUZghbI/ORV3DcUdQjFYT6KoU6G2VRmSj47HWw==}
-
   /@holochain-open-dev/signals@0.300.0-dev.5:
     resolution: {integrity: sha512-aglodUte9ov5oq6sIGZuAcF/TTNCw5vn+gOBxajd98H+MEAoCpRtH2bjO0ayIScoer0OvtaP//cEXuPcPkOksw==}
 
@@ -675,9 +672,6 @@ packages:
 
   /@holochain-open-dev/utils@0.300.0-dev.0:
     resolution: {integrity: sha512-sqpnfK3xh5ufMD98HHOhVH2iUnJ+xbe87BWLnJ9g3iQ/Dkp7yeM22HanBV8GKw5lr8CPgOKKlJ1EQ+q8eGGXag==}
-
-  /@holochain-open-dev/utils@0.300.0-dev.1:
-    resolution: {integrity: sha512-AI8xaf5YEflHw3rRBjzMkMwSa3ErfNFe63ruWWWOw65eRGrBTF9d9mErT0qfmkpwICqvj02ANlCkSjZlP2Qeqw==}
 
   /@holochain-open-dev/utils@0.300.0-dev.2:
     resolution: {integrity: sha512-V4kwnfnVrxg35tiRebijDl8SCTJ7f+icIK7Apbwy5DwOOfdNH9/MinvkHP9ef26i6QooBuxlvwaLh0PvKgwegQ==}
@@ -697,8 +691,8 @@ packages:
   /@holochain/serialization@0.1.0-beta-rc.3:
     resolution: {integrity: sha512-DJx4V2KXHVLciyOGjOYKTM/JLBpBEZ3RsPIRCgf7qmwhQdxXvhi2p+oFFRD51yUT5uC1/MzIVeJCl/R60PwFbw==}
 
-  /@holochain/tryorama@0.16.0-dev.3:
-    resolution: {integrity: sha512-mxt8wCGVh4x2u5v6hXVF/1dl2P97XqkGdJRiAE3lngfQLS24DaV3ElEC22tVLatCSS8Vv/deYCQPju9lyeFDjw==}
+  /@holochain/tryorama@0.16.0-dev.6:
+    resolution: {integrity: sha512-5ltiUWqGze+530tlspIvoGBQ2TUp3pru7MX2ywY9XfCsuiPXrOANeOBe1Y9GnqtMX2GGqCiQ9NrAJUfIqg4N2w==}
     engines: {node: '>=18.0.0 || >=20.0.0'}
 
   /@humanwhocodes/config-array@0.13.0:
@@ -3557,20 +3551,6 @@ snapshots:
       - utf-8-validate
     dev: false
 
-  /@holochain-open-dev/signals@0.300.0-dev.3(@types/react@18.2.79):
-    dependencies:
-      '@holochain-open-dev/utils': 0.300.0-dev.1
-      '@holochain/client': 0.17.0-dev.9
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
-      async-signals: 0.1.6
-      lit-signal-watcher: 0.1.0
-      signal-polyfill: 0.1.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
   /@holochain-open-dev/signals@0.300.0-dev.5(@types/react@18.2.79):
     dependencies:
       '@holochain-open-dev/utils': 0.300.0-dev.2
@@ -3613,19 +3593,6 @@ snapshots:
       - bufferutil
       - utf-8-validate
     dev: true
-
-  /@holochain-open-dev/utils@0.300.0-dev.1:
-    dependencies:
-      '@holochain/client': 0.17.0-dev.9
-      '@msgpack/msgpack': 2.8.0
-      blakejs: 1.2.1
-      emittery: 1.0.3
-      lodash-es: 4.17.21
-      sort-keys: 5.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
 
   /@holochain-open-dev/utils@0.300.0-dev.2:
     dependencies:
@@ -3673,12 +3640,13 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: true
 
   /@holochain/serialization@0.1.0-beta-rc.3: {}
 
-  /@holochain/tryorama@0.16.0-dev.3:
+  /@holochain/tryorama@0.16.0-dev.6:
     dependencies:
-      '@holochain/client': 0.17.0-dev.9
+      '@holochain/client': 0.17.0-dev.12
       get-port: 6.1.2
       lodash: 4.17.21
       uuid: 8.3.2
@@ -3911,7 +3879,8 @@ snapshots:
   /@sinclair/typebox@0.27.8:
     dev: false
 
-  /@tauri-apps/api@1.5.3: {}
+  /@tauri-apps/api@1.5.3:
+    dev: true
 
   /@trivago/prettier-plugin-sort-imports@4.3.0(prettier@3.2.5):
     dependencies:

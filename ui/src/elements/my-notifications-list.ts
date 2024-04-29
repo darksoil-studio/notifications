@@ -1,33 +1,22 @@
 import { sharedStyles, wrapPathInSvg } from '@holochain-open-dev/elements';
-import '@holochain-open-dev/elements/dist/elements/display-error.js';
-import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import {
-	AsyncSignal,
+	AsyncComputed,
 	SignalWatcher,
 	joinAsync,
 	joinAsyncMap,
 } from '@holochain-open-dev/signals';
 import { EntryRecord, mapValues } from '@holochain-open-dev/utils';
-import { ActionHash, Delete, SignedActionHashed } from '@holochain/client';
+import { Delete, SignedActionHashed } from '@holochain/client';
 import { consume } from '@lit/context';
-import { localized, msg } from '@lit/localize';
-import {
-	mdiBell,
-	mdiInformationOutline,
-	mdiNotificationClearAll,
-} from '@mdi/js';
-import '@shoelace-style/shoelace/dist/components/badge/badge.js';
+import { msg } from '@lit/localize';
+import { mdiInformationOutline, mdiNotificationClearAll } from '@mdi/js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/card/card.js';
 import '@shoelace-style/shoelace/dist/components/divider/divider.js';
-import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
-import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/relative-time/relative-time.js';
 import '@shoelace-style/shoelace/dist/components/skeleton/skeleton.js';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { notificationsStoreContext } from '../context.js';
@@ -35,10 +24,9 @@ import { NotificationsStore } from '../notifications-store.js';
 import { Notification } from '../types.js';
 
 /**
- * @element my-notifications
+ * @element my-notifications-list
  */
-@localized()
-@customElement('my-notifications')
+@customElement('my-notifications-list')
 export class MyNotifications extends SignalWatcher(LitElement) {
 	/**
 	 * @internal
@@ -58,14 +46,16 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		return html`<div
 				class="column"
 				style=${styleMap({
-					'background-color': read ? 'var(--sl-color-neutral-100)' : 'auto',
+					'background-color': read
+						? 'var(--sl-color-neutral-100)'
+						: 'var(--sl-color-neutral-0)',
 					padding: '8px',
+					cursor: 'pointer',
 				})}
 				@click=${() => info.onClick()}
 			>
-				<div class="row">
-					<span>${info.title}</span>
-					<div style="flex: 1"></div>
+				<div class="row" style="gap: 8px">
+					<span style="flex: 1">${info.title}</span>
 					<sl-relative-time
 						style="color: grey;"
 						.date=${new Date(notification.action.timestamp)}
@@ -79,26 +69,29 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				: html``} `;
 	}
 
-	renderNotifications(
-		unreadNotifications: ReadonlyMap<
-			ActionHash,
-			{
-				entry$: AsyncSignal<EntryRecord<Notification>>;
-				deletes$: AsyncSignal<SignedActionHashed<Delete>[]>;
-			}
-		>,
-		readNotifications: ReadonlyMap<
-			ActionHash,
-			{
-				entry$: AsyncSignal<EntryRecord<Notification>>;
-				deletes$: AsyncSignal<SignedActionHashed<Delete>[]>;
-			}
-		>,
-	) {
-		const result = joinAsync([
-			joinAsyncMap(mapValues(unreadNotifications, n => n.entry$)),
-			joinAsyncMap(mapValues(readNotifications, n => n.entry$)),
-		]).get();
+	get notifications() {
+		const unreadNotifications =
+			this.notificationsStore.unreadNotifications$.get();
+		const readNotifications = this.notificationsStore.readNotifications$.get();
+		if (unreadNotifications.status !== 'completed') return unreadNotifications;
+		if (readNotifications.status !== 'completed') return readNotifications;
+
+		const unreadMapResult = joinAsyncMap(
+			mapValues(unreadNotifications.value, n =>
+				joinAsync([n.entry$, n.deletes$]),
+			),
+		);
+		const readMapResult = joinAsyncMap(
+			mapValues(readNotifications.value, n =>
+				joinAsync([n.entry$, n.deletes$]),
+			),
+		);
+
+		return joinAsync([unreadMapResult, readMapResult]).get();
+	}
+
+	render() {
+		const result = this.notifications;
 
 		switch (result.status) {
 			case 'pending':
@@ -116,24 +109,35 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				></display-error>`;
 			case 'completed':
 				const [unreadNotifications, readNotifications] = result.value;
-				const compareTimeAscendant = (
+				const compareTimeDescendant = (
 					n1: EntryRecord<any>,
 					n2: EntryRecord<any>,
 				) => n2.action.timestamp - n1.action.timestamp;
 
+				const isPersistent = ([notification, deletes]: [
+					EntryRecord<Notification>,
+					Array<SignedActionHashed<Delete>>,
+				]) => notification.entry.persistent && deletes.length === 0;
+
 				const unreadPersistent = Array.from(unreadNotifications.values())
-					.filter(n => n.entry.persistent)
-					.sort(compareTimeAscendant);
+					.filter(isPersistent)
+					.map(([n]) => n)
+					.sort(compareTimeDescendant);
 				const readPersistent = Array.from(readNotifications.values())
-					.filter(n => n.entry.persistent)
-					.sort(compareTimeAscendant);
+					.filter(isPersistent)
+					.map(([n]) => n)
+					.sort(compareTimeDescendant);
 
 				const unreadNonPersistent = Array.from(unreadNotifications.values())
-					.filter(n => !n.entry.persistent)
-					.sort(compareTimeAscendant);
+					.filter(n => !isPersistent(n))
+					.map(([n]) => n)
+					.sort(compareTimeDescendant);
+
 				const readNonPersistent = Array.from(readNotifications.values())
-					.filter(n => !n.entry.persistent)
-					.sort(compareTimeAscendant);
+					.filter(n => !isPersistent(n))
+					.map(([n]) => n)
+					.sort(compareTimeDescendant);
+
 				const nonPersistentNotificationsCount =
 					unreadNonPersistent.length + readNonPersistent.length;
 				const persistentNotificationsCount =
@@ -165,7 +169,11 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 								<div class="column">
 									${nonPersistentNotificationsCount > 0
 										? html`
-												<sl-divider style="--spacing: 0"></sl-divider>
+												${persistentNotificationsCount > 0
+													? html`
+															<sl-divider style="--spacing: 0"></sl-divider>
+														`
+													: html``}
 												<div class="row" style="justify-content: end">
 													<sl-button
 														variant="text"
@@ -224,66 +232,6 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 								>
 							</div>
 						`;
-		}
-	}
-
-	render() {
-		const result = joinAsync([
-			this.notificationsStore.unreadNotifications$,
-			this.notificationsStore.readNotifications$,
-		]).get();
-
-		switch (result.status) {
-			case 'pending':
-				return html`<div
-					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
-				>
-					<sl-skeleton></sl-skeleton>
-				</div>`;
-			case 'error':
-				return html`<display-error
-					tooltip
-					.headline=${msg('Error fetching the notifications')}
-					.error=${result.error}
-				></display-error>`;
-			case 'completed':
-				const [unreadNotifications, readNotifications] = result.value;
-				return html`
-					<sl-dropdown
-						placement="bottom"
-						distance="8"
-						@sl-hide=${() =>
-							this.notificationsStore.client.markNotificationsAsRead(
-								Array.from(unreadNotifications.keys()),
-							)}
-					>
-						<div slot="trigger" style="position: relative;">
-							<sl-icon-button
-								slot="anchor"
-								style="font-size: 1.5rem"
-								.src=${wrapPathInSvg(mdiBell)}
-							>
-							</sl-icon-button>
-							${unreadNotifications.size + readNotifications.size > 0
-								? html`
-										<sl-badge
-											style="position: absolute; left: 20px; bottom: -4px; z-index: 1000"
-											pill
-											.pulse=${unreadNotifications.size > 0}
-											>${unreadNotifications.size +
-											readNotifications.size}</sl-badge
-										>
-									`
-								: html``}
-						</div>
-						<sl-card style="--padding: 0; width: 320px;">
-							${this.renderNotifications(
-								unreadNotifications,
-								readNotifications,
-							)}
-						</sl-card>
-					</sl-dropdown>
-				`;
 		}
 	}
 

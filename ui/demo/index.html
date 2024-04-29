@@ -48,7 +48,8 @@
 			import '@shoelace-style/shoelace/dist/themes/light.css';
 			import { LitElement, css, html } from 'lit';
 
-			import '../src/elements/my-notifications.ts';
+			import '../src/elements/my-notifications-icon-button.ts';
+			import '../src/elements/my-notifications-list.ts';
 			import '../src/elements/notifications-context.ts';
 			import { NotificationsClient, NotificationsStore } from '../src/index.ts';
 
@@ -101,7 +102,8 @@
 					];
 					return html`
 						<notifications-context .store=${this._notificationsStore}>
-							<my-notifications></my-notifications>
+							<my-notifications-icon-button></my-notifications-icon-button>
+							<my-notifications-list></my-notifications-list>
 							<div>
 								<sl-button
 									@click=${e => {

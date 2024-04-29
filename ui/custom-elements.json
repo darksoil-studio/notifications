@@ -495,7 +495,49 @@
     },
     {
       "kind": "javascript-module",
-      "path": "src/elements/my-notifications.ts",
+      "path": "src/elements/my-notifications-icon-button.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "MyNotificationsIconButton",
+          "members": [],
+          "mixins": [
+            {
+              "name": "SignalWatcher",
+              "package": "@holochain-open-dev/signals"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "my-notifications-icon-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "MyNotificationsIconButton",
+          "declaration": {
+            "name": "MyNotificationsIconButton",
+            "module": "src/elements/my-notifications-icon-button.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "my-notifications-icon-button",
+          "declaration": {
+            "name": "MyNotificationsIconButton",
+            "module": "src/elements/my-notifications-icon-button.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/elements/my-notifications-list.ts",
       "declarations": [
         {
           "kind": "class",
@@ -504,19 +546,32 @@
           "members": [
             {
               "kind": "method",
-              "name": "renderList",
+              "name": "renderNotification",
               "parameters": [
                 {
-                  "name": "hashes",
+                  "name": "read",
                   "type": {
-                    "text": "Array<ActionHash>"
+                    "text": "boolean"
+                  }
+                },
+                {
+                  "name": "notification",
+                  "type": {
+                    "text": "EntryRecord<Notification>"
+                  }
+                },
+                {
+                  "name": "last",
+                  "type": {
+                    "text": "boolean"
                   }
                 }
               ]
             },
             {
-              "kind": "method",
-              "name": "renderBadge"
+              "kind": "field",
+              "name": "notifications",
+              "default": "new AsyncComputed(() => {\n\t\tconst unreadNotifications =\n\t\t\tthis.notificationsStore.unreadNotifications$.get();\n\t\tconst readNotifications = this.notificationsStore.readNotifications$.get();\n\t\tif (unreadNotifications.status !== 'completed') return unreadNotifications;\n\t\tif (readNotifications.status !== 'completed') return readNotifications;\n\n\t\tconst unreadMapResult = joinAsyncMap(\n\t\t\tmapValues(unreadNotifications.value, n =>\n\t\t\t\tjoinAsync([n.entry$, n.deletes$]),\n\t\t\t),\n\t\t);\n\t\tconst readMapResult = joinAsyncMap(\n\t\t\tmapValues(readNotifications.value, n =>\n\t\t\t\tjoinAsync([n.entry$, n.deletes$]),\n\t\t\t),\n\t\t);\n\n\t\treturn joinAsync([unreadMapResult, readMapResult]).get();\n\t})"
             }
           ],
           "mixins": [
@@ -529,7 +584,7 @@
             "name": "LitElement",
             "package": "lit"
           },
-          "tagName": "my-notifications",
+          "tagName": "my-notifications-list",
           "customElement": true
         }
       ],
@@ -539,15 +594,15 @@
           "name": "MyNotifications",
           "declaration": {
             "name": "MyNotifications",
-            "module": "src/elements/my-notifications.ts"
+            "module": "src/elements/my-notifications-list.ts"
           }
         },
         {
           "kind": "custom-element-definition",
-          "name": "my-notifications",
+          "name": "my-notifications-list",
           "declaration": {
             "name": "MyNotifications",
-            "module": "src/elements/my-notifications.ts"
+            "module": "src/elements/my-notifications-list.ts"
           }
         }
       ]
