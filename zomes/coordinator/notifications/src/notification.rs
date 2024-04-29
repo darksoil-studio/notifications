@@ -1,6 +1,8 @@
 use hdk::prelude::*;
 use notifications_integrity::*;
 
+pub const MAX_TAG_SIZE: usize = 1000;
+
 #[hdk_extern]
 pub fn create_notification(notification: Notification) -> ExternResult<Record> {
 	let notification_hash = create_entry(&EntryTypes::Notification(notification.clone()))?;
@@ -36,20 +38,27 @@ pub struct ReadNotifications(pub Vec<ActionHash>);
 
 #[hdk_extern]
 pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> ExternResult<()> {
-	let read_notifications = ReadNotifications(notifications_hashes);
+	let hash_size = 39;
+	let max_hashes_per_link_tag = (MAX_TAG_SIZE / hash_size) - 1;
 
-	let bytes = SerializedBytes::try_from(read_notifications).map_err(|err| {
-		wasm_error!(WasmErrorInner::Guest(format!(
-			"Failed to serialize ReadNotifications {err:?}"
-		)))
-	})?;
+	let chunks = notifications_hashes.chunks(max_hashes_per_link_tag);
 
-	create_link(
-		agent_info()?.agent_latest_pubkey,
-		agent_info()?.agent_latest_pubkey,
-		LinkTypes::ReadNotifications,
-		bytes.bytes().to_vec(),
-	)?;
+	for chunk in chunks.into_iter() {
+		let read_notifications = ReadNotifications(chunk.to_vec());
+
+		let bytes = SerializedBytes::try_from(read_notifications).map_err(|err| {
+			wasm_error!(WasmErrorInner::Guest(format!(
+				"Failed to serialize ReadNotifications {err:?}"
+			)))
+		})?;
+
+		create_link(
+			agent_info()?.agent_latest_pubkey,
+			agent_info()?.agent_latest_pubkey,
+			LinkTypes::ReadNotifications,
+			bytes.bytes().to_vec(),
+		)?;
+	}
 
 	Ok(())
 }

@@ -7,14 +7,27 @@ import {
 	uniquify,
 	withLogger,
 } from '@holochain-open-dev/signals';
-import { LazyHoloHashMap, slice } from '@holochain-open-dev/utils';
+import { EntryRecord, LazyHoloHashMap, slice } from '@holochain-open-dev/utils';
 import { ActionHash, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { NotificationsClient } from './notifications-client.js';
+import { Notification } from './types.js';
+
+export type NotificationsTypes = Record<
+	string,
+	(notification: EntryRecord<Notification>) => {
+		title: string;
+		body: string;
+		onClick: () => void;
+	}
+>;
 
 export class NotificationsStore {
-	constructor(public client: NotificationsClient) {}
+	constructor(
+		public client: NotificationsClient,
+		public notificationsTypes: NotificationsTypes,
+	) {}
 
 	/** Notification */
 

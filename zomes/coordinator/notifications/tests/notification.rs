@@ -108,11 +108,11 @@ async fn create_and_delete_notification() {
 	let original_action_hash = record.signed_action.hashed.hash;
 
 	// Alice deletes the Notification
-	let delete_action_hash: ActionHash = conductors[0]
+	let _r: () = conductors[0]
 		.call(
 			&alice_zome,
-			"delete_notification",
-			original_action_hash.clone(),
+			"dismiss_notifications",
+			vec![original_action_hash.clone()],
 		)
 		.await;
 
@@ -129,5 +129,4 @@ async fn create_and_delete_notification() {
 		.await;
 
 	assert_eq!(deletes.len(), 1);
-	assert_eq!(deletes[0].hashed.hash, delete_action_hash);
 }

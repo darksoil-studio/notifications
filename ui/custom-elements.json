@@ -456,7 +456,8 @@
             },
             {
               "kind": "field",
-              "name": "readNotifications$"
+              "name": "readNotifications$",
+              "default": "new AsyncComputed(() => {\n\t\tconst readNotificationsLinks = this.readNotificationsLinks$.get();\n\t\tconst undismissedNotifications = this.undismissedNotificationsLinks$.get();\n\t\tif (readNotificationsLinks.status !== 'completed')\n\t\t\treturn readNotificationsLinks;\n\t\tif (undismissedNotifications.status !== 'completed')\n\t\t\treturn undismissedNotifications;\n\n\t\t/** Aggregate the read notification hashes and filter them by whether they've been dismissed */\n\n\t\tconst allReadNotificationsHashes = uniquify(\n\t\t\tArray.from([] as ActionHash[]).concat(\n\t\t\t\t...readNotificationsLinks.value.map(\n\t\t\t\t\tlink => decode(link.tag) as ActionHash[],\n\t\t\t\t),\n\t\t\t),\n\t\t);\n\n\t\tconst undismissedNotificationsHashes = undismissedNotifications.value.map(\n\t\t\tl => encodeHashToBase64(l.target),\n\t\t);\n\n\t\tconst notificationsHashes = allReadNotificationsHashes.filter(hash =>\n\t\t\tundismissedNotificationsHashes.includes(encodeHashToBase64(hash)),\n\t\t);\n\t\tconst value = slice(this.notifications, notificationsHashes);\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
             },
             {
               "kind": "field",

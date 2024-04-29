@@ -1,16 +1,10 @@
-import {
-	EntryRecord,
-	ZomeClient,
-	isSignalFromCellWithRole,
-} from '@holochain-open-dev/utils';
+import { EntryRecord, ZomeClient } from '@holochain-open-dev/utils';
 import {
 	ActionHash,
-	AgentPubKey,
-	AppAgentClient,
+	AppClient,
 	CreateLink,
 	Delete,
 	DeleteLink,
-	EntryHash,
 	Link,
 	Record,
 	SignedActionHashed,
@@ -21,7 +15,7 @@ import { NotificationsSignal } from './types.js';
 
 export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	constructor(
-		public client: AppAgentClient,
+		public client: AppClient,
 		public roleName: string,
 		public zomeName = 'notifications',
 	) {

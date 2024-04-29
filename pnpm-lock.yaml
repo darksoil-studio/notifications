@@ -92,9 +92,6 @@ importers:
       '@msgpack/msgpack':
         specifier: ^2.7.0
         version: 2.8.0
-      async-signals:
-        specifier: 0.1.6
-        version: 0.1.6
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -105,20 +102,20 @@ importers:
   ui:
     dependencies:
       '@holochain-open-dev/elements':
-        specifier: ^0.300.0-dev.0
-        version: 0.300.0-dev.0(@types/react@18.2.79)
+        specifier: ^0.300.0-dev.1
+        version: 0.300.0-dev.1(@types/react@18.2.79)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#69dba6ebf0ee04985e799ccaa39ae2852ab465b7&path:ui
-        version: github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.2.79)
+        specifier: github:holochain-open-dev/profiles#0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47&path:ui
+        version: github.com/holochain-open-dev/profiles/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47#path:ui(@types/react@18.2.79)
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-dev.3
-        version: 0.300.0-dev.3(@types/react@18.2.79)
+        specifier: ^0.300.0-dev.5
+        version: 0.300.0-dev.5(@types/react@18.2.79)
       '@holochain-open-dev/utils':
-        specifier: ^0.300.0-dev.0
-        version: 0.300.0-dev.1
+        specifier: ^0.300.0-dev.2
+        version: 0.300.0-dev.2
       '@holochain/client':
-        specifier: ^0.17.0-dev.9
-        version: 0.17.0-dev.9
+        specifier: ^0.17.0-dev.12
+        version: 0.17.0-dev.12
       '@lit/context':
         specifier: ^1.0.0
         version: 1.1.1
@@ -137,9 +134,6 @@ importers:
       lit:
         specifier: ^3.0.0
         version: 3.1.3
-      lodash-es:
-        specifier: ^4.17.21
-        version: 4.17.21
     devDependencies:
       '@custom-elements-manifest/analyzer':
         specifier: ^0.9.4
@@ -667,8 +661,14 @@ packages:
   /@holochain-open-dev/elements@0.300.0-dev.0:
     resolution: {integrity: sha512-oyfnkg4hksQazQN4AVShgL3Hzg2GJEmQeE3z0G8cN5y4+0n3/eCfQsrtvZO4l+Xo01BH9llVRk6LC6EVsMP2Uw==}
 
+  /@holochain-open-dev/elements@0.300.0-dev.1:
+    resolution: {integrity: sha512-wjwUp2j9dZAm39K5pl+2SA5PzwY7s+8eouoBjzOoWuAQhSvzdyBw8r7mdUlnQlc+U6R+nwt2mz4Hl48XEa3p0g==}
+
   /@holochain-open-dev/signals@0.300.0-dev.3:
     resolution: {integrity: sha512-Ju5UJkDUZhlm1VpxoBOPXk+/qhoA/WM8xHaIkAT7mWaWsKsAHUZghbI/ORV3DcUdQjFYT6KoU6G2VRmSj47HWw==}
+
+  /@holochain-open-dev/signals@0.300.0-dev.5:
+    resolution: {integrity: sha512-aglodUte9ov5oq6sIGZuAcF/TTNCw5vn+gOBxajd98H+MEAoCpRtH2bjO0ayIScoer0OvtaP//cEXuPcPkOksw==}
 
   /@holochain-open-dev/stores@0.300.0-dev.0:
     resolution: {integrity: sha512-s6knLTAfVHUYR7Y8HYiLL9JJtr86b2kBQDQVfyDNLcSdf7kwJUjNbza8ZozQ1ON9IDvVC7+LMiQ87H3oJihU0g==}
@@ -679,9 +679,16 @@ packages:
   /@holochain-open-dev/utils@0.300.0-dev.1:
     resolution: {integrity: sha512-AI8xaf5YEflHw3rRBjzMkMwSa3ErfNFe63ruWWWOw65eRGrBTF9d9mErT0qfmkpwICqvj02ANlCkSjZlP2Qeqw==}
 
+  /@holochain-open-dev/utils@0.300.0-dev.2:
+    resolution: {integrity: sha512-V4kwnfnVrxg35tiRebijDl8SCTJ7f+icIK7Apbwy5DwOOfdNH9/MinvkHP9ef26i6QooBuxlvwaLh0PvKgwegQ==}
+
   /@holochain-playground/cli@0.1.1:
     resolution: {integrity: sha512-JbapAe+uBaec52rTePjdlP0mq3zQhJG/hrdbCd+eecZLA3cXWEGgISR5YwLtx6udN+0ghCDH4U6KILjPiwWZMg==}
     hasBin: true
+
+  /@holochain/client@0.17.0-dev.12:
+    resolution: {integrity: sha512-aEOkD4wtFeHAv5AiEkBfsiGeAujCyQf1yfvmtcdERnv73zgZhxCiZ0ZrEi46kdJhRHMXX/1Qkqo6VY8afrepfQ==}
+    engines: {node: '>=18.0.0 || >=20.0.0'}
 
   /@holochain/client@0.17.0-dev.9:
     resolution: {integrity: sha512-/s4TiMAliB5XUEgs/lWVfx1xAXsjtkKDSd7cveWuHKUf2BiZ+eqk1Mt1UMXrkILAwpSpdFLknDHM7rNhXlk2nQ==}
@@ -2967,6 +2974,11 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
 
+  github.com/holochain-open-dev/profiles/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47}
+    name: '@holochain-open-dev/profiles'
+    version: 0.300.0-dev.0
+
   github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui:
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/69dba6ebf0ee04985e799ccaa39ae2852ab465b7}
     name: '@holochain-open-dev/profiles'
@@ -2980,6 +2992,7 @@ snapshots:
   /@alenaksu/json-viewer@2.0.1:
     dependencies:
       lit: 2.8.0
+    dev: true
 
   /@algolia/autocomplete-core@1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.13.0):
     dependencies:
@@ -3511,7 +3524,7 @@ snapshots:
     dependencies:
       '@holo-host/identicon': 0.1.0
       '@holochain-open-dev/stores': 0.300.0-dev.0(@types/react@18.2.79)
-      '@holochain/client': 0.17.0-dev.9
+      '@holochain/client': 0.17.0-dev.12
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
       '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
@@ -3524,6 +3537,25 @@ snapshots:
       - '@types/react'
       - bufferutil
       - utf-8-validate
+    dev: true
+
+  /@holochain-open-dev/elements@0.300.0-dev.1(@types/react@18.2.79):
+    dependencies:
+      '@holo-host/identicon': 0.1.0
+      '@holochain/client': 0.17.0-dev.12
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      lit: 3.1.3
+      prosemirror-commands: 1.5.2
+      prosemirror-keymap: 1.2.2
+      prosemirror-state: 1.4.3
+      prosemirror-view: 1.33.5
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+    dev: false
 
   /@holochain-open-dev/signals@0.300.0-dev.3(@types/react@18.2.79):
     dependencies:
@@ -3539,11 +3571,25 @@ snapshots:
       - utf-8-validate
     dev: false
 
+  /@holochain-open-dev/signals@0.300.0-dev.5(@types/react@18.2.79):
+    dependencies:
+      '@holochain-open-dev/utils': 0.300.0-dev.2
+      '@holochain/client': 0.17.0-dev.12
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      async-signals: 0.1.6
+      lit-signal-watcher: 0.1.0
+      signal-polyfill: 0.1.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+    dev: false
+
   /@holochain-open-dev/stores@0.300.0-dev.0(@types/react@18.2.79):
     dependencies:
       '@alenaksu/json-viewer': 2.0.1
       '@holochain-open-dev/utils': 0.300.0-dev.0
-      '@holochain/client': 0.17.0-dev.9
+      '@holochain/client': 0.17.0-dev.12
       '@scoped-elements/cytoscape': 0.2.0
       '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
       lit: 3.1.3
@@ -3553,10 +3599,11 @@ snapshots:
       - '@types/react'
       - bufferutil
       - utf-8-validate
+    dev: true
 
   /@holochain-open-dev/utils@0.300.0-dev.0:
     dependencies:
-      '@holochain/client': 0.17.0-dev.9
+      '@holochain/client': 0.17.0-dev.12
       '@msgpack/msgpack': 2.8.0
       blakejs: 1.2.1
       emittery: 1.0.3
@@ -3565,6 +3612,7 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: true
 
   /@holochain-open-dev/utils@0.300.0-dev.1:
     dependencies:
@@ -3579,8 +3627,36 @@ snapshots:
       - utf-8-validate
     dev: false
 
+  /@holochain-open-dev/utils@0.300.0-dev.2:
+    dependencies:
+      '@holochain/client': 0.17.0-dev.12
+      '@msgpack/msgpack': 2.8.0
+      blakejs: 1.2.1
+      emittery: 1.0.3
+      lodash-es: 4.17.21
+      sort-keys: 5.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: false
+
   /@holochain-playground/cli@0.1.1:
     dev: true
+
+  /@holochain/client@0.17.0-dev.12:
+    dependencies:
+      '@bitgo/blake2b': 3.2.4
+      '@holochain/serialization': 0.1.0-beta-rc.3
+      '@msgpack/msgpack': 2.8.0
+      emittery: 1.0.3
+      isomorphic-ws: 5.0.0(ws@8.16.0)
+      js-base64: 3.7.7
+      libsodium-wrappers: 0.7.13
+      lodash-es: 4.17.21
+      ws: 8.16.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   /@holochain/client@0.17.0-dev.9:
     dependencies:
@@ -3695,6 +3771,7 @@ snapshots:
   /@lit/reactive-element@1.6.3:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.2.0
+    dev: true
 
   /@lit/reactive-element@2.0.4:
     dependencies:
@@ -3731,12 +3808,14 @@ snapshots:
       fastq: 1.17.1
     dev: true
 
-  /@open-wc/dedupe-mixin@1.4.0: {}
+  /@open-wc/dedupe-mixin@1.4.0:
+    dev: true
 
   /@open-wc/scoped-elements@2.2.4:
     dependencies:
       '@lit/reactive-element': 2.0.4
       '@open-wc/dedupe-mixin': 1.4.0
+    dev: true
 
   /@parse5/tools@0.3.0:
     dependencies:
@@ -3802,6 +3881,7 @@ snapshots:
       cytoscape-klay: 3.1.4(cytoscape@3.29.0)
       lit: 2.8.0
       lodash-es: 4.17.21
+    dev: true
 
   /@shikijs/core@1.3.0:
     dev: true
@@ -3846,7 +3926,8 @@ snapshots:
       - supports-color
     dev: true
 
-  /@types/cytoscape@3.21.0: {}
+  /@types/cytoscape@3.21.0:
+    dev: true
 
   /@types/d3-scale-chromatic@3.0.3:
     dev: true
@@ -4458,6 +4539,7 @@ snapshots:
   /cose-base@1.0.3:
     dependencies:
       layout-base: 1.0.2
+    dev: true
 
   /cose-base@2.2.0:
     dependencies:
@@ -4483,11 +4565,13 @@ snapshots:
     dependencies:
       cytoscape: 3.29.0
       webcola: 3.4.0
+    dev: true
 
   /cytoscape-cose-bilkent@4.1.0(cytoscape@3.29.0):
     dependencies:
       cose-base: 1.0.3
       cytoscape: 3.29.0
+    dev: true
 
   /cytoscape-cose-bilkent@4.1.0(cytoscape@3.29.1):
     dependencies:
@@ -4499,6 +4583,7 @@ snapshots:
     dependencies:
       cytoscape: 3.29.0
       dagre: 0.8.5
+    dev: true
 
   /cytoscape-fcose@2.2.0(cytoscape@3.29.0):
     dependencies:
@@ -4511,8 +4596,10 @@ snapshots:
     dependencies:
       cytoscape: 3.29.0
       klayjs: 0.4.1
+    dev: true
 
-  /cytoscape@3.29.0: {}
+  /cytoscape@3.29.0:
+    dev: true
 
   /cytoscape@3.29.1:
     dev: true
@@ -4557,7 +4644,8 @@ snapshots:
       delaunator: 5.0.1
     dev: true
 
-  /d3-dispatch@1.0.6: {}
+  /d3-dispatch@1.0.6:
+    dev: true
 
   /d3-dispatch@3.0.1:
     dev: true
@@ -4566,6 +4654,7 @@ snapshots:
     dependencies:
       d3-dispatch: 1.0.6
       d3-selection: 1.4.2
+    dev: true
 
   /d3-drag@3.0.0:
     dependencies:
@@ -4611,7 +4700,8 @@ snapshots:
       d3-color: 3.1.0
     dev: true
 
-  /d3-path@1.0.9: {}
+  /d3-path@1.0.9:
+    dev: true
 
   /d3-path@3.1.0:
     dev: true
@@ -4646,7 +4736,8 @@ snapshots:
       d3-time-format: 4.1.0
     dev: true
 
-  /d3-selection@1.4.2: {}
+  /d3-selection@1.4.2:
+    dev: true
 
   /d3-selection@3.0.0:
     dev: true
@@ -4654,6 +4745,7 @@ snapshots:
   /d3-shape@1.3.7:
     dependencies:
       d3-path: 1.0.9
+    dev: true
 
   /d3-shape@3.2.0:
     dependencies:
@@ -4670,7 +4762,8 @@ snapshots:
       d3-array: 3.2.4
     dev: true
 
-  /d3-timer@1.0.10: {}
+  /d3-timer@1.0.10:
+    dev: true
 
   /d3-timer@3.0.1:
     dev: true
@@ -4738,6 +4831,7 @@ snapshots:
     dependencies:
       graphlib: 2.1.8
       lodash: 4.17.21
+    dev: true
 
   /date-fns@2.30.0:
     dependencies:
@@ -5175,6 +5269,7 @@ snapshots:
   /graphlib@2.1.8:
     dependencies:
       lodash: 4.17.21
+    dev: true
 
   /has-flag@3.0.0:
     dev: true
@@ -5319,7 +5414,8 @@ snapshots:
   /khroma@2.1.0:
     dev: true
 
-  /klayjs@0.4.1: {}
+  /klayjs@0.4.1:
+    dev: true
 
   /kleur@4.1.5:
     dev: true
@@ -5327,7 +5423,8 @@ snapshots:
   /kuler@2.0.0:
     dev: false
 
-  /layout-base@1.0.2: {}
+  /layout-base@1.0.2:
+    dev: true
 
   /layout-base@2.0.1:
     dev: true
@@ -5350,6 +5447,7 @@ snapshots:
       '@lit-labs/ssr-dom-shim': 1.2.0
       '@lit/reactive-element': 1.6.3
       lit-html: 2.8.0
+    dev: true
 
   /lit-element@4.0.5:
     dependencies:
@@ -5360,6 +5458,7 @@ snapshots:
   /lit-html@2.8.0:
     dependencies:
       '@types/trusted-types': 2.0.7
+    dev: true
 
   /lit-html@3.1.3:
     dependencies:
@@ -5376,12 +5475,14 @@ snapshots:
       lit: 3.1.3
       lodash-es: 4.17.21
       svelte: 3.59.2
+    dev: true
 
   /lit@2.8.0:
     dependencies:
       '@lit/reactive-element': 1.6.3
       lit-element: 3.3.3
       lit-html: 2.8.0
+    dev: true
 
   /lit@3.1.3:
     dependencies:
@@ -6132,7 +6233,8 @@ snapshots:
       has-flag: 4.0.0
     dev: true
 
-  /svelte@3.59.2: {}
+  /svelte@3.59.2:
+    dev: true
 
   /tabbable@6.2.0:
     dev: true
@@ -6453,6 +6555,7 @@ snapshots:
       d3-drag: 1.2.5
       d3-shape: 1.3.7
       d3-timer: 1.0.10
+    dev: true
 
   /which@2.0.2:
     dependencies:
@@ -6524,6 +6627,25 @@ snapshots:
   /yocto-queue@1.0.0:
     dev: false
 
+  github.com/holochain-open-dev/profiles/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47#path:ui(@types/react@18.2.79):
+    id: github.com/holochain-open-dev/profiles/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47#path:ui
+    dependencies:
+      '@holochain-open-dev/elements': 0.300.0-dev.1(@types/react@18.2.79)
+      '@holochain-open-dev/signals': 0.300.0-dev.5(@types/react@18.2.79)
+      '@holochain-open-dev/utils': 0.300.0-dev.2
+      '@holochain/client': 0.17.0-dev.12
+      '@lit/context': 1.1.1
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@msgpack/msgpack': 2.8.0
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      lit: 3.1.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+    dev: false
+
   github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.2.79):
     id: github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui
     dependencies:
@@ -6541,3 +6663,4 @@ snapshots:
       - '@types/react'
       - bufferutil
       - utf-8-validate
+    dev: true

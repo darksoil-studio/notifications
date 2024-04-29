@@ -17,18 +17,12 @@ pub fn validate_create_notification(
 pub fn validate_update_notification(
 	_action: Update,
 	_notification: Notification,
-	_original_action: EntryCreationAction,
-	_original_notification: Notification,
 ) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Invalid(String::from(
 		"Notifications cannot be updated",
 	)))
 }
-pub fn validate_delete_notification(
-	_action: Delete,
-	_original_action: EntryCreationAction,
-	_original_notification: Notification,
-) -> ExternResult<ValidateCallbackResult> {
+pub fn validate_delete_notification(_action: Delete) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_recipient_to_notifications(

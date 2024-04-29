@@ -48,39 +48,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			_ => Ok(ValidateCallbackResult::Valid),
 		},
 		FlatOp::RegisterUpdate(update_entry) => match update_entry {
-			OpUpdate::Entry {
-				original_action,
-				original_app_entry,
-				app_entry,
-				action,
-			} => match (app_entry, original_app_entry) {
-				(
-					EntryTypes::Notification(notification),
-					EntryTypes::Notification(original_notification),
-				) => validate_update_notification(
-					action,
-					notification,
-					original_action,
-					original_notification,
-				),
-				_ => Ok(ValidateCallbackResult::Invalid(
-					"Original and updated entry types must be the same".to_string(),
-				)),
-			},
-			_ => Ok(ValidateCallbackResult::Valid),
-		},
-		FlatOp::RegisterDelete(delete_entry) => match delete_entry {
-			OpDelete::Entry {
-				original_action,
-				original_app_entry,
-				action,
-			} => match original_app_entry {
+			OpUpdate::Entry { app_entry, action } => match app_entry {
 				EntryTypes::Notification(notification) => {
-					validate_delete_notification(action, original_action, notification)
+					validate_update_notification(action, notification)
 				}
 			},
 			_ => Ok(ValidateCallbackResult::Valid),
 		},
+		FlatOp::RegisterDelete(delete_entry) => validate_delete_notification(delete_entry.action),
 		FlatOp::RegisterCreateLink {
 			link_type,
 			base_address,
@@ -128,108 +103,20 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				}
 			},
 			OpRecord::UpdateEntry {
-				original_action_hash,
-				app_entry,
-				action,
-				..
-			} => {
-				let original_record = must_get_valid_record(original_action_hash)?;
-				let original_action = original_record.action().clone();
-				let original_action = match original_action {
-					Action::Create(create) => EntryCreationAction::Create(create),
-					Action::Update(update) => EntryCreationAction::Update(update),
-					_ => {
-						return Ok(ValidateCallbackResult::Invalid(
-							"Original action for an update must be a Create or Update action"
-								.to_string(),
-						));
-					}
-				};
-				match app_entry {
-					EntryTypes::Notification(notification) => {
-						let result = validate_create_notification(
-							EntryCreationAction::Update(action.clone()),
-							notification.clone(),
-						)?;
-						if let ValidateCallbackResult::Valid = result {
-							let original_notification: Option<Notification> = original_record
-								.entry()
-								.to_app_option()
-								.map_err(|e| wasm_error!(e))?;
-							let original_notification = match original_notification {
-								Some(notification) => notification,
-								None => {
-									return Ok(ValidateCallbackResult::Invalid(
-										"The updated entry type must be the same as the original entry type"
-											.to_string(),
-									));
-								}
-							};
-							validate_update_notification(
-								action,
-								notification,
-								original_action,
-								original_notification,
-							)
-						} else {
-							Ok(result)
-						}
-					}
+				app_entry, action, ..
+			} => match app_entry {
+				EntryTypes::Notification(notification) => {
+					let result = validate_create_notification(
+						EntryCreationAction::Update(action.clone()),
+						notification.clone(),
+					)?;
+					let ValidateCallbackResult::Valid = result else {
+						return Ok(result);
+					};
+					validate_update_notification(action, notification)
 				}
-			}
-			OpRecord::DeleteEntry {
-				original_action_hash,
-				action,
-				..
-			} => {
-				let original_record = must_get_valid_record(original_action_hash)?;
-				let original_action = original_record.action().clone();
-				let original_action = match original_action {
-					Action::Create(create) => EntryCreationAction::Create(create),
-					Action::Update(update) => EntryCreationAction::Update(update),
-					_ => {
-						return Ok(ValidateCallbackResult::Invalid(
-							"Original action for a delete must be a Create or Update action"
-								.to_string(),
-						));
-					}
-				};
-				let app_entry_type = match original_action.entry_type() {
-					EntryType::App(app_entry_type) => app_entry_type,
-					_ => {
-						return Ok(ValidateCallbackResult::Valid);
-					}
-				};
-				let entry = match original_record.entry().as_option() {
-					Some(entry) => entry,
-					None => {
-						if original_action.entry_type().visibility().is_public() {
-							return Ok(ValidateCallbackResult::Invalid(
-								"Original record for a delete of a public entry must contain an entry".to_string(),
-							));
-						} else {
-							return Ok(ValidateCallbackResult::Valid);
-						}
-					}
-				};
-				let original_app_entry = match EntryTypes::deserialize_from_type(
-					app_entry_type.zome_index,
-					app_entry_type.entry_index,
-					entry,
-				)? {
-					Some(app_entry) => app_entry,
-					None => {
-						return Ok(ValidateCallbackResult::Invalid(
-							"Original app entry must be one of the defined entry types for this zome".to_string(),
-						));
-					}
-				};
-				match original_app_entry {
-					EntryTypes::Notification(original_notification) => {
-						validate_delete_notification(action, original_action, original_notification)
-					}
-				}
-			}
+			},
+			OpRecord::DeleteEntry { action, .. } => validate_delete_notification(action),
 			OpRecord::CreateLink {
 				base_address,
 				target_address,

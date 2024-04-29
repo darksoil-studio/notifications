@@ -17,7 +17,7 @@ import {
 import {
 	ActionHash,
 	AgentPubKey,
-	AppAgentClient,
+	AppClient,
 	Delete,
 	EntryHash,
 	Link,
@@ -35,7 +35,7 @@ import { encode } from '@msgpack/msgpack';
 import { NotificationsClient } from './notifications-client.js';
 import { Notification } from './types.js';
 
-export class NotificationsZomeMock extends ZomeMock implements AppAgentClient {
+export class NotificationsZomeMock extends ZomeMock implements AppClient {
 	constructor(myPubKey?: AgentPubKey) {
 		super('notifications_test', 'notifications', myPubKey);
 	}

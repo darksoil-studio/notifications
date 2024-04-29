@@ -2,8 +2,6 @@ import { EntryRecord } from '@holochain-open-dev/utils';
 import {
 	ActionHash,
 	AgentPubKey,
-	AppAgentCallZomeRequest,
-	AppAgentWebsocket,
 	AppBundleSource,
 	EntryHash,
 	NewEntryAction,

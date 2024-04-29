@@ -39,9 +39,10 @@
 				profilesStoreContext,
 			} from '@holochain-open-dev/profiles';
 			import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
-			import { AppAgentWebsocket } from '@holochain/client';
+			import { SignalWatcher, joinAsync } from '@holochain-open-dev/signals';
+			import { AppWebsocket } from '@holochain/client';
 			import { ContextProvider } from '@lit/context';
-			import { encode } from '@msgpack/msgpack';
+			import { decode, encode } from '@msgpack/msgpack';
 			import '@shoelace-style/shoelace/dist/components/button/button.js';
 			import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 			import '@shoelace-style/shoelace/dist/themes/light.css';
@@ -51,7 +52,7 @@
 			import '../src/elements/notifications-context.ts';
 			import { NotificationsClient, NotificationsStore } from '../src/index.ts';
 
-			export class DemoApp extends LitElement {
+			export class DemoApp extends SignalWatcher(LitElement) {
 				constructor() {
 					super();
 					this._loading = true;
@@ -59,7 +60,7 @@
 				}
 
 				async firstUpdated() {
-					this._client = await AppAgentWebsocket.connect('notifications');
+					this._client = await AppWebsocket.connect();
 
 					await this.initStores(this._client);
 
@@ -75,39 +76,71 @@
 
 					this._notificationsStore = new NotificationsStore(
 						new NotificationsClient(appAgentClient, 'notifications_test'),
+						{
+							type1: n => {
+								const i = decode(n.entry.content);
+
+								return {
+									title: i.title,
+									body: i.body,
+									onClick: () => console.log('clicked', n),
+								};
+							},
+						},
 					);
 				}
 
 				renderContent() {
+					const result = joinAsync([
+						this._notificationsStore.unreadNotifications$,
+						this._notificationsStore.readNotifications$,
+					]).get();
+					const undismissedNotifications = [
+						...Array.from(result.value ? result.value[0].keys() : []),
+						...Array.from(result.value ? result.value[1].keys() : []),
+					];
 					return html`
 						<notifications-context .store=${this._notificationsStore}>
 							<my-notifications></my-notifications>
-							<sl-button
-								@click=${() =>
-									this._notificationsStore.client.createNotification({
-										notification_type: '',
-										notification_group: undefined,
-										persistent: true,
-										recipients: [
-											this._notificationsStore.client.client.myPubKey,
-										],
-										content: encode({ title: 'hey!', body: "what's up?" }),
-									})}
-								>Create persistent notification</sl-button
-							>
-							<sl-button
-								@click=${() =>
-									this._notificationsStore.client.createNotification({
-										notification_type: '',
-										notification_group: undefined,
-										persistent: false,
-										recipients: [
-											this._notificationsStore.client.client.myPubKey,
-										],
-										content: encode({ title: 'hey!', body: "what's up?" }),
-									})}
-								>Create non-persistent notification</sl-button
-							>
+							<div>
+								<sl-button
+									@click=${e => {
+										console.log(e);
+										this._notificationsStore.client.createNotification({
+											notification_type: 'type1',
+											notification_group: undefined,
+											persistent: true,
+											recipients: [
+												this._notificationsStore.client.client.myPubKey,
+											],
+											content: encode({ title: 'hey!', body: "what's up?" }),
+										});
+									}}
+									>Create persistent notification</sl-button
+								>
+								<sl-button
+									@click=${e => {
+										console.log(e);
+										this._notificationsStore.client.createNotification({
+											notification_type: 'type1',
+											notification_group: undefined,
+											persistent: false,
+											recipients: [
+												this._notificationsStore.client.client.myPubKey,
+											],
+											content: encode({ title: 'hey!', body: "what's up2?" }),
+										});
+									}}
+									>Create non-persistent notification</sl-button
+								>
+								<sl-button
+									@click=${() =>
+										this._notificationsStore.client.dismissNotifications(
+											undismissedNotifications,
+										)}
+									>Clear all notifications</sl-button
+								>
+							</div>
 						</notifications-context>
 					`;
 				}
