@@ -78,8 +78,8 @@ importers:
   tests:
     dependencies:
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-dev.5
-        version: 0.300.0-dev.5(@types/react@18.2.79)
+        specifier: ^0.300.0-dev.7
+        version: 0.300.0-dev.7(@types/react@18.2.79)
       '@holochain-open-dev/utils':
         specifier: ^0.300.0-dev.2
         version: 0.300.0-dev.2
@@ -108,8 +108,8 @@ importers:
         specifier: github:holochain-open-dev/profiles#0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47&path:ui
         version: github.com/holochain-open-dev/profiles/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47#path:ui(@types/react@18.2.79)
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-dev.5
-        version: 0.300.0-dev.5(@types/react@18.2.79)
+        specifier: ^0.300.0-dev.7
+        version: 0.300.0-dev.7(@types/react@18.2.79)
       '@holochain-open-dev/utils':
         specifier: ^0.300.0-dev.2
         version: 0.300.0-dev.2
@@ -664,8 +664,8 @@ packages:
   /@holochain-open-dev/elements@0.300.0-dev.1:
     resolution: {integrity: sha512-wjwUp2j9dZAm39K5pl+2SA5PzwY7s+8eouoBjzOoWuAQhSvzdyBw8r7mdUlnQlc+U6R+nwt2mz4Hl48XEa3p0g==}
 
-  /@holochain-open-dev/signals@0.300.0-dev.5:
-    resolution: {integrity: sha512-aglodUte9ov5oq6sIGZuAcF/TTNCw5vn+gOBxajd98H+MEAoCpRtH2bjO0ayIScoer0OvtaP//cEXuPcPkOksw==}
+  /@holochain-open-dev/signals@0.300.0-dev.7:
+    resolution: {integrity: sha512-DG1dTbWeGjnqu9Q5vFLChAZE3gVUsL5PBHMEuKc0f32bfe8BrPvNsk4QOwtmvVHUDsS6okYph/p4/hOLqsN+5g==}
 
   /@holochain-open-dev/stores@0.300.0-dev.0:
     resolution: {integrity: sha512-s6knLTAfVHUYR7Y8HYiLL9JJtr86b2kBQDQVfyDNLcSdf7kwJUjNbza8ZozQ1ON9IDvVC7+LMiQ87H3oJihU0g==}
@@ -1219,8 +1219,8 @@ packages:
   /assertion-error@1.1.0:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
 
-  /async-signals@0.1.6:
-    resolution: {integrity: sha512-mJvunW0yDJyM4wqLm/54/1GLDv8Jn0xQQecG5IHeFRxlsUatsm+oSof1vXlhNl2U5KE/iOwm+sviFxKi8+cuzQ==}
+  /async-signals@0.1.7:
+    resolution: {integrity: sha512-4P9JU/yw20g1KYHB1jGwTDInwlirvQSe8FlGy4L17WvI1saQiLVfv19C6pyCFcNejaOvxYPams9F0rR/vy+Q8A==}
 
   /async@2.6.4:
     resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
@@ -3551,12 +3551,12 @@ snapshots:
       - utf-8-validate
     dev: false
 
-  /@holochain-open-dev/signals@0.300.0-dev.5(@types/react@18.2.79):
+  /@holochain-open-dev/signals@0.300.0-dev.7(@types/react@18.2.79):
     dependencies:
       '@holochain-open-dev/utils': 0.300.0-dev.2
       '@holochain/client': 0.17.0-dev.12
       '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
-      async-signals: 0.1.6
+      async-signals: 0.1.7
       lit-signal-watcher: 0.1.0
       signal-polyfill: 0.1.0
     transitivePeerDependencies:
@@ -4319,7 +4319,7 @@ snapshots:
   /assertion-error@1.1.0:
     dev: false
 
-  /async-signals@0.1.6:
+  /async-signals@0.1.7:
     dependencies:
       lit: 3.1.3
       signal-polyfill: 0.1.0
@@ -6600,7 +6600,7 @@ snapshots:
     id: github.com/holochain-open-dev/profiles/0ef5ce9c9e1a5550402fd16ccd19f338d3c61c47#path:ui
     dependencies:
       '@holochain-open-dev/elements': 0.300.0-dev.1(@types/react@18.2.79)
-      '@holochain-open-dev/signals': 0.300.0-dev.5(@types/react@18.2.79)
+      '@holochain-open-dev/signals': 0.300.0-dev.7(@types/react@18.2.79)
       '@holochain-open-dev/utils': 0.300.0-dev.2
       '@holochain/client': 0.17.0-dev.12
       '@lit/context': 1.1.1

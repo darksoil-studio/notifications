@@ -22,7 +22,7 @@ export type LinkTypes = string;
 export interface Notification {
 	notification_type: string;
 
-	notification_group: string | undefined;
+	notification_group: string;
 
 	persistent: boolean;
 

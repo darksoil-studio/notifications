@@ -31,9 +31,9 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 
 	render() {
 		const result = joinAsync([
-			this.notificationsStore.unreadNotifications$,
-			this.notificationsStore.readNotifications$,
-		]).get();
+			this.notificationsStore.unreadNotifications$.get(),
+			this.notificationsStore.readNotifications$.get(),
+		]);
 
 		switch (result.status) {
 			case 'pending':
@@ -69,7 +69,7 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 							${unreadNotifications.size + readNotifications.size > 0
 								? html`
 										<sl-badge
-											style="position: absolute; left: 20px; bottom: -4px; z-index: 1000"
+											style="position: absolute; left: 16px; top: 0px; z-index: 1000"
 											pill
 											.pulse=${unreadNotifications.size > 0}
 											>${unreadNotifications.size +

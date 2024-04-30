@@ -3,7 +3,7 @@ use hdi::prelude::*;
 #[derive(Clone, PartialEq)]
 pub struct Notification {
 	pub notification_type: String,
-	pub notification_group: Option<String>,
+	pub notification_group: String,
 	pub persistent: bool,
 	pub recipients: Vec<AgentPubKey>,
 	pub content: SerializedBytes,

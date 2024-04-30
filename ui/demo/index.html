@@ -31,7 +31,10 @@
 		<demo-app></demo-app>
 
 		<script type="module">
-			import { sharedStyles } from '@holochain-open-dev/elements';
+			import {
+				sharedStyles,
+				wrapPathInSvg,
+			} from '@holochain-open-dev/elements';
 			import '@holochain-open-dev/elements/dist/elements/display-error.js';
 			import {
 				ProfilesClient,
@@ -39,9 +42,14 @@
 				profilesStoreContext,
 			} from '@holochain-open-dev/profiles';
 			import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
-			import { SignalWatcher, joinAsync } from '@holochain-open-dev/signals';
+			import {
+				Signal,
+				SignalWatcher,
+				joinAsync,
+			} from '@holochain-open-dev/signals';
 			import { AppWebsocket } from '@holochain/client';
 			import { ContextProvider } from '@lit/context';
+			import { mdiBell } from '@mdi/js';
 			import { decode, encode } from '@msgpack/msgpack';
 			import '@shoelace-style/shoelace/dist/components/button/button.js';
 			import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
@@ -78,14 +86,25 @@
 					this._notificationsStore = new NotificationsStore(
 						new NotificationsClient(appAgentClient, 'notifications_test'),
 						{
-							type1: n => {
-								const i = decode(n.entry.content);
+							type1: {
+								title(group) {
+									return new Signal.State({
+										status: 'completed',
+										value: group,
+									});
+								},
+								onClick: group => console.log('clicked', group),
+								contents: n => {
+									const i = decode(n.entry.content);
 
-								return {
-									title: i.title,
-									body: i.body,
-									onClick: () => console.log('clicked', n),
-								};
+									return new Signal.State({
+										status: 'completed',
+										value: {
+											iconSrc: wrapPathInSvg(mdiBell),
+											body: i.body,
+										},
+									});
+								},
 							},
 						},
 					);
@@ -93,9 +112,9 @@
 
 				renderContent() {
 					const result = joinAsync([
-						this._notificationsStore.unreadNotifications$,
-						this._notificationsStore.readNotifications$,
-					]).get();
+						this._notificationsStore.unreadNotifications$.get(),
+						this._notificationsStore.readNotifications$.get(),
+					]);
 					const undismissedNotifications = [
 						...Array.from(result.value ? result.value[0].keys() : []),
 						...Array.from(result.value ? result.value[1].keys() : []),
@@ -107,15 +126,15 @@
 							<div>
 								<sl-button
 									@click=${e => {
-										console.log(e);
 										this._notificationsStore.client.createNotification({
 											notification_type: 'type1',
-											notification_group: undefined,
+											notification_group:
+												this.shadowRoot.getElementById('group').value,
 											persistent: true,
 											recipients: [
 												this._notificationsStore.client.client.myPubKey,
 											],
-											content: encode({ title: 'hey!', body: "what's up?" }),
+											content: encode({ body: "what's up?" }),
 										});
 									}}
 									>Create persistent notification</sl-button
@@ -125,12 +144,13 @@
 										console.log(e);
 										this._notificationsStore.client.createNotification({
 											notification_type: 'type1',
-											notification_group: undefined,
+											notification_group:
+												this.shadowRoot.getElementById('group').value,
 											persistent: false,
 											recipients: [
 												this._notificationsStore.client.client.myPubKey,
 											],
-											content: encode({ title: 'hey!', body: "what's up2?" }),
+											content: encode({ body: "what's up2?" }),
 										});
 									}}
 									>Create non-persistent notification</sl-button
@@ -143,6 +163,8 @@
 									>Clear all notifications</sl-button
 								>
 							</div>
+							<span>Group</span>
+							<input id="group" type="text" />
 						</notifications-context>
 					`;
 				}

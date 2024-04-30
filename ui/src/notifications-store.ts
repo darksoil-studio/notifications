@@ -1,11 +1,12 @@
 import {
 	AsyncComputed,
+	AsyncSignal,
 	deletedLinksSignal,
 	deletesForEntrySignal,
 	immutableEntrySignal,
+	joinAsync,
 	liveLinksSignal,
 	uniquify,
-	withLogger,
 } from '@holochain-open-dev/signals';
 import { EntryRecord, LazyHoloHashMap, slice } from '@holochain-open-dev/utils';
 import { ActionHash, encodeHashToBase64 } from '@holochain/client';
@@ -14,14 +15,21 @@ import { decode } from '@msgpack/msgpack';
 import { NotificationsClient } from './notifications-client.js';
 import { Notification } from './types.js';
 
-export type NotificationsTypes = Record<
-	string,
-	(notification: EntryRecord<Notification>) => {
-		title: string;
-		body: string;
-		onClick: () => void;
-	}
->;
+export type NotificationsTypes = Record<string, NotificationType>;
+
+export interface NotificationType {
+	// The title only depends on the notification type and group to make sure that notifications for the same type and group have the same title
+	title: (notificationGroup: string) => AsyncSignal<string>;
+	contents: (
+		notification: EntryRecord<Notification>,
+	) => AsyncSignal<NotificationContents>;
+	onClick: (notificationGroup: string) => void;
+}
+
+export interface NotificationContents {
+	iconSrc: string;
+	body: string;
+}
 
 export class NotificationsStore {
 	constructor(
@@ -79,7 +87,38 @@ export class NotificationsStore {
 		const notificationsHashes = allReadNotificationsHashes.filter(hash =>
 			undismissedNotificationsHashes.includes(encodeHashToBase64(hash)),
 		);
-		const value = slice(this.notifications, notificationsHashes);
+
+		/* If a notification was persistent and has been read but was deleted (usually by someone else performing the action that the notification required), then we dismiss the notification */
+
+		const deletes = joinAsync(
+			notificationsHashes.map(hash =>
+				this.notifications.get(hash).deletes$.get(),
+			),
+		);
+		const entries = joinAsync(
+			notificationsHashes.map(hash =>
+				this.notifications.get(hash).entry$.get(),
+			),
+		);
+		if (entries.status !== 'completed') return entries;
+		if (deletes.status !== 'completed') return deletes;
+
+		const nonDeletedNotificationHashes: ActionHash[] = [];
+		const notificationsToDismiss: ActionHash[] = [];
+
+		for (let i = 0; i < notificationsHashes.length; i++) {
+			if (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {
+				nonDeletedNotificationHashes.push(notificationsHashes[i]);
+			} else {
+				notificationsToDismiss.push(notificationsHashes[i]);
+			}
+		}
+
+		if (notificationsToDismiss.length > 0) {
+			this.client.dismissNotifications(notificationsToDismiss);
+		}
+
+		const value = slice(this.notifications, nonDeletedNotificationHashes);
 		return {
 			status: 'completed',
 			value,

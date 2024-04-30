@@ -1,12 +1,11 @@
 import { sharedStyles, wrapPathInSvg } from '@holochain-open-dev/elements';
 import {
-	AsyncComputed,
+	AsyncResult,
 	SignalWatcher,
-	joinAsync,
 	joinAsyncMap,
 } from '@holochain-open-dev/signals';
 import { EntryRecord, mapValues } from '@holochain-open-dev/utils';
-import { Delete, SignedActionHashed } from '@holochain/client';
+import { ActionHash, Delete, SignedActionHashed } from '@holochain/client';
 import { consume } from '@lit/context';
 import { msg } from '@lit/localize';
 import { mdiInformationOutline, mdiNotificationClearAll } from '@mdi/js';
@@ -20,8 +19,26 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { notificationsStoreContext } from '../context.js';
-import { NotificationsStore } from '../notifications-store.js';
+import {
+	NotificationContents,
+	NotificationsStore,
+} from '../notifications-store.js';
 import { Notification } from '../types.js';
+
+interface NotificationGroup {
+	notificationType: string;
+	group: string;
+	timestamp: number;
+	title: string;
+	notifications: Array<NotificationInfo>;
+}
+
+interface NotificationInfo {
+	record: EntryRecord<Notification>;
+	deletes: Array<SignedActionHashed<Delete>>;
+	title: string;
+	contents: NotificationContents;
+}
 
 /**
  * @element my-notifications-list
@@ -34,34 +51,61 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 	@consume({ context: notificationsStoreContext, subscribe: true })
 	notificationsStore!: NotificationsStore;
 
-	renderNotification(
+	renderNotificationGroup(
 		read: boolean,
-		notification: EntryRecord<Notification>,
+		notificationGroup: NotificationGroup,
 		last: boolean,
 	) {
-		const info =
-			this.notificationsStore.notificationsTypes[
-				notification.entry.notification_type
-			](notification);
+		const singleNotification = notificationGroup.notifications.length === 1;
 		return html`<div
-				class="column"
+				class="row"
 				style=${styleMap({
 					'background-color': read
 						? 'var(--sl-color-neutral-100)'
 						: 'var(--sl-color-neutral-0)',
 					padding: '8px',
 					cursor: 'pointer',
+					gap: '8px',
+					'align-items': 'center',
 				})}
-				@click=${() => info.onClick()}
+				@click=${() =>
+					this.notificationsStore.notificationsTypes[
+						notificationGroup.notificationType
+					].onClick(notificationGroup.group)}
 			>
-				<div class="row" style="gap: 8px">
-					<span style="flex: 1">${info.title}</span>
-					<sl-relative-time
-						style="color: grey;"
-						.date=${new Date(notification.action.timestamp)}
-					></sl-relative-time>
+				${singleNotification
+					? html`<sl-icon
+							style="font-size: 1.3rem; padding: 0 8px;"
+							src="${notificationGroup.notifications[0].contents.iconSrc}"
+						></sl-icon>`
+					: html``}
+				<div
+					class="column"
+					style=${styleMap({
+						flex: '1',
+						gap: singleNotification ? '0' : '8px',
+					})}
+				>
+					<div class="row" style="gap: 8px">
+						<span style="flex: 1">${notificationGroup.title}</span>
+						<sl-relative-time
+							style="color: grey;"
+							.date=${new Date(notificationGroup.timestamp)}
+						></sl-relative-time>
+					</div>
+					<div class="column" style="gap: 8px">
+						${notificationGroup.notifications.map(
+							n => html`
+								<div class="row" style="gap: 8px; align-items: center">
+									${!singleNotification
+										? html`<sl-icon src="${n.contents.iconSrc}"></sl-icon>`
+										: html``}
+									<span class="placeholder">${n.contents.body}</span>
+								</div>
+							`,
+						)}
+					</div>
 				</div>
-				<span class="placeholder">${info.body}</span>
 			</div>
 
 			${!last
@@ -69,7 +113,44 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				: html``} `;
 	}
 
-	get notifications() {
+	notificationInfo(
+		notificationHash: ActionHash,
+	): AsyncResult<NotificationInfo> {
+		const record = this.notificationsStore.notifications
+			.get(notificationHash)
+			.entry$.get();
+		const deletes = this.notificationsStore.notifications
+			.get(notificationHash)
+			.deletes$.get();
+
+		if (record.status !== 'completed') return record;
+		if (deletes.status !== 'completed') return deletes;
+
+		const contents = this.notificationsStore.notificationsTypes[
+			record.value.entry.notification_type
+		]
+			.contents(record.value)
+			.get();
+		const title = this.notificationsStore.notificationsTypes[
+			record.value.entry.notification_type
+		]
+			.title(record.value.entry.notification_group)
+			.get();
+		if (contents.status !== 'completed') return contents;
+		if (title.status !== 'completed') return title;
+
+		return {
+			status: 'completed',
+			value: {
+				record: record.value,
+				deletes: deletes.value,
+				title: title.value,
+				contents: contents.value,
+			},
+		};
+	}
+
+	getNotificationsGroups() {
 		const unreadNotifications =
 			this.notificationsStore.unreadNotifications$.get();
 		const readNotifications = this.notificationsStore.readNotifications$.get();
@@ -77,21 +158,117 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		if (readNotifications.status !== 'completed') return readNotifications;
 
 		const unreadMapResult = joinAsyncMap(
-			mapValues(unreadNotifications.value, n =>
-				joinAsync([n.entry$, n.deletes$]),
+			mapValues(unreadNotifications.value, (_n, key) =>
+				this.notificationInfo(key),
 			),
 		);
 		const readMapResult = joinAsyncMap(
-			mapValues(readNotifications.value, n =>
-				joinAsync([n.entry$, n.deletes$]),
+			mapValues(readNotifications.value, (_n, key) =>
+				this.notificationInfo(key),
 			),
 		);
+		if (unreadMapResult.status !== 'completed') return unreadMapResult;
+		if (readMapResult.status !== 'completed') return readMapResult;
 
-		return joinAsync([unreadMapResult, readMapResult]).get();
+		const notifications: Record<
+			string,
+			Record<
+				string,
+				Array<{
+					read: boolean;
+					notificationInfo: NotificationInfo;
+				}>
+			>
+		> = {};
+
+		for (const [hash, info] of Array.from(unreadMapResult.value.entries())) {
+			if (!notifications[info.record.entry.notification_type]) {
+				notifications[info.record.entry.notification_type] = {};
+			}
+			if (
+				!notifications[info.record.entry.notification_type][
+					info.record.entry.notification_group
+				]
+			) {
+				notifications[info.record.entry.notification_type][
+					info.record.entry.notification_group
+				] = [];
+			}
+
+			notifications[info.record.entry.notification_type][
+				info.record.entry.notification_group
+			].push({
+				read: false,
+				notificationInfo: info,
+			});
+		}
+
+		for (const [hash, info] of Array.from(readMapResult.value.entries())) {
+			if (!notifications[info.record.entry.notification_type]) {
+				notifications[info.record.entry.notification_type] = {};
+			}
+			if (
+				!notifications[info.record.entry.notification_type][
+					info.record.entry.notification_group
+				]
+			) {
+				notifications[info.record.entry.notification_type][
+					info.record.entry.notification_group
+				] = [];
+			}
+
+			notifications[info.record.entry.notification_type][
+				info.record.entry.notification_group
+			].push({
+				read: true,
+				notificationInfo: info,
+			});
+		}
+
+		const unreadPersistent: Array<NotificationGroup> = [];
+		const readPersistent: Array<NotificationGroup> = [];
+		const unreadNonPersistent: Array<NotificationGroup> = [];
+		const readNonPersistent: Array<NotificationGroup> = [];
+
+		for (const [notificationType, groups] of Object.entries(notifications)) {
+			for (const [group, notifications] of Object.entries(groups)) {
+				const persistent = notifications.some(
+					n =>
+						n.notificationInfo.record.entry.persistent &&
+						n.notificationInfo.deletes.length === 0,
+				);
+				const unread = notifications.some(n => !n.read);
+				const timestamps = notifications.map(
+					n => n.notificationInfo.record.action.timestamp,
+				);
+				timestamps.sort((t1, t2) => t2 - t1);
+				const notificationsGroup: NotificationGroup = {
+					notificationType,
+					group,
+					notifications: notifications.map(n => n.notificationInfo),
+					title: notifications[0].notificationInfo.title,
+					timestamp: timestamps[0],
+				};
+				if (persistent && unread) unreadPersistent.push(notificationsGroup);
+				if (persistent && !unread) readPersistent.push(notificationsGroup);
+				if (!persistent && unread) unreadNonPersistent.push(notificationsGroup);
+				if (!persistent && !unread) readNonPersistent.push(notificationsGroup);
+			}
+		}
+
+		return {
+			status: 'completed' as 'completed',
+			value: {
+				unreadPersistent,
+				readPersistent,
+				unreadNonPersistent,
+				readNonPersistent,
+			},
+		};
 	}
 
 	render() {
-		const result = this.notifications;
+		const result = this.getNotificationsGroups();
 
 		switch (result.status) {
 			case 'pending':
@@ -108,35 +285,12 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 					.error=${result.error}
 				></display-error>`;
 			case 'completed':
-				const [unreadNotifications, readNotifications] = result.value;
-				const compareTimeDescendant = (
-					n1: EntryRecord<any>,
-					n2: EntryRecord<any>,
-				) => n2.action.timestamp - n1.action.timestamp;
-
-				const isPersistent = ([notification, deletes]: [
-					EntryRecord<Notification>,
-					Array<SignedActionHashed<Delete>>,
-				]) => notification.entry.persistent && deletes.length === 0;
-
-				const unreadPersistent = Array.from(unreadNotifications.values())
-					.filter(isPersistent)
-					.map(([n]) => n)
-					.sort(compareTimeDescendant);
-				const readPersistent = Array.from(readNotifications.values())
-					.filter(isPersistent)
-					.map(([n]) => n)
-					.sort(compareTimeDescendant);
-
-				const unreadNonPersistent = Array.from(unreadNotifications.values())
-					.filter(n => !isPersistent(n))
-					.map(([n]) => n)
-					.sort(compareTimeDescendant);
-
-				const readNonPersistent = Array.from(readNotifications.values())
-					.filter(n => !isPersistent(n))
-					.map(([n]) => n)
-					.sort(compareTimeDescendant);
+				const {
+					unreadPersistent,
+					readPersistent,
+					unreadNonPersistent,
+					readNonPersistent,
+				} = result.value;
 
 				const nonPersistentNotificationsCount =
 					unreadNonPersistent.length + readNonPersistent.length;
@@ -149,7 +303,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 							<div class="column" style="flex: 1">
 								<div class="column">
 									${unreadPersistent.map((n, i) =>
-										this.renderNotification(
+										this.renderNotificationGroup(
 											false,
 											n,
 											i === unreadPersistent.length - 1,
@@ -159,7 +313,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 										? html`<sl-divider style="--spacing: 0"></sl-divider>`
 										: html``}
 									${readPersistent.map((n, i) =>
-										this.renderNotification(
+										this.renderNotificationGroup(
 											true,
 											n,
 											i === readPersistent.length - 1,
@@ -180,8 +334,20 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 														@click=${() =>
 															this.notificationsStore.client.dismissNotifications(
 																[
-																	...unreadNonPersistent.map(n => n.actionHash),
-																	...readNonPersistent.map(n => n.actionHash),
+																	...Array.from([] as ActionHash[]).concat(
+																		...unreadNonPersistent.map(group =>
+																			group.notifications.map(
+																				n => n.record.actionHash,
+																			),
+																		),
+																	),
+																	...Array.from([] as ActionHash[]).concat(
+																		...readNonPersistent.map(group =>
+																			group.notifications.map(
+																				n => n.record.actionHash,
+																			),
+																		),
+																	),
 																],
 															)}
 													>
@@ -196,7 +362,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 												<sl-divider style="--spacing: 0"></sl-divider>
 												<div class="column">
 													${unreadNonPersistent.map((n, i) =>
-														this.renderNotification(
+														this.renderNotificationGroup(
 															false,
 															n,
 															i === unreadNonPersistent.length - 1,
@@ -209,7 +375,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 															></sl-divider>`
 														: html``}
 													${readNonPersistent.map((n, i) =>
-														this.renderNotification(
+														this.renderNotificationGroup(
 															true,
 															n,
 															i === readNonPersistent.length - 1,
