@@ -457,7 +457,7 @@
             {
               "kind": "field",
               "name": "readNotifications$",
-              "default": "new AsyncComputed(() => {\n\t\tconst readNotificationsLinks = this.readNotificationsLinks$.get();\n\t\tconst undismissedNotifications = this.undismissedNotificationsLinks$.get();\n\t\tif (readNotificationsLinks.status !== 'completed')\n\t\t\treturn readNotificationsLinks;\n\t\tif (undismissedNotifications.status !== 'completed')\n\t\t\treturn undismissedNotifications;\n\n\t\t/** Aggregate the read notification hashes and filter them by whether they've been dismissed */\n\n\t\tconst allReadNotificationsHashes = uniquify(\n\t\t\tArray.from([] as ActionHash[]).concat(\n\t\t\t\t...readNotificationsLinks.value.map(\n\t\t\t\t\tlink => decode(link.tag) as ActionHash[],\n\t\t\t\t),\n\t\t\t),\n\t\t);\n\n\t\tconst undismissedNotificationsHashes = undismissedNotifications.value.map(\n\t\t\tl => encodeHashToBase64(l.target),\n\t\t);\n\n\t\tconst notificationsHashes = allReadNotificationsHashes.filter(hash =>\n\t\t\tundismissedNotificationsHashes.includes(encodeHashToBase64(hash)),\n\t\t);\n\t\tconst value = slice(this.notifications, notificationsHashes);\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
+              "default": "new AsyncComputed(() => {\n\t\tconst readNotificationsLinks = this.readNotificationsLinks$.get();\n\t\tconst undismissedNotifications = this.undismissedNotificationsLinks$.get();\n\t\tif (readNotificationsLinks.status !== 'completed')\n\t\t\treturn readNotificationsLinks;\n\t\tif (undismissedNotifications.status !== 'completed')\n\t\t\treturn undismissedNotifications;\n\n\t\t/** Aggregate the read notification hashes and filter them by whether they've been dismissed */\n\n\t\tconst allReadNotificationsHashes = uniquify(\n\t\t\tArray.from([] as ActionHash[]).concat(\n\t\t\t\t...readNotificationsLinks.value.map(\n\t\t\t\t\tlink => decode(link.tag) as ActionHash[],\n\t\t\t\t),\n\t\t\t),\n\t\t);\n\n\t\tconst undismissedNotificationsHashes = undismissedNotifications.value.map(\n\t\t\tl => encodeHashToBase64(l.target),\n\t\t);\n\n\t\tconst notificationsHashes = allReadNotificationsHashes.filter(hash =>\n\t\t\tundismissedNotificationsHashes.includes(encodeHashToBase64(hash)),\n\t\t);\n\n\t\t/* If a notification was persistent and has been read but was deleted (usually by someone else performing the action that the notification required), then we dismiss the notification */\n\n\t\tconst deletes = joinAsync(\n\t\t\tnotificationsHashes.map(hash =>\n\t\t\t\tthis.notifications.get(hash).deletes$.get(),\n\t\t\t),\n\t\t);\n\t\tconst entries = joinAsync(\n\t\t\tnotificationsHashes.map(hash =>\n\t\t\t\tthis.notifications.get(hash).entry$.get(),\n\t\t\t),\n\t\t);\n\t\tif (entries.status !== 'completed') return entries;\n\t\tif (deletes.status !== 'completed') return deletes;\n\n\t\tconst nonDeletedNotificationHashes: ActionHash[] = [];\n\t\tconst notificationsToDismiss: ActionHash[] = [];\n\n\t\tfor (let i = 0; i < notificationsHashes.length; i++) {\n\t\t\tif (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {\n\t\t\t\tnonDeletedNotificationHashes.push(notificationsHashes[i]);\n\t\t\t} else {\n\t\t\t\tnotificationsToDismiss.push(notificationsHashes[i]);\n\t\t\t}\n\t\t}\n\n\t\tif (notificationsToDismiss.length > 0) {\n\t\t\tthis.client.dismissNotifications(notificationsToDismiss);\n\t\t}\n\n\t\tconst value = slice(this.notifications, nonDeletedNotificationHashes);\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
             },
             {
               "kind": "field",
@@ -546,7 +546,7 @@
           "members": [
             {
               "kind": "method",
-              "name": "renderNotification",
+              "name": "renderNotificationGroup",
               "parameters": [
                 {
                   "name": "read",
@@ -555,9 +555,9 @@
                   }
                 },
                 {
-                  "name": "notification",
+                  "name": "notificationGroup",
                   "type": {
-                    "text": "EntryRecord<Notification>"
+                    "text": "NotificationGroup"
                   }
                 },
                 {
@@ -569,9 +569,25 @@
               ]
             },
             {
-              "kind": "field",
-              "name": "notifications",
-              "default": "new AsyncComputed(() => {\n\t\tconst unreadNotifications =\n\t\t\tthis.notificationsStore.unreadNotifications$.get();\n\t\tconst readNotifications = this.notificationsStore.readNotifications$.get();\n\t\tif (unreadNotifications.status !== 'completed') return unreadNotifications;\n\t\tif (readNotifications.status !== 'completed') return readNotifications;\n\n\t\tconst unreadMapResult = joinAsyncMap(\n\t\t\tmapValues(unreadNotifications.value, n =>\n\t\t\t\tjoinAsync([n.entry$, n.deletes$]),\n\t\t\t),\n\t\t);\n\t\tconst readMapResult = joinAsyncMap(\n\t\t\tmapValues(readNotifications.value, n =>\n\t\t\t\tjoinAsync([n.entry$, n.deletes$]),\n\t\t\t),\n\t\t);\n\n\t\treturn joinAsync([unreadMapResult, readMapResult]).get();\n\t})"
+              "kind": "method",
+              "name": "notificationInfo",
+              "return": {
+                "type": {
+                  "text": "AsyncResult<NotificationInfo>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "notificationHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getNotificationsGroups"
             }
           ],
           "mixins": [
