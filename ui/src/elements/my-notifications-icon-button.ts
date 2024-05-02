@@ -52,7 +52,7 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 				const [unreadNotifications, readNotifications] = result.value;
 				return html`
 					<sl-dropdown
-						placement="bottom"
+						placement="bottom-end"
 						distance="8"
 						@sl-hide=${() =>
 							this.notificationsStore.client.markNotificationsAsRead(
