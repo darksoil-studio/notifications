@@ -90,35 +90,35 @@ export class NotificationsStore {
 
 		/* If a notification was persistent and has been read but was deleted (usually by someone else performing the action that the notification required), then we dismiss the notification */
 
-		const deletes = joinAsync(
-			notificationsHashes.map(hash =>
-				this.notifications.get(hash).deletes$.get(),
-			),
-		);
-		const entries = joinAsync(
-			notificationsHashes.map(hash =>
-				this.notifications.get(hash).entry$.get(),
-			),
-		);
-		if (entries.status !== 'completed') return entries;
-		if (deletes.status !== 'completed') return deletes;
+		// const deletes = joinAsync(
+		// 	notificationsHashes.map(hash =>
+		// 		this.notifications.get(hash).deletes$.get(),
+		// 	),
+		// );
+		// const entries = joinAsync(
+		// 	notificationsHashes.map(hash =>
+		// 		this.notifications.get(hash).entry$.get(),
+		// 	),
+		// );
+		// if (entries.status !== 'completed') return entries;
+		// if (deletes.status !== 'completed') return deletes;
 
-		const nonDeletedNotificationHashes: ActionHash[] = [];
-		const notificationsToDismiss: ActionHash[] = [];
+		// const nonDeletedNotificationHashes: ActionHash[] = [];
+		// const notificationsToDismiss: ActionHash[] = [];
 
-		for (let i = 0; i < notificationsHashes.length; i++) {
-			if (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {
-				nonDeletedNotificationHashes.push(notificationsHashes[i]);
-			} else {
-				notificationsToDismiss.push(notificationsHashes[i]);
-			}
-		}
+		// for (let i = 0; i < notificationsHashes.length; i++) {
+		// 	if (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {
+		// 		nonDeletedNotificationHashes.push(notificationsHashes[i]);
+		// 	} else {
+		// 		notificationsToDismiss.push(notificationsHashes[i]);
+		// 	}
+		// }
 
-		if (notificationsToDismiss.length > 0) {
-			this.client.dismissNotifications(notificationsToDismiss);
-		}
+		// if (notificationsToDismiss.length > 0) {
+		// 	this.client.dismissNotifications(notificationsToDismiss);
+		// }
 
-		const value = slice(this.notifications, nonDeletedNotificationHashes);
+		const value = slice(this.notifications, notificationsHashes);
 		return {
 			status: 'completed',
 			value,

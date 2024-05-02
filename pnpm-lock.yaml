@@ -105,8 +105,8 @@ importers:
         specifier: ^0.300.0-dev.1
         version: 0.300.0-dev.1(@types/react@18.2.79)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#f12b9ac57e229993e30379d748d632bfcedfd540&path:ui
-        version: github.com/holochain-open-dev/profiles/f12b9ac57e229993e30379d748d632bfcedfd540#path:ui(@types/react@18.2.79)
+        specifier: github:holochain-open-dev/profiles#81a42479e30778d273a985bd82b8715c40116a7d&path:ui
+        version: github.com/holochain-open-dev/profiles/81a42479e30778d273a985bd82b8715c40116a7d#path:ui(@types/react@18.2.79)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-dev.7
         version: 0.300.0-dev.7(@types/react@18.2.79)
@@ -2973,8 +2973,8 @@ packages:
     name: '@holochain-open-dev/profiles'
     version: 0.300.0-dev.0
 
-  github.com/holochain-open-dev/profiles/f12b9ac57e229993e30379d748d632bfcedfd540#path:ui:
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/f12b9ac57e229993e30379d748d632bfcedfd540}
+  github.com/holochain-open-dev/profiles/81a42479e30778d273a985bd82b8715c40116a7d#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/81a42479e30778d273a985bd82b8715c40116a7d}
     name: '@holochain-open-dev/profiles'
     version: 0.300.0-dev.0
 
@@ -6615,8 +6615,8 @@ snapshots:
       - utf-8-validate
     dev: true
 
-  github.com/holochain-open-dev/profiles/f12b9ac57e229993e30379d748d632bfcedfd540#path:ui(@types/react@18.2.79):
-    id: github.com/holochain-open-dev/profiles/f12b9ac57e229993e30379d748d632bfcedfd540#path:ui
+  github.com/holochain-open-dev/profiles/81a42479e30778d273a985bd82b8715c40116a7d#path:ui(@types/react@18.2.79):
+    id: github.com/holochain-open-dev/profiles/81a42479e30778d273a985bd82b8715c40116a7d#path:ui
     dependencies:
       '@holochain-open-dev/elements': 0.300.0-dev.1(@types/react@18.2.79)
       '@holochain-open-dev/signals': 0.300.0-dev.7(@types/react@18.2.79)

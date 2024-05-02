@@ -8,13 +8,18 @@ import { EntryRecord, mapValues } from '@holochain-open-dev/utils';
 import { ActionHash, Delete, SignedActionHashed } from '@holochain/client';
 import { consume } from '@lit/context';
 import { msg } from '@lit/localize';
-import { mdiInformationOutline, mdiNotificationClearAll } from '@mdi/js';
+import {
+	mdiClose,
+	mdiInformationOutline,
+	mdiNotificationClearAll,
+} from '@mdi/js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/divider/divider.js';
+import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/relative-time/relative-time.js';
 import '@shoelace-style/shoelace/dist/components/skeleton/skeleton.js';
-import { LitElement, html } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -53,6 +58,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 
 	renderNotificationGroup(
 		read: boolean,
+		persistent: boolean,
 		notificationGroup: NotificationGroup,
 		last: boolean,
 	) {
@@ -86,25 +92,43 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 						gap: singleNotification ? '0' : '8px',
 					})}
 				>
-					<div class="row" style="gap: 8px">
-						<span style="flex: 1">${notificationGroup.title}</span>
-						<sl-relative-time
-							style="color: grey;"
-							.date=${new Date(notificationGroup.timestamp)}
-						></sl-relative-time>
+					<span style="flex: 1">${notificationGroup.title}</span>
+					${notificationGroup.notifications.map(
+						n => html`
+							<div class="row" style="gap: 8px; align-items: center">
+								${!singleNotification
+									? html`<sl-icon src="${n.contents.iconSrc}"></sl-icon>`
+									: html``}
+								<span class="placeholder">${n.contents.body}</span>
+							</div>
+						`,
+					)}
+				</div>
+
+				<div
+					class="column"
+					style="align-items: end; flex: 1; align-self: stretch"
+				>
+					<div style="flex: 1;">
+						${persistent
+							? html``
+							: html`
+									<sl-icon-button
+										.src=${wrapPathInSvg(mdiClose)}
+										id="dismiss-single-notification"
+										@click=${() =>
+											this.notificationsStore.client.dismissNotifications(
+												notificationGroup.notifications.map(
+													n => n.record.actionHash,
+												),
+											)}
+									></sl-icon-button>
+								`}
 					</div>
-					<div class="column" style="gap: 8px">
-						${notificationGroup.notifications.map(
-							n => html`
-								<div class="row" style="gap: 8px; align-items: center">
-									${!singleNotification
-										? html`<sl-icon src="${n.contents.iconSrc}"></sl-icon>`
-										: html``}
-									<span class="placeholder">${n.contents.body}</span>
-								</div>
-							`,
-						)}
-					</div>
+					<sl-relative-time
+						style="color: grey; text-align: right"
+						.date=${new Date(notificationGroup.timestamp)}
+					></sl-relative-time>
 				</div>
 			</div>
 
@@ -305,6 +329,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 									${unreadPersistent.map((n, i) =>
 										this.renderNotificationGroup(
 											false,
+											true,
 											n,
 											i === unreadPersistent.length - 1,
 										),
@@ -314,6 +339,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 										: html``}
 									${readPersistent.map((n, i) =>
 										this.renderNotificationGroup(
+											true,
 											true,
 											n,
 											i === readPersistent.length - 1,
@@ -350,6 +376,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 																	),
 																],
 															)}
+														size="small"
 													>
 														<sl-icon
 															slot="prefix"
@@ -364,6 +391,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 													${unreadNonPersistent.map((n, i) =>
 														this.renderNotificationGroup(
 															false,
+															false,
 															n,
 															i === unreadNonPersistent.length - 1,
 														),
@@ -377,6 +405,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 													${readNonPersistent.map((n, i) =>
 														this.renderNotificationGroup(
 															true,
+															false,
 															n,
 															i === readNonPersistent.length - 1,
 														),
@@ -401,5 +430,12 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		}
 	}
 
-	static styles = [sharedStyles];
+	static styles = [
+		sharedStyles,
+		css`
+			sl-icon-button::part(base) {
+				padding: 0 !important;
+			}
+		`,
+	];
 }
