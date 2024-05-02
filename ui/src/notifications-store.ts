@@ -5,10 +5,18 @@ import {
 	deletesForEntrySignal,
 	immutableEntrySignal,
 	joinAsync,
+	joinAsyncMap,
 	liveLinksSignal,
 	uniquify,
 } from '@holochain-open-dev/signals';
-import { EntryRecord, LazyHoloHashMap, slice } from '@holochain-open-dev/utils';
+import {
+	EntryRecord,
+	LazyHoloHashMap,
+	LazyMap,
+	mapValues,
+	pickBy,
+	slice,
+} from '@holochain-open-dev/utils';
 import { ActionHash, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -169,4 +177,54 @@ export class NotificationsStore {
 			value,
 		};
 	});
+
+	/** Helpers for consuming UIs */
+
+	notificationsByTypeAndGroup = new LazyMap(
+		(notificationType: string) =>
+			new LazyMap((notificationGroup: string) => ({
+				read$: new AsyncComputed(() => {
+					const notifications = this.readNotifications$.get();
+					if (notifications.status !== 'completed') return notifications;
+
+					const entries = joinAsyncMap(
+						mapValues(notifications.value, n => n.entry$.get()),
+					);
+					if (entries.status !== 'completed') return entries;
+
+					const value = pickBy(
+						entries.value,
+						n =>
+							n.entry.notification_type === notificationType &&
+							n.entry.notification_group === notificationGroup,
+					);
+
+					return {
+						status: 'completed',
+						value,
+					};
+				}),
+				unread$: new AsyncComputed(() => {
+					const notifications = this.unreadNotifications$.get();
+					if (notifications.status !== 'completed') return notifications;
+
+					const entries = joinAsyncMap(
+						mapValues(notifications.value, n => n.entry$.get()),
+					);
+					if (entries.status !== 'completed') return entries;
+
+					const value = pickBy(
+						entries.value,
+						n =>
+							n.entry.notification_type === notificationType &&
+							n.entry.notification_group === notificationGroup,
+					);
+
+					return {
+						status: 'completed',
+						value,
+					};
+				}),
+			})),
+	);
 }
