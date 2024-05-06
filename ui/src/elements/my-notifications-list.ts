@@ -116,12 +116,14 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 									<sl-icon-button
 										.src=${wrapPathInSvg(mdiClose)}
 										id="dismiss-single-notification"
-										@click=${() =>
+										@click=${(e: Event) => {
 											this.notificationsStore.client.dismissNotifications(
 												notificationGroup.notifications.map(
 													n => n.record.actionHash,
 												),
-											)}
+											);
+											e.stopPropagation();
+										}}
 									></sl-icon-button>
 								`}
 					</div>

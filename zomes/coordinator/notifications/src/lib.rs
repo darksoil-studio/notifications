@@ -1,6 +1,8 @@
-pub mod notification;
 use hdk::prelude::*;
 use notifications_integrity::*;
+
+pub mod notification;
+
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 	Ok(InitCallbackResult::Pass)

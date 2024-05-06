@@ -61,6 +61,7 @@ export class NotificationsStore {
 		this.client.client.myPubKey,
 		() => this.client.getUndismissedNotifications(),
 		'RecipientToNotifications',
+		5000,
 	);
 
 	private readNotificationsLinks$ = liveLinksSignal(
