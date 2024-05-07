@@ -33,6 +33,28 @@ pub enum Signal {
 		original_app_entry: EntryTypes,
 	},
 }
+
+#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
+pub enum NotificationsRemoteSignal {
+	NewNotification(SignedActionHashed),
+}
+
+#[hdk_extern]
+pub fn recv_remote_signal(signal: SerializedBytes) -> ExternResult<()> {
+	let signal = NotificationsRemoteSignal::try_from(signal).map_err(|err| {
+		wasm_error!(WasmErrorInner::Guest(format!(
+			"Malformed remote signal: {err:?}"
+		)))
+	})?;
+
+	match signal {
+		NotificationsRemoteSignal::NewNotification(action) => emit_signal(Signal::LinkCreated {
+			action,
+			link_type: LinkTypes::RecipientToNotifications,
+		}),
+	}
+}
+
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
 	for action in committed_actions {
@@ -47,7 +69,16 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 			if let Ok(Some(link_type)) =
 				LinkTypes::from_type(create_link.zome_index, create_link.link_type)
 			{
-				emit_signal(Signal::LinkCreated { action, link_type })?;
+				emit_signal(Signal::LinkCreated {
+					action: action.clone(),
+					link_type,
+				})?;
+
+				if let LinkTypes::RecipientToNotifications = link_type {
+					if let Some(notifiee) = create_link.base_address.into_agent_pub_key() {
+						send_remote_signal(action, vec![notifiee])?;
+					}
+				}
 			}
 			Ok(())
 		}
@@ -107,6 +138,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 		_ => Ok(()),
 	}
 }
+
 fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
 	let record = match get_details(action_hash.clone(), GetOptions::default())? {
 		Some(Details::Record(record_details)) => record_details.record,
