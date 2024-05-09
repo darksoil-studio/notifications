@@ -6,18 +6,23 @@ pub use notification::*;
 pub mod read_notifications;
 pub use read_notifications::*;
 
+pub mod notifications_settings;
+pub use notifications_settings::*;
+
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
 	Notification(Notification),
+	NotificationsSettings(NotificationsSettings),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
 	RecipientToNotifications,
 	ReadNotifications,
+	AgentToNotificationsSettings,
 }
 #[hdk_extern]
 pub fn genesis_self_check(_data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {
@@ -37,12 +42,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				EntryTypes::Notification(notification) => {
 					validate_create_notification(EntryCreationAction::Create(action), notification)
 				}
+				EntryTypes::NotificationsSettings(notifications_settings) => {
+					validate_create_notifications_settings(
+						EntryCreationAction::Create(action),
+						notifications_settings,
+					)
+				}
 			},
 			OpEntry::UpdateEntry {
 				app_entry, action, ..
 			} => match app_entry {
 				EntryTypes::Notification(notification) => {
 					validate_create_notification(EntryCreationAction::Update(action), notification)
+				}
+				EntryTypes::NotificationsSettings(notifications_settings) => {
+					validate_create_notifications_settings(
+						EntryCreationAction::Update(action),
+						notifications_settings,
+					)
 				}
 			},
 			_ => Ok(ValidateCallbackResult::Valid),
@@ -51,6 +68,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			OpUpdate::Entry { app_entry, action } => match app_entry {
 				EntryTypes::Notification(notification) => {
 					validate_update_notification(action, notification)
+				}
+				EntryTypes::NotificationsSettings(notifications_settings) => {
+					validate_update_notifications_settings(action, notifications_settings)
 				}
 			},
 			_ => Ok(ValidateCallbackResult::Valid),
@@ -71,6 +91,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			),
 			LinkTypes::ReadNotifications => {
 				validate_create_link_read_notifications(action, base_address, target_address, tag)
+			}
+			LinkTypes::AgentToNotificationsSettings => {
+				validate_create_link_agent_to_notifications_settings(
+					action,
+					base_address,
+					target_address,
+					tag,
+				)
 			}
 		},
 		FlatOp::RegisterDeleteLink {
@@ -95,11 +123,26 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				target_address,
 				tag,
 			),
+			LinkTypes::AgentToNotificationsSettings => {
+				validate_delete_link_agent_to_notifications_settings(
+					action,
+					original_action,
+					base_address,
+					target_address,
+					tag,
+				)
+			}
 		},
 		FlatOp::StoreRecord(store_record) => match store_record {
 			OpRecord::CreateEntry { app_entry, action } => match app_entry {
 				EntryTypes::Notification(notification) => {
 					validate_create_notification(EntryCreationAction::Create(action), notification)
+				}
+				EntryTypes::NotificationsSettings(notifications_settings) => {
+					validate_create_notifications_settings(
+						EntryCreationAction::Create(action),
+						notifications_settings,
+					)
 				}
 			},
 			OpRecord::UpdateEntry {
@@ -114,6 +157,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 						return Ok(result);
 					};
 					validate_update_notification(action, notification)
+				}
+				EntryTypes::NotificationsSettings(notifications_settings) => {
+					let result = validate_create_notifications_settings(
+						EntryCreationAction::Update(action.clone()),
+						notifications_settings.clone(),
+					)?;
+					let ValidateCallbackResult::Valid = result else {
+						return Ok(result);
+					};
+					validate_update_notifications_settings(action, notifications_settings)
 				}
 			},
 			OpRecord::DeleteEntry { action, .. } => validate_delete_notification(action),
@@ -138,6 +191,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 					target_address,
 					tag,
 				),
+				LinkTypes::AgentToNotificationsSettings => {
+					validate_create_link_agent_to_notifications_settings(
+						action,
+						base_address,
+						target_address,
+						tag,
+					)
+				}
 			},
 			OpRecord::DeleteLink {
 				original_action_hash,
@@ -177,6 +238,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 						create_link.target_address,
 						create_link.tag,
 					),
+					LinkTypes::AgentToNotificationsSettings => {
+						validate_delete_link_agent_to_notifications_settings(
+							action,
+							create_link.clone(),
+							base_address,
+							create_link.target_address,
+							create_link.tag,
+						)
+					}
 				}
 			}
 			OpRecord::CreatePrivateEntry { .. } => Ok(ValidateCallbackResult::Valid),

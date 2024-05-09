@@ -2,6 +2,7 @@ use hdk::prelude::*;
 use notifications_integrity::*;
 
 pub mod notification;
+pub mod notifications_settings;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
@@ -47,6 +48,7 @@ pub fn recv_remote_signal(signal: SerializedBytes) -> ExternResult<()> {
 		)))
 	})?;
 
+	// TODO: take into account wether the recipient has the notification enabled in their settings
 	match signal {
 		NotificationsRemoteSignal::NewNotification(action) => emit_signal(Signal::LinkCreated {
 			action,

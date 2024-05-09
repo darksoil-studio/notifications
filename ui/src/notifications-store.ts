@@ -4,7 +4,6 @@ import {
 	deletedLinksSignal,
 	deletesForEntrySignal,
 	immutableEntrySignal,
-	joinAsync,
 	joinAsyncMap,
 	liveLinksSignal,
 	uniquify,
@@ -17,21 +16,40 @@ import {
 	pickBy,
 	slice,
 } from '@holochain-open-dev/utils';
-import { ActionHash, encodeHashToBase64 } from '@holochain/client';
+import { ActionHash, AgentPubKey, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { NotificationsClient } from './notifications-client.js';
 import { Notification } from './types.js';
 
-export type NotificationsTypes = Record<string, NotificationType>;
+export interface NotificationsConfig {
+	groups: {
+		// The title only depends on the notification type and group to make sure that notifications for the same type and group have the same title
+		title: (notificationGroup: string) => AsyncSignal<string>;
+
+		onClick: (notificationGroup: string) => void;
+	};
+
+	types: Record<string, NotificationType>;
+
+	services?: {
+		email?: {
+			enabled: boolean;
+			sendEmail: (
+				notification: EntryRecord<Notification>,
+				recipientPubKey: AgentPubKey,
+				recipientEmailAddress: string,
+			) => Promise<void>;
+		};
+	};
+}
 
 export interface NotificationType {
-	// The title only depends on the notification type and group to make sure that notifications for the same type and group have the same title
-	title: (notificationGroup: string) => AsyncSignal<string>;
+	name: string; // For the notifications settings UI
+	description: string; // For the notifications settings UI
 	contents: (
 		notification: EntryRecord<Notification>,
 	) => AsyncSignal<NotificationContents>;
-	onClick: (notificationGroup: string) => void;
 }
 
 export interface NotificationContents {
@@ -42,7 +60,7 @@ export interface NotificationContents {
 export class NotificationsStore {
 	constructor(
 		public client: NotificationsClient,
-		public notificationsTypes: NotificationsTypes,
+		public notificationsConfig: NotificationsConfig,
 	) {}
 
 	/** Notification */

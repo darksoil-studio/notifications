@@ -1,24 +1,12 @@
-import { EntryRecord } from '@holochain-open-dev/utils';
-import {
-	ActionHash,
-	AgentPubKey,
-	AppBundleSource,
-	EntryHash,
-	NewEntryAction,
-	Record,
-	encodeHashToBase64,
-	fakeActionHash,
-	fakeAgentPubKey,
-	fakeDnaHash,
-	fakeEntryHash,
-} from '@holochain/client';
 import { Scenario } from '@holochain/tryorama';
-import { encode } from '@msgpack/msgpack';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import { NotificationsClient } from '../../ui/src/notifications-client.js';
-import { NotificationsStore } from '../../ui/src/notifications-store.js';
+import {
+	NotificationsConfig,
+	NotificationsStore,
+} from '../../ui/src/notifications-store.js';
 
 export async function setup(scenario: Scenario) {
 	const testHappUrl =
@@ -36,20 +24,32 @@ export async function setup(scenario: Scenario) {
 	// conductor of the scenario.
 	await scenario.shareAllAgents();
 
+	const config: NotificationsConfig = {
+		groups: {
+			onClick(notificationGroup) {},
+			title(notificationGroup) {
+				throw new Error('');
+			},
+		},
+		types: {},
+	};
+
 	const aliceStore = new NotificationsStore(
 		new NotificationsClient(
-			alice.appAgentWs as any,
+			alice.appWs as any,
 			'notifications_test',
 			'notifications',
 		),
+		config,
 	);
 
 	const bobStore = new NotificationsStore(
 		new NotificationsClient(
-			bob.appAgentWs as any,
+			bob.appWs as any,
 			'notifications_test',
 			'notifications',
 		),
+		config,
 	);
 
 	// Shortcut peer discovery through gossip and register all agents in every

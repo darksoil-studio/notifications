@@ -3,8 +3,13 @@
 The `NotificationsStore` is a typescript class that contains `svelte` stores, to which you can subscribe to get reactive updates in your elements.
 
 ```js
-import { NotificationsStore, NotificationsClient } from "@darksoil-studio/notifications";
-const store = new NotificationsStore(new NotificationsClient(appAgentClient, 'my-role-name'));
+import { NotificationsStore, NotificationsClient, NotificationsConfig } from "@darksoil-studio/notifications";
+
+const config: NotificationsConfig = {
+  // TODO: fill this
+};
+
+const store = new NotificationsStore(new NotificationsClient(appClient, 'my-role-name'), config);
 ```
 
 > Learn how to setup the `AppClient` object [here](https://www.npmjs.com/package/@holochain/client).

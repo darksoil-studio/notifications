@@ -77,16 +77,16 @@
 					this.requestUpdate();
 				}
 
-				async initStores(appAgentClient) {
+				async initStores(appClient) {
 					const profilesStore = new ProfilesStore(
-						new ProfilesClient(appAgentClient, 'notifications_test'),
+						new ProfilesClient(appClient, 'notifications_test'),
 					);
 					new ContextProvider(this, profilesStoreContext, profilesStore);
 
 					this._notificationsStore = new NotificationsStore(
-						new NotificationsClient(appAgentClient, 'notifications_test'),
+						new NotificationsClient(appClient, 'notifications_test'),
 						{
-							type1: {
+							groups: {
 								title(group) {
 									return new Signal.State({
 										status: 'completed',
@@ -94,16 +94,22 @@
 									});
 								},
 								onClick: group => console.log('clicked', group),
-								contents: n => {
-									const i = decode(n.entry.content);
+							},
+							types: {
+								name: 'Hii',
+								description: 'something',
+								type1: {
+									contents: n => {
+										const i = decode(n.entry.content);
 
-									return new Signal.State({
-										status: 'completed',
-										value: {
-											iconSrc: wrapPathInSvg(mdiBell),
-											body: i.body,
-										},
-									});
+										return new Signal.State({
+											status: 'completed',
+											value: {
+												iconSrc: wrapPathInSvg(mdiBell),
+												body: i.body,
+											},
+										});
+									},
 								},
 							},
 						},
