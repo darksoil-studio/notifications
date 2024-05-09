@@ -54,7 +54,7 @@ pub fn validate_create_link_agent_to_notifications_settings(
 				"No action hash associated with link".to_string()
 			)))?;
 	let record = must_get_valid_record(action_hash)?;
-	let _notification: crate::Notification = record
+	let _notification: crate::NotificationsSettings = record
 		.entry()
 		.to_app_option()
 		.map_err(|e| wasm_error!(e))?
