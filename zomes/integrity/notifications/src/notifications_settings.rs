@@ -11,13 +11,14 @@ pub enum NotificationProvider {
 #[derive(Serialize, Clone, Deserialize, Debug)]
 pub struct NotificationTypeSettings {
 	enabled: bool,
-	providers: Vec<NotificationProvider>,
+	providers: HashSet<String>,
 }
 
 #[derive(Clone)]
 #[hdk_entry_helper]
 pub struct NotificationsSettings {
 	settings_by_notification_type: HashMap<String, NotificationTypeSettings>,
+	available_notification_providers: HashMap<String, NotificationProvider>,
 }
 
 pub fn validate_create_notifications_settings(
