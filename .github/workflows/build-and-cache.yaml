@@ -34,18 +34,18 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          nix build -L .#notifications_integrity.meta.debug
-          cachix push darksoil-studio $(nix path-info .#notifications_integrity.meta.debug)
-          cachix pin darksoil-studio notifications_integrity_debug $(nix path-info .#notifications_integrity.meta.debug)
-
           nix build -L .#notifications_integrity
           cachix push darksoil-studio $(nix path-info .#notifications_integrity)
-          cachix pin darksoil-studio notifications_integrity $(nix path-info .#notifications_integrity)
+          cachix pin darksoil-studio notifications_integrity_debug $(nix path-info .#notifications_integrity)
 
-          nix build -L .#notifications.meta.debug
-          cachix push darksoil-studio $(nix path-info .#notifications.meta.debug)
-          cachix pin darksoil-studio notifications_debug $(nix path-info .#notifications.meta.debug)
+          nix build -L .#notifications_integrity.meta.release
+          cachix push darksoil-studio $(nix path-info .#notifications_integrity.meta.release)
+          cachix pin darksoil-studio notifications_integrity $(nix path-info .#notifications_integrity.meta.release)
 
           nix build -L .#notifications
           cachix push darksoil-studio $(nix path-info .#notifications)
-          cachix pin darksoil-studio notifications$(nix path-info .#notifications)
+          cachix pin darksoil-studio notifications_debug $(nix path-info .#notifications)
+
+          nix build -L .#notifications.meta.release
+          cachix push darksoil-studio $(nix path-info .#notifications.meta.release)
+          cachix pin darksoil-studio notifications$(nix path-info .#notifications.meta.release)

@@ -10,7 +10,7 @@
     "build:happ": "nix build -L .#notifications_test_app.meta.debug -o workdir/notifications_test-debug.happ"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.1.1",
+    "@holochain-playground/cli": "^0.300.0-rc",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@eslint/js": "^9.0.0",
     "concurrently": "^6.2.1",

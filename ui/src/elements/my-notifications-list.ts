@@ -75,9 +75,9 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 					'align-items': 'center',
 				})}
 				@click=${() =>
-					this.notificationsStore.notificationsTypes[
-						notificationGroup.notificationType
-					].onClick(notificationGroup.group)}
+					this.notificationsStore.notificationsConfig.groups.onClick(
+						notificationGroup.group,
+					)}
 			>
 				${singleNotification
 					? html`<sl-icon
@@ -152,14 +152,12 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		if (record.status !== 'completed') return record;
 		if (deletes.status !== 'completed') return deletes;
 
-		const contents = this.notificationsStore.notificationsTypes[
+		const contents = this.notificationsStore.notificationsConfig.types[
 			record.value.entry.notification_type
 		]
 			.contents(record.value)
 			.get();
-		const title = this.notificationsStore.notificationsTypes[
-			record.value.entry.notification_type
-		]
+		const title = this.notificationsStore.notificationsConfig.groups
 			.title(record.value.entry.notification_group)
 			.get();
 		if (contents.status !== 'completed') return contents;
