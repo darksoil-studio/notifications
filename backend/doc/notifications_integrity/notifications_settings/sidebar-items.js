@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["NotificationProvider"],"fn":["validate_create_link_agent_to_notifications_settings","validate_create_notifications_settings","validate_delete_link_agent_to_notifications_settings","validate_delete_notifications_settings","validate_update_notifications_settings"],"struct":["NotificationTypeSettings","NotificationsSettings"]};

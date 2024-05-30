@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["MAX_TAG_SIZE"],"fn":["create_notification","dismiss_notifications","get_all_deletes_for_notification","get_dismissed_notifications","get_notification","get_read_notifications","get_undismissed_notifications","mark_notifications_as_read"],"struct":["ReadNotifications"]};

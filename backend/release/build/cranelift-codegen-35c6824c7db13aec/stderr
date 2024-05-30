@@ -1,0 +1,19 @@
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/settings.rs
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/types.rs
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/opcodes.rs
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/clif_opt.isle
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/clif_lower.isle
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/inst_builder.rs
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/settings-x86.rs
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/settings-arm64.rs
+Writing generated file: /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/settings-riscv64.rs
+Rebuilding /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_opt.rs
+Writing ISLE-generated Rust code to /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_opt.rs
+Rebuilding /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_x64.rs
+Writing ISLE-generated Rust code to /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_x64.rs
+Rebuilding /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_aarch64.rs
+Writing ISLE-generated Rust code to /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_aarch64.rs
+Rebuilding /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_s390x.rs
+Writing ISLE-generated Rust code to /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_s390x.rs
+Rebuilding /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_riscv64.rs
+Writing ISLE-generated Rust code to /home/runner/work/notifications/notifications/docs/public/backend/release/build/cranelift-codegen-35c6824c7db13aec/out/isle_riscv64.rs

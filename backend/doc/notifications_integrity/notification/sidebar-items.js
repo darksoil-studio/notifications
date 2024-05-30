@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["validate_create_link_recipient_to_notifications","validate_create_notification","validate_delete_link_recipient_to_notifications","validate_delete_notification","validate_update_notification"],"struct":["Notification"]};
