@@ -159,7 +159,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 			.contents(record.value)
 			.get();
 		const title = this.notificationsStore.notificationsConfig.types[
-			record.value.entry.notification_group
+			record.value.entry.notification_type
 		]
 			.title(record.value.entry.notification_group)
 			.get();
