@@ -425,7 +425,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 									style="color: grey; height: 64px; width: 48px;"
 								></sl-icon>
 								<span class="placeholder"
-									>${msg('You have no notifications')}</span
+									>${msg("You don't have any notifications")}</span
 								>
 							</div>
 						`;
