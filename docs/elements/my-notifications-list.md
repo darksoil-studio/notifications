@@ -1,13 +1,13 @@
-# `<create-notification>`
+# `<my-notifications-list>`
 
 ## Usage
 
 0. If you haven't already, [go through the setup for the module](/setup).
 
-1. Import the `<create-notification>` element somewhere in the javascript side of your web-app like this:
+1. Import the `<my-notifications-list>` element somewhere in the javascript side of your web-app like this:
 
 ```js
-import '@holochain-open-dev/notifications/dist/elements/create-notification.js'
+import '@holochain-open-dev/notifications/dist/elements/my-notifications-list.js'
 ```
 
 2. Use it in the html side of your web-app like this:
@@ -15,63 +15,33 @@ import '@holochain-open-dev/notifications/dist/elements/create-notification.js'
 
 ::: code-group
 ```html [Lit]
-<create-notification 
-  .notificationType=${ notificationType }
-  .notificationGroup=${ notificationGroup }
-  .persistent=${ persistent }
-  .recipients=${[recipients]}
-  .content=${ content }
->
-</create-notification>
+<my-notifications-list>
+</my-notifications-list>
 ```
 
 ```html [React]
-<create-notification
-  notificationType={ notificationType }
-  notificationGroup={ notificationGroup }
-  persistent={ persistent }
-  recipients={[recipients]}
-  content={ content }
->
-</create-notification>
+<my-notifications-list>
+</my-notifications-list>
 ```
 
 ```html [Angular]
-<create-notification
-  [notificationType]="notificationType"
-  [notificationGroup]="notificationGroup"
-  [persistent]="persistent"
-  [recipients]="[recipients]"
-  [content]="content"
->
-</create-notification>
+<my-notifications-list>
+</my-notifications-list>
 ```
 
 ```html [Vue]
-<create-notification
-  :notificationType="notificationType"
-  :notificationGroup="notificationGroup"
-  :persistent="persistent"
-  :recipients="[recipients]"
-  :content="content"
->
-</create-notification>
+<my-notifications-list>
+</my-notifications-list>
 ```
 
 ```html [Svelte]
-<create-notification
-  notification-type={encodeHashToBase64(notificationType)}
-  notification-group={encodeHashToBase64(notificationGroup)}
-  persistent={encodeHashToBase64(persistent)}
-  recipients={[encodeHashToBase64(recipients)]}
-  content={encodeHashToBase64(content)}
->
-</create-notification>
+<my-notifications-list>
+</my-notifications-list>
 ```
 :::
 
 > [!WARNING]
-> Like all the elements in this module, `<create-notification>` needs to be placed inside an initialized `<notifications-context>`.
+> Like all the elements in this module, `<my-notifications-list>` needs to be placed inside an initialized `<notifications-context>`.
 
 ## Demo
 
@@ -98,7 +68,7 @@ onMounted(async () => {
   await import('@api-viewer/demo/lib/api-demo.js');
   await import('@holochain-open-dev/profiles/dist/elements/profiles-context.js');
   if (!customElements.get('notifications-context')) await import('../../ui/src/elements/notifications-context.ts');
-  if (!customElements.get('create-notification')) await import('../../ui/src/elements/create-notification.ts');
+  if (!customElements.get('my-notifications-list')) await import('../../ui/src/elements/my-notifications-list.ts');
 
   const profiles = await demoProfiles();
 
@@ -120,7 +90,7 @@ onMounted(async () => {
   render(html`
     <profiles-context .store=${profilesStore}>
       <notifications-context .store=${store}>
-        <api-demo src="custom-elements.json" only="create-notification" exclude-knobs="store">
+        <api-demo src="custom-elements.json" only="my-notifications-list" exclude-knobs="store">
         </api-demo>
       </notifications-context>
     </profiles-context>
@@ -132,7 +102,7 @@ onMounted(async () => {
 
 ## API Reference
 
-`<create-notification>` is a [custom element](https://web.dev/articles/custom-elements-v1), which means that it can be used in any web app or website. Here is the reference for its API:
+`<my-notifications-list>` is a [custom element](https://web.dev/articles/custom-elements-v1), which means that it can be used in any web app or website. Here is the reference for its API:
 
-<api-docs src="custom-elements.json" only="create-notification">
+<api-docs src="custom-elements.json" only="my-notifications-list">
 </api-docs>
