@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@holochain-open-dev/elements": "^0.300.0-rc",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#f95cd9b627a308dcac016b47df960dbb24b741b8&path:ui",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#2a23e238c6c4d29f7a75d61d73c51fae3be2e874&path:ui",
     "@holochain-open-dev/signals": "^0.300.0-rc",
     "@holochain-open-dev/utils": "^0.300.0-rc",
     "@holochain/client": "^0.17.0-rc",
