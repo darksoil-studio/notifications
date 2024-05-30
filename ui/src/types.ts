@@ -1,17 +1,6 @@
-import { ActionCommittedSignal } from '@holochain-open-dev/utils';
-import {
-	ActionHash,
-	AgentPubKey,
-	Create,
-	CreateLink,
-	Delete,
-	DeleteLink,
-	DnaHash,
-	EntryHash,
-	Record,
-	SignedActionHashed,
-	Update,
-} from '@holochain/client';
+import { AsyncSignal } from '@holochain-open-dev/signals';
+import { ActionCommittedSignal, EntryRecord } from '@holochain-open-dev/utils';
+import { AgentPubKey } from '@holochain/client';
 
 export type NotificationsSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -29,4 +18,37 @@ export interface Notification {
 	recipients: Array<AgentPubKey>;
 
 	content: Uint8Array;
+}
+
+export interface NotificationsConfig {
+	types: Record<string, NotificationType>;
+
+	services?: {
+		email?: {
+			enabled: boolean;
+			sendEmail: (
+				notification: EntryRecord<Notification>,
+				recipientPubKey: AgentPubKey,
+				recipientEmailAddress: string,
+			) => Promise<void>;
+		};
+	};
+}
+
+export interface NotificationType {
+	// For the notifications settings UI
+	name: string;
+	// For the notifications settings UI
+	description: string;
+	// The title only depends on the notification type and group to make sure that notifications for the same group have the same title
+	title: (notificationGroup: string) => AsyncSignal<string>;
+	contents: (
+		notification: EntryRecord<Notification>,
+	) => AsyncSignal<NotificationContents>;
+	onClick: (notificationGroup: string) => void;
+}
+
+export interface NotificationContents {
+	iconSrc: string;
+	body: string;
 }

@@ -24,14 +24,10 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { notificationsStoreContext } from '../context.js';
-import {
-	NotificationContents,
-	NotificationsStore,
-} from '../notifications-store.js';
-import { Notification } from '../types.js';
+import { NotificationsStore } from '../notifications-store.js';
+import { Notification, NotificationContents } from '../types.js';
 
 interface NotificationGroup {
-	notificationType: string;
 	group: string;
 	timestamp: number;
 	title: string;
@@ -74,10 +70,15 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 					gap: '8px',
 					'align-items': 'center',
 				})}
-				@click=${() =>
-					this.notificationsStore.notificationsConfig.groups.onClick(
-						notificationGroup.group,
-					)}
+				@click=${() => {
+					const lastNotification =
+						notificationGroup.notifications[
+							notificationGroup.notifications.length - 1
+						];
+					this.notificationsStore.notificationsConfig.types[
+						lastNotification.record.entry.notification_type
+					].onClick(notificationGroup.group);
+				}}
 			>
 				${singleNotification
 					? html`<sl-icon
@@ -157,7 +158,9 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		]
 			.contents(record.value)
 			.get();
-		const title = this.notificationsStore.notificationsConfig.groups
+		const title = this.notificationsStore.notificationsConfig.types[
+			record.value.entry.notification_group
+		]
 			.title(record.value.entry.notification_group)
 			.get();
 		if (contents.status !== 'completed') return contents;
@@ -267,7 +270,6 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				);
 				timestamps.sort((t1, t2) => t2 - t1);
 				const notificationsGroup: NotificationGroup = {
-					notificationType,
 					group,
 					notifications: notifications.map(n => n.notificationInfo),
 					title: notifications[0].notificationInfo.title,
@@ -281,7 +283,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		}
 
 		return {
-			status: 'completed' as 'completed',
+			status: 'completed' as const,
 			value: {
 				unreadPersistent,
 				readPersistent,

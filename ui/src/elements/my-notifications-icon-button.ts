@@ -11,7 +11,7 @@ import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { notificationsStoreContext } from '../context.js';
 import { NotificationsStore } from '../notifications-store.js';
@@ -71,6 +71,9 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 										<sl-badge
 											style="position: absolute; left: 16px; top: 0px; z-index: 1000"
 											pill
+											.variant=${unreadNotifications.size > 0
+												? 'primary'
+												: 'neutral'}
 											.pulse=${unreadNotifications.size > 0}
 											>${unreadNotifications.size +
 											readNotifications.size}</sl-badge
