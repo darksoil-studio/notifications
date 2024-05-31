@@ -34,3 +34,4 @@ storybook-static
 /.cargo/
 
 /.direnv/
+result*

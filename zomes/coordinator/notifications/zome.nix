@@ -1,16 +1,16 @@
-{ inputs, rootPath, ... }:
+{ inputs, ... }:
 
 {
   perSystem = { inputs', self', ... }: {
     packages.notifications = inputs.hc-infra.outputs.lib.rustZome {
-      workspacePath = rootPath;
+      workspacePath = inputs.self.outPath;
       holochain = inputs'.holochain;
       crateCargoToml = ./Cargo.toml;
     };
 
     # Test only this zome and its integrity in isolation
     checks.notifications = inputs.hc-infra.outputs.lib.sweettest {
-      workspacePath = rootPath;
+      workspacePath = inputs.self.outPath;
       holochain = inputs'.holochain;
       dna = (inputs.hc-infra.outputs.lib.dna {
         dnaManifest = builtins.toFile "dna.yaml" ''

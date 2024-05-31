@@ -28,14 +28,7 @@
   };
 
   outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {
-      inherit inputs;
-      specialArgs = {
-        # Special arguments for the flake parts of this repository
-
-        rootPath = ./.;
-      };
-    } {
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         ./zomes/integrity/notifications/zome.nix
         ./zomes/coordinator/notifications/zome.nix
