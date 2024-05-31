@@ -78,7 +78,10 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 
 				if let LinkTypes::RecipientToNotifications = link_type {
 					if let Some(notifiee) = create_link.base_address.into_agent_pub_key() {
-						send_remote_signal(action, vec![notifiee])?;
+						send_remote_signal(
+							NotificationsRemoteSignal::NewNotification(action),
+							vec![notifiee],
+						)?;
 					}
 				}
 			}

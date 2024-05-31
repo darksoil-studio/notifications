@@ -27,25 +27,27 @@ jobs:
           name: darksoil-studio
 
       - name: Install and test
+        env:
+          CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          nix develop --command bash -c "pnpm i && pnpm t && pnpm -F @darksoil-studio/notifications build"
+          cachix watch-exec darksoil-studio -- nix develop --accept-flake-config --command bash -c "pnpm i && pnpm t && pnpm -F @darksoil-studio/notifications build"
 
       - name: Build zomes
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          nix build -L .#notifications_integrity
-          cachix push darksoil-studio $(nix path-info .#notifications_integrity)
-          cachix pin darksoil-studio notifications_integrity_debug $(nix path-info .#notifications_integrity)
+          nix build --accept-flake-config -L .#notifications_integrity
+          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications_integrity)
+          cachix pin darksoil-studio notifications_integrity_debug $(nix path-info --accept-flake-config .#notifications_integrity)
 
-          nix build -L .#notifications_integrity.meta.release
-          cachix push darksoil-studio $(nix path-info .#notifications_integrity.meta.release)
-          cachix pin darksoil-studio notifications_integrity $(nix path-info .#notifications_integrity.meta.release)
+          nix build --accept-flake-config -L .#notifications_integrity.meta.release
+          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications_integrity.meta.release)
+          cachix pin darksoil-studio notifications_integrity $(nix path-info --accept-flake-config .#notifications_integrity.meta.release)
 
-          nix build -L .#notifications
-          cachix push darksoil-studio $(nix path-info .#notifications)
-          cachix pin darksoil-studio notifications_debug $(nix path-info .#notifications)
+          nix build --accept-flake-config -L .#notifications
+          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications)
+          cachix pin darksoil-studio notifications_debug $(nix path-info --accept-flake-config .#notifications)
 
-          nix build -L .#notifications.meta.release
-          cachix push darksoil-studio $(nix path-info .#notifications.meta.release)
-          cachix pin darksoil-studio notifications$(nix path-info .#notifications.meta.release)
+          nix build --accept-flake-config -L .#notifications.meta.release
+          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications.meta.release)
+          cachix pin darksoil-studio notifications $(nix path-info --accept-flake-config .#notifications.meta.release)
