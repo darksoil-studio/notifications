@@ -41,13 +41,7 @@ pub enum NotificationsRemoteSignal {
 }
 
 #[hdk_extern]
-pub fn recv_remote_signal(signal: SerializedBytes) -> ExternResult<()> {
-	let signal = NotificationsRemoteSignal::try_from(signal).map_err(|err| {
-		wasm_error!(WasmErrorInner::Guest(format!(
-			"Malformed remote signal: {err:?}"
-		)))
-	})?;
-
+pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()> {
 	// TODO: take into account wether the recipient has the notification enabled in their settings
 	match signal {
 		NotificationsRemoteSignal::NewNotification(action) => emit_signal(Signal::LinkCreated {
