@@ -168,6 +168,9 @@
 <a href="#166" id="166">166</a>
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdk::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>notifications_integrity::<span class="kw-2">*</span>;
 
@@ -248,7 +251,10 @@
 
 				<span class="kw">if let </span>LinkTypes::RecipientToNotifications = link_type {
 					<span class="kw">if let </span><span class="prelude-val">Some</span>(notifiee) = create_link.base_address.into_agent_pub_key() {
-						send_remote_signal(action, <span class="macro">vec!</span>[notifiee])<span class="question-mark">?</span>;
+						send_remote_signal(
+							NotificationsRemoteSignal::NewNotification(action),
+							<span class="macro">vec!</span>[notifiee],
+						)<span class="question-mark">?</span>;
 					}
 				}
 			}
