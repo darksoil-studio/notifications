@@ -7,6 +7,7 @@ import {
 	joinAsyncMap,
 	liveLinksSignal,
 	uniquify,
+	withLogger,
 } from '@holochain-open-dev/signals';
 import {
 	EntryRecord,
@@ -39,12 +40,15 @@ export class NotificationsStore {
 		),
 	}));
 
-	private undismissedNotificationsLinks$ = liveLinksSignal(
-		this.client,
-		this.client.client.myPubKey,
-		() => this.client.getUndismissedNotifications(),
-		'RecipientToNotifications',
-		5000,
+	private undismissedNotificationsLinks$ = withLogger(
+		liveLinksSignal(
+			this.client,
+			this.client.client.myPubKey,
+			() => this.client.getUndismissedNotifications(),
+			'RecipientToNotifications',
+			5000,
+		),
+		'¡',
 	);
 
 	private readNotificationsLinks$ = liveLinksSignal(

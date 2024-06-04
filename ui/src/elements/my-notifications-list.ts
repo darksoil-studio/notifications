@@ -299,11 +299,20 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		switch (result.status) {
 			case 'pending':
 				return html`<div
-					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
+					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 8px"
 				>
-					<sl-skeleton effect="pulse"></sl-skeleton>
-					<sl-skeleton effect="pulse"></sl-skeleton>
-					<sl-skeleton effect="pulse"></sl-skeleton>
+					<sl-skeleton
+						effect="pulse"
+						style="height: 12px; width: 300px"
+					></sl-skeleton>
+					<sl-skeleton
+						effect="pulse"
+						style="height: 12px; width: 300px"
+					></sl-skeleton>
+					<sl-skeleton
+						effect="pulse"
+						style="height: 12px; width: 300px"
+					></sl-skeleton>
 				</div>`;
 			case 'error':
 				return html`<display-error

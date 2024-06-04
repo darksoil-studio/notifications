@@ -6,8 +6,19 @@ pub mod notifications_settings;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
+	let mut fns: BTreeSet<GrantedFunction> = BTreeSet::new();
+	fns.insert((zome_info()?.name, FunctionName::from("recv_remote_signal")));
+	let functions = GrantedFunctions::Listed(fns);
+	let cap_grant = ZomeCallCapGrant {
+		tag: String::from("recv_remote_signal"),
+		access: CapAccess::Unrestricted,
+		functions,
+	};
+	create_cap_grant(cap_grant)?;
+
 	Ok(InitCallbackResult::Pass)
 }
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum Signal {
