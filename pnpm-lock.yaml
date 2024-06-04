@@ -55,13 +55,13 @@ importers:
         version: link:../ui
       '@holochain-open-dev/profiles':
         specifier: github:holochain-open-dev/profiles#nixify&path:ui
-        version: github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.2.79)
+        version: github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.3.3)
       '@holochain/client':
         specifier: ^0.17.0-rc
         version: 0.17.0-rc.0
       '@shoelace-style/shoelace':
         specifier: ^2.11.0
-        version: 2.15.0(@types/react@18.2.79)
+        version: 2.15.0(@types/react@18.3.3)
       api-viewer-element:
         specifier: ^1.0.0-pre.10
         version: 1.0.0-pre.10
@@ -70,16 +70,19 @@ importers:
         version: 3.1.3
       vitepress:
         specifier: ^1.0.1
-        version: 1.1.3(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)(typescript@5.4.5)
+        version: 1.1.3(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)(typescript@5.4.5)
       vitepress-plugin-mermaid:
         specifier: ^2.0.16
-        version: 2.0.16(mermaid@10.9.0)(vitepress@1.1.3(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)(typescript@5.4.5))
+        version: 2.0.16(mermaid@10.9.1)(vitepress@1.1.3(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)(typescript@5.4.5))
 
   tests:
     dependencies:
+      '@holochain-open-dev/profiles':
+        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
+        version: github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-rc
-        version: 0.300.0-rc.1(@types/react@18.2.79)
+        version: 0.300.0-rc.1(@types/react@18.3.3)
       '@holochain-open-dev/utils':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0
@@ -103,13 +106,13 @@ importers:
     dependencies:
       '@holochain-open-dev/elements':
         specifier: ^0.300.0-rc
-        version: 0.300.0-rc.0(@types/react@18.2.79)
+        version: 0.300.0-rc.0(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#63aafdb8e4f9eb97741b98634859cb48f3d1f046&path:ui
-        version: github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui(@types/react@18.2.79)
+        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
+        version: github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-rc
-        version: 0.300.0-rc.1(@types/react@18.2.79)
+        version: 0.300.0-rc.1(@types/react@18.3.3)
       '@holochain-open-dev/utils':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0
@@ -130,7 +133,7 @@ importers:
         version: 2.8.0
       '@shoelace-style/shoelace':
         specifier: ^2.11.0
-        version: 2.15.0(@types/react@18.2.79)
+        version: 2.15.0(@types/react@18.3.3)
       lit:
         specifier: ^3.0.0
         version: 3.1.3
@@ -942,8 +945,8 @@ packages:
   /@types/prop-types@15.7.12:
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
 
-  /@types/react@18.2.79:
-    resolution: {integrity: sha512-RwGAGXPl9kSXwdNTafkOEuFrTBD5SA2B3iEB96xi8+xu5ddUa/cpvyVCSNn+asgLCTHkb5ZxN8gbuibYJi4s1w==}
+  /@types/react@18.3.3:
+    resolution: {integrity: sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==}
 
   /@types/semver@7.5.8:
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
@@ -1386,8 +1389,8 @@ packages:
     resolution: {integrity: sha512-ADqhlrCKhhQF8s/s3hTpvVAIyWwsfgFI/hD2vhAXc2ndncJFVZaq3/uBkDIhf4RrNwPw93vUarW36x6rFbUk0Q==}
     engines: {node: '>=0.10'}
 
-  /cytoscape@3.29.1:
-    resolution: {integrity: sha512-5auqNEMTPjXYPqDLMDKS9QVoPLC/qzpdkg7TOnxUs7GOvKj7Whp1LY75qNljGmPFHt9ONIPPXtt1OANSXENcWA==}
+  /cytoscape@3.29.2:
+    resolution: {integrity: sha512-2G1ycU28Nh7OHT9rkXRLpCDP30MKH1dXJORZuBhtEhEW7pKwgPi77ImqlCWinouyE1PNepIOGZBOrE84DG7LyQ==}
     engines: {node: '>=0.10'}
 
   /d3-array@2.12.1:
@@ -1551,14 +1554,23 @@ packages:
     resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
     engines: {node: '>=0.11'}
 
-  /dayjs@1.11.10:
-    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
+  /dayjs@1.11.11:
+    resolution: {integrity: sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==}
 
   /debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
 
   /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  /debug@4.3.5:
+    resolution: {integrity: sha512-pt0bNEmneDIvdL1Xsd9oDQ/wrQRkXDT4AUWlNZNPKvW5x/jyO9VFXkJUP07vQ2upmw5PlaITaPKc31jK13V+jg==}
     engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
@@ -1598,8 +1610,8 @@ packages:
   /dompurify@2.5.0:
     resolution: {integrity: sha512-5RXhAXSCrKTqt9pSbobT9PVRX+oPpENplTZqCiK1l0ya+ZOzwo9kqsGLbYRsAhzIiLCwKEy99XKSSrqnRTLVcw==}
 
-  /dompurify@3.1.0:
-    resolution: {integrity: sha512-yoU4rhgPKCo+p5UrWWWNKiIq+ToGqmVVhk0PmMYBK4kRsR3/qhemNFL8f6CFmBd4gMwm3F4T7HBoydP5uY07fA==}
+  /dompurify@3.1.5:
+    resolution: {integrity: sha512-lwG+n5h8QNpxtyrJW/gJWckL+1/DQiYMX8f7t8Z2AZTPw1esVrqjI63i7Zc2Gz0aKzLVMYC1V1PL/ky+aY/NgA==}
 
   /elkjs@0.9.3:
     resolution: {integrity: sha512-f/ZeWvW/BCXbhGEf1Ujp29EASo/lk1FDnETgNKwJrsVvGZhUWCZyg3xLJjAsxfOmt8KjswHmI5EwCQcPMpOYhQ==}
@@ -2105,8 +2117,8 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  /mermaid@10.9.0:
-    resolution: {integrity: sha512-swZju0hFox/B/qoLKK0rOxxgh8Cf7rJSfAUc1u8fezVihYMvrJAS45GzAxTVf4Q+xn9uMgitBcmWk7nWGXOs/g==}
+  /mermaid@10.9.1:
+    resolution: {integrity: sha512-Mx45Obds5W1UkW1nv/7dHRsbfMM1aOKA2+Pxs/IGHNonygDHwmng8xTHyS9z4KWVi0rbko8gjiBmuwwXQ7tiNA==}
 
   /micromark-core-commonmark@1.1.0:
     resolution: {integrity: sha512-BgHO1aRbolh2hcrzL2d1La37V0Aoz73ymF8rAcKnohLy93titmv62E0gP8Hrx9PKcKrqCZ1BbLGbP3bEhoXYlw==}
@@ -2465,8 +2477,8 @@ packages:
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  /search-insights@2.13.0:
-    resolution: {integrity: sha512-Orrsjf9trHHxFRuo9/rzm0KIWmgzE8RMlZMzuhZOJ01Rnz3D0YBAe+V6473t6/H6c7irs6Lt48brULAiRWb3Vw==}
+  /search-insights@2.14.0:
+    resolution: {integrity: sha512-OLN6MsPMCghDOqlCtsIsYgtsC0pnwVTyT9Mu6A3ewOj1DxvzZF6COrn2g86E/c05xbktB0XN04m/t1Z+n+fTGw==}
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -2960,15 +2972,15 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
 
-  github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui:
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/63aafdb8e4f9eb97741b98634859cb48f3d1f046}
-    name: '@holochain-open-dev/profiles'
-    version: 0.300.0-rc.0
-
   github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui:
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/69dba6ebf0ee04985e799ccaa39ae2852ab465b7}
     name: '@holochain-open-dev/profiles'
     version: 0.300.0-dev.0
+
+  github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274}
+    name: '@holochain-open-dev/profiles'
+    version: 0.300.0-rc.0
 
 snapshots:
 
@@ -2980,9 +2992,9 @@ snapshots:
       lit: 2.8.0
     dev: true
 
-  /@algolia/autocomplete-core@1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.13.0):
+  /@algolia/autocomplete-core@1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.14.0):
     dependencies:
-      '@algolia/autocomplete-plugin-algolia-insights': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.13.0)
+      '@algolia/autocomplete-plugin-algolia-insights': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.14.0)
       '@algolia/autocomplete-shared': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -2990,10 +3002,10 @@ snapshots:
       - search-insights
     dev: true
 
-  /@algolia/autocomplete-plugin-algolia-insights@1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.13.0):
+  /@algolia/autocomplete-plugin-algolia-insights@1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.14.0):
     dependencies:
       '@algolia/autocomplete-shared': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)
-      search-insights: 2.13.0
+      search-insights: 2.14.0
     transitivePeerDependencies:
       - '@algolia/client-search'
       - algoliasearch
@@ -3282,9 +3294,9 @@ snapshots:
   /@docsearch/css@3.6.0:
     dev: true
 
-  /@docsearch/js@3.6.0(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0):
+  /@docsearch/js@3.6.0(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0):
     dependencies:
-      '@docsearch/react': 3.6.0(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)
+      '@docsearch/react': 3.6.0(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)
       preact: 10.20.2
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -3294,14 +3306,14 @@ snapshots:
       - search-insights
     dev: true
 
-  /@docsearch/react@3.6.0(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0):
+  /@docsearch/react@3.6.0(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0):
     dependencies:
-      '@algolia/autocomplete-core': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.13.0)
+      '@algolia/autocomplete-core': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)(search-insights@2.14.0)
       '@algolia/autocomplete-preset-algolia': 1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)
       '@docsearch/css': 3.6.0
-      '@types/react': 18.2.79
+      '@types/react': 18.3.3
       algoliasearch: 4.23.3
-      search-insights: 2.13.0
+      search-insights: 2.14.0
     transitivePeerDependencies:
       - '@algolia/client-search'
     dev: true
@@ -3506,14 +3518,14 @@ snapshots:
 
   /@holo-host/identicon@0.1.0: {}
 
-  /@holochain-open-dev/elements@0.300.0-dev.0(@types/react@18.2.79):
+  /@holochain-open-dev/elements@0.300.0-dev.0(@types/react@18.3.3):
     dependencies:
       '@holo-host/identicon': 0.1.0
-      '@holochain-open-dev/stores': 0.300.0-dev.0(@types/react@18.2.79)
+      '@holochain-open-dev/stores': 0.300.0-dev.0(@types/react@18.3.3)
       '@holochain/client': 0.17.0-rc.0
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.3.3)
       lit: 3.1.3
       prosemirror-commands: 1.5.2
       prosemirror-keymap: 1.2.2
@@ -3525,13 +3537,13 @@ snapshots:
       - utf-8-validate
     dev: true
 
-  /@holochain-open-dev/elements@0.300.0-rc.0(@types/react@18.2.79):
+  /@holochain-open-dev/elements@0.300.0-rc.0(@types/react@18.3.3):
     dependencies:
       '@holo-host/identicon': 0.1.0
       '@holochain/client': 0.17.0-rc.0
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.3.3)
       lit: 3.1.3
       prosemirror-commands: 1.5.2
       prosemirror-keymap: 1.2.2
@@ -3543,11 +3555,11 @@ snapshots:
       - utf-8-validate
     dev: false
 
-  /@holochain-open-dev/signals@0.300.0-rc.1(@types/react@18.2.79):
+  /@holochain-open-dev/signals@0.300.0-rc.1(@types/react@18.3.3):
     dependencies:
       '@holochain-open-dev/utils': 0.300.0-rc.0
       '@holochain/client': 0.17.0-rc.0
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.3.3)
       async-signals: 0.1.9
       lit-signal-watcher: 0.1.0
       signal-polyfill: 0.1.0
@@ -3557,13 +3569,13 @@ snapshots:
       - utf-8-validate
     dev: false
 
-  /@holochain-open-dev/stores@0.300.0-dev.0(@types/react@18.2.79):
+  /@holochain-open-dev/stores@0.300.0-dev.0(@types/react@18.3.3):
     dependencies:
       '@alenaksu/json-viewer': 2.0.1
       '@holochain-open-dev/utils': 0.300.0-dev.0
       '@holochain/client': 0.17.0-rc.0
       '@scoped-elements/cytoscape': 0.2.0
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.3.3)
       lit: 3.1.3
       lit-svelte-stores: 0.3.3
       svelte: 3.59.2
@@ -3707,9 +3719,9 @@ snapshots:
     dependencies:
       lit: 3.1.3
 
-  /@lit/react@1.0.4(@types/react@18.2.79):
+  /@lit/react@1.0.4(@types/react@18.3.3):
     dependencies:
-      '@types/react': 18.2.79
+      '@types/react': 18.3.3
 
   /@lit/reactive-element@1.6.3:
     dependencies:
@@ -3838,11 +3850,11 @@ snapshots:
 
   /@shoelace-style/localize@3.1.2: {}
 
-  /@shoelace-style/shoelace@2.15.0(@types/react@18.2.79):
+  /@shoelace-style/shoelace@2.15.0(@types/react@18.3.3):
     dependencies:
       '@ctrl/tinycolor': 4.1.0
       '@floating-ui/dom': 1.6.3
-      '@lit/react': 1.0.4(@types/react@18.2.79)
+      '@lit/react': 1.0.4(@types/react@18.3.3)
       '@shoelace-style/animations': 1.1.0
       '@shoelace-style/localize': 3.1.2
       composed-offset-position: 0.0.4
@@ -3921,7 +3933,7 @@ snapshots:
 
   /@types/prop-types@15.7.12: {}
 
-  /@types/react@18.2.79:
+  /@types/react@18.3.3:
     dependencies:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
@@ -4514,10 +4526,10 @@ snapshots:
       cytoscape: 3.29.0
     dev: true
 
-  /cytoscape-cose-bilkent@4.1.0(cytoscape@3.29.1):
+  /cytoscape-cose-bilkent@4.1.0(cytoscape@3.29.2):
     dependencies:
       cose-base: 1.0.3
-      cytoscape: 3.29.1
+      cytoscape: 3.29.2
     dev: true
 
   /cytoscape-dagre@2.5.0(cytoscape@3.29.0):
@@ -4542,7 +4554,7 @@ snapshots:
   /cytoscape@3.29.0:
     dev: true
 
-  /cytoscape@3.29.1:
+  /cytoscape@3.29.2:
     dev: true
 
   /d3-array@2.12.1:
@@ -4779,7 +4791,7 @@ snapshots:
       '@babel/runtime': 7.24.4
     dev: true
 
-  /dayjs@1.11.10:
+  /dayjs@1.11.11:
     dev: true
 
   /debounce@1.2.1:
@@ -4788,6 +4800,11 @@ snapshots:
   /debug@4.3.4:
     dependencies:
       ms: 2.1.2
+
+  /debug@4.3.5:
+    dependencies:
+      ms: 2.1.2
+    dev: true
 
   /decode-named-character-reference@1.0.2:
     dependencies:
@@ -4824,7 +4841,7 @@ snapshots:
   /dompurify@2.5.0:
     dev: true
 
-  /dompurify@3.1.0:
+  /dompurify@3.1.5:
     dev: true
 
   /elkjs@0.9.3:
@@ -5527,18 +5544,18 @@ snapshots:
   /merge2@1.4.1:
     dev: true
 
-  /mermaid@10.9.0:
+  /mermaid@10.9.1:
     dependencies:
       '@braintree/sanitize-url': 6.0.4
       '@types/d3-scale': 4.0.8
       '@types/d3-scale-chromatic': 3.0.3
-      cytoscape: 3.29.1
-      cytoscape-cose-bilkent: 4.1.0(cytoscape@3.29.1)
+      cytoscape: 3.29.2
+      cytoscape-cose-bilkent: 4.1.0(cytoscape@3.29.2)
       d3: 7.9.0
       d3-sankey: 0.12.3
       dagre-d3-es: 7.0.10
-      dayjs: 1.11.10
-      dompurify: 3.1.0
+      dayjs: 1.11.11
+      dompurify: 3.1.5
       elkjs: 0.9.3
       katex: 0.16.10
       khroma: 2.1.0
@@ -5687,7 +5704,7 @@ snapshots:
   /micromark@3.2.0:
     dependencies:
       '@types/debug': 4.1.12
-      debug: 4.3.4
+      debug: 4.3.5
       decode-named-character-reference: 1.0.2
       micromark-core-commonmark: 1.1.0
       micromark-factory-space: 1.1.0
@@ -6051,7 +6068,7 @@ snapshots:
   /safer-buffer@2.1.2:
     dev: true
 
-  /search-insights@2.13.0:
+  /search-insights@2.14.0:
     dev: true
 
   /semver@6.3.1:
@@ -6355,18 +6372,18 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  /vitepress-plugin-mermaid@2.0.16(mermaid@10.9.0)(vitepress@1.1.3(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)(typescript@5.4.5)):
+  /vitepress-plugin-mermaid@2.0.16(mermaid@10.9.1)(vitepress@1.1.3(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)(typescript@5.4.5)):
     dependencies:
-      mermaid: 10.9.0
-      vitepress: 1.1.3(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)(typescript@5.4.5)
+      mermaid: 10.9.1
+      vitepress: 1.1.3(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)(typescript@5.4.5)
     optionalDependencies:
       '@mermaid-js/mermaid-mindmap': 9.3.0
     dev: true
 
-  /vitepress@1.1.3(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)(typescript@5.4.5):
+  /vitepress@1.1.3(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)(typescript@5.4.5):
     dependencies:
       '@docsearch/css': 3.6.0
-      '@docsearch/js': 3.6.0(@algolia/client-search@4.23.3)(@types/react@18.2.79)(search-insights@2.13.0)
+      '@docsearch/js': 3.6.0(@algolia/client-search@4.23.3)(@types/react@18.3.3)(search-insights@2.14.0)
       '@shikijs/core': 1.3.0
       '@shikijs/transformers': 1.3.0
       '@types/markdown-it': 14.0.1
@@ -6568,40 +6585,40 @@ snapshots:
   /yocto-queue@1.0.0:
     dev: false
 
-  github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui(@types/react@18.2.79):
-    id: github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui
-    dependencies:
-      '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.2.79)
-      '@holochain-open-dev/signals': 0.300.0-rc.1(@types/react@18.2.79)
-      '@holochain-open-dev/utils': 0.300.0-rc.0
-      '@holochain/client': 0.17.0-rc.0
-      '@lit/context': 1.1.1
-      '@lit/localize': 0.12.1
-      '@mdi/js': 7.4.47
-      '@msgpack/msgpack': 2.8.0
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
-      lit: 3.1.3
-    transitivePeerDependencies:
-      - '@types/react'
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
-  github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.2.79):
+  github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.3.3):
     id: github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui
     dependencies:
-      '@holochain-open-dev/elements': 0.300.0-dev.0(@types/react@18.2.79)
-      '@holochain-open-dev/stores': 0.300.0-dev.0(@types/react@18.2.79)
+      '@holochain-open-dev/elements': 0.300.0-dev.0(@types/react@18.3.3)
+      '@holochain-open-dev/stores': 0.300.0-dev.0(@types/react@18.3.3)
       '@holochain-open-dev/utils': 0.300.0-dev.0
       '@holochain/client': 0.17.0-rc.0
       '@lit/context': 1.1.1
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
       '@msgpack/msgpack': 2.8.0
-      '@shoelace-style/shoelace': 2.15.0(@types/react@18.2.79)
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.3.3)
       lit: 3.1.3
     transitivePeerDependencies:
       - '@types/react'
       - bufferutil
       - utf-8-validate
     dev: true
+
+  github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3):
+    id: github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui
+    dependencies:
+      '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0-rc.1(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0-rc.0
+      '@holochain/client': 0.17.0-rc.0
+      '@lit/context': 1.1.1
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@msgpack/msgpack': 2.8.0
+      '@shoelace-style/shoelace': 2.15.0(@types/react@18.3.3)
+      lit: 3.1.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+    dev: false
