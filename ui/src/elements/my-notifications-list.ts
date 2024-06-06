@@ -145,10 +145,10 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 	): AsyncResult<NotificationInfo> {
 		const record = this.notificationsStore.notifications
 			.get(notificationHash)
-			.entry$.get();
+			.entry.get();
 		const deletes = this.notificationsStore.notifications
 			.get(notificationHash)
-			.deletes$.get();
+			.deletes.get();
 
 		if (record.status !== 'completed') return record;
 		if (deletes.status !== 'completed') return deletes;
@@ -179,8 +179,8 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 
 	getNotificationsGroups() {
 		const unreadNotifications =
-			this.notificationsStore.unreadNotifications$.get();
-		const readNotifications = this.notificationsStore.readNotifications$.get();
+			this.notificationsStore.unreadNotifications.get();
+		const readNotifications = this.notificationsStore.readNotifications.get();
 		if (unreadNotifications.status !== 'completed') return unreadNotifications;
 		if (readNotifications.status !== 'completed') return readNotifications;
 

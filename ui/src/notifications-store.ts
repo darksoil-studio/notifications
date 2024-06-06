@@ -1,23 +1,20 @@
 import {
 	AsyncComputed,
-	AsyncSignal,
 	deletedLinksSignal,
 	deletesForEntrySignal,
 	immutableEntrySignal,
 	joinAsyncMap,
 	liveLinksSignal,
 	uniquify,
-	withLogger,
 } from '@holochain-open-dev/signals';
 import {
-	EntryRecord,
 	LazyHoloHashMap,
 	LazyMap,
 	mapValues,
 	pickBy,
 	slice,
 } from '@holochain-open-dev/utils';
-import { ActionHash, AgentPubKey, encodeHashToBase64 } from '@holochain/client';
+import { ActionHash, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { NotificationsClient } from './notifications-client.js';
@@ -32,35 +29,32 @@ export class NotificationsStore {
 	/** Notification */
 
 	notifications = new LazyHoloHashMap((notificationHash: ActionHash) => ({
-		entry$: immutableEntrySignal(() =>
+		entry: immutableEntrySignal(() =>
 			this.client.getNotification(notificationHash),
 		),
-		deletes$: deletesForEntrySignal(this.client, notificationHash, () =>
+		deletes: deletesForEntrySignal(this.client, notificationHash, () =>
 			this.client.getAllDeletesForNotification(notificationHash),
 		),
 	}));
 
-	private undismissedNotificationsLinks$ = withLogger(
-		liveLinksSignal(
-			this.client,
-			this.client.client.myPubKey,
-			() => this.client.getUndismissedNotifications(),
-			'RecipientToNotifications',
-			5000,
-		),
-		'¡',
+	private undismissedNotificationsLinks = liveLinksSignal(
+		this.client,
+		this.client.client.myPubKey,
+		() => this.client.getUndismissedNotifications(),
+		'RecipientToNotifications',
+		5000,
 	);
 
-	private readNotificationsLinks$ = liveLinksSignal(
+	private readNotificationsLinks = liveLinksSignal(
 		this.client,
 		this.client.client.myPubKey,
 		() => this.client.getReadNotifications(),
 		'ReadNotifications',
 	);
 
-	readNotifications$ = new AsyncComputed(() => {
-		const readNotificationsLinks = this.readNotificationsLinks$.get();
-		const undismissedNotifications = this.undismissedNotificationsLinks$.get();
+	readNotifications = new AsyncComputed(() => {
+		const readNotificationsLinks = this.readNotificationsLinks.get();
+		const undismissedNotifications = this.undismissedNotificationsLinks.get();
 		if (readNotificationsLinks.status !== 'completed')
 			return readNotificationsLinks;
 		if (undismissedNotifications.status !== 'completed')
@@ -88,12 +82,12 @@ export class NotificationsStore {
 
 		// const deletes = joinAsync(
 		// 	notificationsHashes.map(hash =>
-		// 		this.notifications.get(hash).deletes$.get(),
+		// 		this.notifications.get(hash).deletes.get(),
 		// 	),
 		// );
 		// const entries = joinAsync(
 		// 	notificationsHashes.map(hash =>
-		// 		this.notifications.get(hash).entry$.get(),
+		// 		this.notifications.get(hash).entry.get(),
 		// 	),
 		// );
 		// if (entries.status !== 'completed') return entries;
@@ -121,9 +115,9 @@ export class NotificationsStore {
 		};
 	});
 
-	unreadNotifications$ = new AsyncComputed(() => {
-		const readNotifications = this.readNotifications$.get();
-		const undismissedNotifications = this.undismissedNotificationsLinks$.get();
+	unreadNotifications = new AsyncComputed(() => {
+		const readNotifications = this.readNotifications.get();
+		const undismissedNotifications = this.undismissedNotificationsLinks.get();
 
 		if (readNotifications.status !== 'completed') return readNotifications;
 		if (undismissedNotifications.status !== 'completed')
@@ -144,15 +138,15 @@ export class NotificationsStore {
 		};
 	});
 
-	deletedNotificationsLinks$ = deletedLinksSignal(
+	deletedNotificationsLinks = deletedLinksSignal(
 		this.client,
 		this.client.client.myPubKey,
 		() => this.client.getDismissedNotifications(),
 		'RecipientToNotifications',
 	);
 
-	dismissedNotifications$ = new AsyncComputed(() => {
-		const deletedLinks = this.deletedNotificationsLinks$.get();
+	dismissedNotifications = new AsyncComputed(() => {
+		const deletedLinks = this.deletedNotificationsLinks.get();
 		if (deletedLinks.status !== 'completed') return deletedLinks;
 
 		const value = slice(
@@ -171,12 +165,12 @@ export class NotificationsStore {
 	notificationsByTypeAndGroup = new LazyMap(
 		(notificationType: string) =>
 			new LazyMap((notificationGroup: string) => ({
-				read$: new AsyncComputed(() => {
-					const notifications = this.readNotifications$.get();
+				read: new AsyncComputed(() => {
+					const notifications = this.readNotifications.get();
 					if (notifications.status !== 'completed') return notifications;
 
 					const entries = joinAsyncMap(
-						mapValues(notifications.value, n => n.entry$.get()),
+						mapValues(notifications.value, n => n.entry.get()),
 					);
 					if (entries.status !== 'completed') return entries;
 
@@ -192,12 +186,12 @@ export class NotificationsStore {
 						value,
 					};
 				}),
-				unread$: new AsyncComputed(() => {
-					const notifications = this.unreadNotifications$.get();
+				unread: new AsyncComputed(() => {
+					const notifications = this.unreadNotifications.get();
 					if (notifications.status !== 'completed') return notifications;
 
 					const entries = joinAsyncMap(
-						mapValues(notifications.value, n => n.entry$.get()),
+						mapValues(notifications.value, n => n.entry.get()),
 					);
 					if (entries.status !== 'completed') return entries;
 

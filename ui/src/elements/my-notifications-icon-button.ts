@@ -31,8 +31,8 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 
 	render() {
 		const result = joinAsync([
-			this.notificationsStore.unreadNotifications$.get(),
-			this.notificationsStore.readNotifications$.get(),
+			this.notificationsStore.unreadNotifications.get(),
+			this.notificationsStore.readNotifications.get(),
 		]);
 
 		switch (result.status) {

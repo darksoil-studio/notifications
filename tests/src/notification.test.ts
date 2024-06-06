@@ -38,7 +38,7 @@ test('create and read Notification', async () => {
 
 		// Bob gets the created Notification
 		const createReadOutput: EntryRecord<Notification> = await toPromise(
-			bob.store.notifications.get(notification.actionHash).entry$,
+			bob.store.notifications.get(notification.actionHash).entry,
 		);
 		assert.deepEqual(sample, cleanNodeDecoding(createReadOutput.entry));
 	});
@@ -63,7 +63,7 @@ test('create and delete Notification', async () => {
 
 		// Bob tries to get the deleted Notification
 		const deletes: Array<SignedActionHashed<Delete>> = await toPromise(
-			bob.store.notifications.get(notification.actionHash).deletes$,
+			bob.store.notifications.get(notification.actionHash).deletes,
 		);
 		assert.equal(deletes.length, 1);
 	});

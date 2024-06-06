@@ -11,7 +11,7 @@ pub fn create_notification(notification: Notification) -> ExternResult<Record> {
 			base,
 			notification_hash.clone(),
 			LinkTypes::RecipientToNotifications,
-			(),
+			notification.notification_group.clone(),
 		)?;
 	}
 	let record = get(notification_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(

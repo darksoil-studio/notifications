@@ -132,8 +132,8 @@
 
 				renderContent() {
 					const result = joinAsync([
-						this._notificationsStore.unreadNotifications$.get(),
-						this._notificationsStore.readNotifications$.get(),
+						this._notificationsStore.unreadNotifications.get(),
+						this._notificationsStore.readNotifications.get(),
 					]);
 					const undismissedNotifications = [
 						...Array.from(result.value ? result.value[0].keys() : []),
