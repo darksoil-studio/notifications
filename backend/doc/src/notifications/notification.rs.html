@@ -175,7 +175,7 @@
 			base,
 			notification_hash.clone(),
 			LinkTypes::RecipientToNotifications,
-			(),
+			notification.notification_group.clone(),
 		)<span class="question-mark">?</span>;
 	}
 	<span class="kw">let </span>record = get(notification_hash.clone(), GetOptions::default())<span class="question-mark">?</span>.ok_or(<span class="macro">wasm_error!</span>(
