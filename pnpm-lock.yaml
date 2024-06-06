@@ -105,8 +105,8 @@ importers:
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#5dae01ec753b997f0b0adbdb5accf3a1b50d27e6&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-rc.3
         version: 0.300.0-rc.3(@types/react@18.3.3)
@@ -661,6 +661,10 @@ packages:
 
   '@holochain-open-dev/elements@0.300.0-rc.0':
     resolution: {integrity: sha512-b26ZChbZ6qmAZjwzHSOyRmCOdBQ7vy/9+MedvQEuiIpAjz5KGdtKfbkMAz4M2GgQwLPVBYS66Gdct6mGVvwkyw==}
+
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6}
+    version: 0.300.0-rc.0
 
   '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui':
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274}
@@ -3359,6 +3363,23 @@ snapshots:
       prosemirror-keymap: 1.2.2
       prosemirror-state: 1.4.3
       prosemirror-view: 1.33.7
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)':
+    dependencies:
+      '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0-rc.3(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0-rc.0
+      '@holochain/client': 0.17.0-rc.0
+      '@lit/context': 1.1.2
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@msgpack/msgpack': 2.8.0
+      '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
+      lit: 3.1.4
     transitivePeerDependencies:
       - '@types/react'
       - bufferutil
