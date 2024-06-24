@@ -1,1 +1,0 @@
-import{_ as s,o as i,c as t,a3 as a}from"./chunks/framework.Dz0868N9.js";const E=JSON.parse('{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"setup.md","filePath":"setup.md"}'),e={name:"setup.md"},n=a("",33),l=[n];function h(p,o,k,d,r,c){return i(),t("div",null,l)}const y=s(e,[["render",h]]);export{E as __pageData,y as default};

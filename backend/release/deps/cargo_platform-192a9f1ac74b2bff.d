@@ -1,9 +1,0 @@
-/home/runner/work/notifications/notifications/docs/public/backend/release/deps/libcargo_platform-192a9f1ac74b2bff.rmeta: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/cfg.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/error.rs
-
-/home/runner/work/notifications/notifications/docs/public/backend/release/deps/libcargo_platform-192a9f1ac74b2bff.rlib: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/cfg.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/error.rs
-
-/home/runner/work/notifications/notifications/docs/public/backend/release/deps/cargo_platform-192a9f1ac74b2bff.d: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/cfg.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/error.rs
-
-/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/lib.rs:
-/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/cfg.rs:
-/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cargo-platform-0.1.8/src/error.rs:

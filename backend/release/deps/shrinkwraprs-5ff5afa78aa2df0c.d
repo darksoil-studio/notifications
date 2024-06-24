@@ -1,0 +1,7 @@
+/home/runner/work/notifications/notifications/docs/public/backend/release/deps/libshrinkwraprs-5ff5afa78aa2df0c.so: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/ast.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/visibility.rs
+
+/home/runner/work/notifications/notifications/docs/public/backend/release/deps/shrinkwraprs-5ff5afa78aa2df0c.d: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/ast.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/visibility.rs
+
+/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/lib.rs:
+/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/ast.rs:
+/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/shrinkwraprs-0.3.0/src/visibility.rs:
