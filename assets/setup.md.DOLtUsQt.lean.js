@@ -1,0 +1,1 @@
+import{_ as i,o as s,c as t,a3 as a}from"./chunks/framework.D_KCp5cu.js";const E=JSON.parse('{"title":"Setup","description":"","frontmatter":{},"headers":[],"relativePath":"setup.md","filePath":"setup.md"}'),e={name:"setup.md"},n=a("",33),l=[n];function h(p,o,k,r,d,c){return s(),t("div",null,l)}const u=i(e,[["render",h]]);export{E as __pageData,u as default};
