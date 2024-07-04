@@ -3,10 +3,8 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import { NotificationsClient } from '../../ui/src/notifications-client.js';
-import {
-	NotificationsConfig,
-	NotificationsStore,
-} from '../../ui/src/notifications-store.js';
+import { NotificationsStore } from '../../ui/src/notifications-store.js';
+import { NotificationsConfig } from '../../ui/src/types.js';
 
 export async function setup(scenario: Scenario) {
 	const testHappUrl =
@@ -25,12 +23,6 @@ export async function setup(scenario: Scenario) {
 	await scenario.shareAllAgents();
 
 	const config: NotificationsConfig = {
-		groups: {
-			onClick(notificationGroup) {},
-			title(notificationGroup) {
-				throw new Error('');
-			},
-		},
 		types: {},
 	};
 
