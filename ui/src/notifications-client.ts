@@ -23,14 +23,8 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	}
 	/** Notification */
 
-	async createNotification(
-		notification: Notification,
-	): Promise<EntryRecord<Notification>> {
-		const record: Record = await this.callZome(
-			'create_notification',
-			notification,
-		);
-		return new EntryRecord(record);
+	async createNotification(notification: Notification): Promise<void> {
+		await this.callZome('create_notification', notification);
 	}
 
 	async getNotification(

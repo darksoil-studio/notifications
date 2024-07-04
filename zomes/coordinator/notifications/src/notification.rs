@@ -1,23 +1,34 @@
 use hdk::prelude::*;
 use notifications_integrity::*;
 
+use crate::{
+	get_entry_for_action,
+	utils::{create_link_relaxed, create_relaxed, delete_link_relaxed, delete_relaxed},
+};
+
 pub const MAX_TAG_SIZE: usize = 1000;
 
 #[hdk_extern]
-pub fn create_notification(notification: Notification) -> ExternResult<Record> {
-	let notification_hash = create_entry(&EntryTypes::Notification(notification.clone()))?;
-	for base in notification.recipients.clone() {
-		create_link(
-			base,
-			notification_hash.clone(),
-			LinkTypes::RecipientToNotifications,
-			notification.notification_group.clone(),
-		)?;
+pub fn create_notification(notification: Notification) -> ExternResult<()> {
+	create_relaxed(EntryTypes::Notification(notification.clone()))?;
+	Ok(())
+}
+
+// Only to be called by post_commit
+#[hdk_extern]
+pub fn create_notification_link(notification_hash: ActionHash) -> ExternResult<()> {
+	let app_entry = get_entry_for_action(&notification_hash)?;
+	if let Some(EntryTypes::Notification(notification)) = app_entry {
+		for base in notification.recipients.clone() {
+			create_link_relaxed(
+				base,
+				notification_hash.clone(),
+				LinkTypes::RecipientToNotifications,
+				notification.notification_group.clone(),
+			)?;
+		}
 	}
-	let record = get(notification_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
-		WasmErrorInner::Guest("Could not find the newly created Notification".to_string())
-	))?;
-	Ok(record)
+	Ok(())
 }
 
 #[hdk_extern]
@@ -52,7 +63,7 @@ pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> Exte
 			)))
 		})?;
 
-		create_link(
+		create_link_relaxed(
 			agent_info()?.agent_latest_pubkey,
 			agent_info()?.agent_latest_pubkey,
 			LinkTypes::ReadNotifications,
@@ -88,24 +99,24 @@ pub fn dismiss_notifications(notifications_hashes: Vec<ActionHash>) -> ExternRes
 		if read_notifications_hashes.0.iter().all(|hash| {
 			notifications_hashes.contains(hash) || !undismissed_notifications_hashes.contains(hash)
 		}) {
-			delete_link(link.create_link_hash)?;
+			delete_link_relaxed(link.create_link_hash)?;
 		}
 	}
 
 	Ok(())
 }
 
-fn dismiss_notification(notification_hash: ActionHash) -> ExternResult<ActionHash> {
+fn dismiss_notification(notification_hash: ActionHash) -> ExternResult<()> {
 	let links = get_undismissed_notifications(())?;
 
 	for link in links {
 		if let Some(action_hash) = link.target.into_action_hash() {
 			if action_hash.eq(&notification_hash) {
-				delete_link(link.create_link_hash)?;
+				delete_link_relaxed(link.create_link_hash)?;
 			}
 		}
 	}
-	delete_entry(notification_hash)
+	delete_relaxed(notification_hash)
 }
 
 #[hdk_extern]

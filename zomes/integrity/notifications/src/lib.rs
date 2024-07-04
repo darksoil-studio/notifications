@@ -9,7 +9,7 @@ pub use read_notifications::*;
 pub mod notifications_settings;
 pub use notifications_settings::*;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 #[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]

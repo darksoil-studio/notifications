@@ -2,6 +2,7 @@ import { sharedStyles, wrapPathInSvg } from '@holochain-open-dev/elements';
 import {
 	AsyncResult,
 	SignalWatcher,
+	joinAsync,
 	joinAsyncMap,
 } from '@holochain-open-dev/signals';
 import { EntryRecord, mapValues } from '@holochain-open-dev/utils';
@@ -181,8 +182,6 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		const unreadNotifications =
 			this.notificationsStore.unreadNotifications.get();
 		const readNotifications = this.notificationsStore.readNotifications.get();
-		// console.log('hey1', unreadNotifications);
-		// console.log('hey2', readNotifications);
 		if (unreadNotifications.status !== 'completed') return unreadNotifications;
 		if (readNotifications.status !== 'completed') return readNotifications;
 
@@ -196,7 +195,6 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				this.notificationInfo(key),
 			),
 		);
-		// console.log('hey3', unreadMapResult);
 		if (unreadMapResult.status !== 'completed') return unreadMapResult;
 		if (readMapResult.status !== 'completed') return readMapResult;
 
@@ -296,26 +294,34 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		};
 	}
 
+	notificationCount() {
+		const result = joinAsync([
+			this.notificationsStore.unreadNotifications.get(),
+			this.notificationsStore.readNotifications.get(),
+		]);
+		if (result.status !== 'completed') return 3;
+
+		return result.value[0].size + result.value[1].size;
+	}
+
 	render() {
 		const result = this.getNotificationsGroups();
+
+		let count = this.notificationCount();
 
 		switch (result.status) {
 			case 'pending':
 				return html`<div
-					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 8px"
+					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; "
 				>
-					<sl-skeleton
-						effect="pulse"
-						style="height: 12px; width: 300px"
-					></sl-skeleton>
-					<sl-skeleton
-						effect="pulse"
-						style="height: 12px; width: 300px"
-					></sl-skeleton>
-					<sl-skeleton
-						effect="pulse"
-						style="height: 12px; width: 300px"
-					></sl-skeleton>
+					${Array.from({ length: count }).map(
+						() => html`
+							<sl-skeleton
+								effect="pulse"
+								style="height: 24px; width: 300px; margin: 8px 20px"
+							></sl-skeleton>
+						`,
+					)}
 				</div>`;
 			case 'error':
 				return html`<display-error

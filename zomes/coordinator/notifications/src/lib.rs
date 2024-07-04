@@ -3,6 +3,7 @@ use notifications_integrity::*;
 
 pub mod notification;
 pub mod notifications_settings;
+pub mod utils;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
@@ -118,7 +119,19 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 		}
 		Action::Create(_create) => {
 			if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
-				emit_signal(Signal::EntryCreated { action, app_entry })?;
+				emit_signal(Signal::EntryCreated {
+					action: action.clone(),
+					app_entry: app_entry.clone(),
+				})?;
+				if let EntryTypes::Notification(_) = app_entry {
+					call_remote(
+						agent_info()?.agent_latest_pubkey,
+						zome_info()?.name,
+						"create_notification_link".into(),
+						None,
+						action.hashed.hash,
+					)?;
+				}
 			}
 			Ok(())
 		}

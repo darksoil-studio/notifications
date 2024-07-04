@@ -24,20 +24,16 @@ test('create notifications, read it, and dismiss it', async () => {
 		assert.equal(dismissedNotifications.size, 0);
 
 		// Alice creates a Notification
-		const notification1: EntryRecord<Notification> =
-			await alice.store.client.createNotification(
-				await sampleNotification(alice.store.client, {
-					recipients: [bob.player.agentPubKey],
-				}),
-			);
-		assert.ok(notification1);
-		const notification2: EntryRecord<Notification> =
-			await alice.store.client.createNotification(
-				await sampleNotification(alice.store.client, {
-					recipients: [bob.player.agentPubKey],
-				}),
-			);
-		assert.ok(notification2);
+		await alice.store.client.createNotification(
+			await sampleNotification(alice.store.client, {
+				recipients: [bob.player.agentPubKey],
+			}),
+		);
+		await alice.store.client.createNotification(
+			await sampleNotification(alice.store.client, {
+				recipients: [bob.player.agentPubKey],
+			}),
+		);
 
 		// Wait for the created entry to be propagated to the other node.
 		await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
@@ -49,7 +45,10 @@ test('create notifications, read it, and dismiss it', async () => {
 		dismissedNotifications = await toPromise(bob.store.dismissedNotifications);
 		assert.equal(dismissedNotifications.size, 0);
 
-		await bob.store.client.markNotificationsAsRead([notification1.actionHash]);
+		const notification1Hash = Array.from(unreadNotifications.keys())[0];
+		const notification2Hash = Array.from(unreadNotifications.keys())[1];
+
+		await bob.store.client.markNotificationsAsRead([notification1Hash]);
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
 		assert.equal(unreadNotifications.size, 1);
@@ -58,7 +57,7 @@ test('create notifications, read it, and dismiss it', async () => {
 		dismissedNotifications = await toPromise(bob.store.dismissedNotifications);
 		assert.equal(dismissedNotifications.size, 0);
 
-		await bob.store.client.markNotificationsAsRead([notification2.actionHash]);
+		await bob.store.client.markNotificationsAsRead([notification2Hash]);
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
 		assert.equal(unreadNotifications.size, 0);
@@ -68,7 +67,7 @@ test('create notifications, read it, and dismiss it', async () => {
 		assert.equal(dismissedNotifications.size, 0);
 
 		// Bob deletes the Notification
-		await bob.store.client.dismissNotifications([notification2.actionHash]);
+		await bob.store.client.dismissNotifications([notification2Hash]);
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
 		assert.equal(unreadNotifications.size, 0);
@@ -78,7 +77,7 @@ test('create notifications, read it, and dismiss it', async () => {
 		assert.equal(dismissedNotifications.size, 1);
 
 		// Bob deletes the Notification
-		await bob.store.client.dismissNotifications([notification1.actionHash]);
+		await bob.store.client.dismissNotifications([notification1Hash]);
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
 		assert.equal(unreadNotifications.size, 0);
@@ -103,20 +102,16 @@ test('create notifications and dismiss it directly', async () => {
 		assert.equal(dismissedNotifications.size, 0);
 
 		// Alice creates a Notification
-		const notification1: EntryRecord<Notification> =
-			await alice.store.client.createNotification(
-				await sampleNotification(alice.store.client, {
-					recipients: [bob.player.agentPubKey],
-				}),
-			);
-		assert.ok(notification1);
-		const notification2: EntryRecord<Notification> =
-			await alice.store.client.createNotification(
-				await sampleNotification(alice.store.client, {
-					recipients: [bob.player.agentPubKey],
-				}),
-			);
-		assert.ok(notification2);
+		await alice.store.client.createNotification(
+			await sampleNotification(alice.store.client, {
+				recipients: [bob.player.agentPubKey],
+			}),
+		);
+		await alice.store.client.createNotification(
+			await sampleNotification(alice.store.client, {
+				recipients: [bob.player.agentPubKey],
+			}),
+		);
 
 		// Wait for the created entry to be propagated to the other node.
 		await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
@@ -128,9 +123,12 @@ test('create notifications and dismiss it directly', async () => {
 		dismissedNotifications = await toPromise(bob.store.dismissedNotifications);
 		assert.equal(dismissedNotifications.size, 0);
 
+		const notification1Hash = Array.from(unreadNotifications.keys())[0];
+		const notification2Hash = Array.from(unreadNotifications.keys())[1];
+
 		await bob.store.client.dismissNotifications([
-			notification1.actionHash,
-			notification2.actionHash,
+			notification1Hash,
+			notification2Hash,
 		]);
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
