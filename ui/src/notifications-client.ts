@@ -53,7 +53,7 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 
 	getAllDeletesForNotification(
 		originalNotificationHash: ActionHash,
-	): Promise<Array<SignedActionHashed<Delete>>> {
+	): Promise<Array<SignedActionHashed<Delete>> | undefined> {
 		return this.callZome(
 			'get_all_deletes_for_notification',
 			originalNotificationHash,

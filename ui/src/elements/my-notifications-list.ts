@@ -93,17 +93,17 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 						gap: singleNotification ? '0' : '8px',
 					})}
 				>
-					<span style="flex: 1">${notificationGroup.title}</span>
 					${notificationGroup.notifications.map(
 						n => html`
 							<div class="row" style="gap: 8px; align-items: center">
 								${!singleNotification
 									? html`<sl-icon src="${n.contents.iconSrc}"></sl-icon>`
 									: html``}
-								<span class="placeholder">${n.contents.body}</span>
+								<span>${n.contents.body}</span>
 							</div>
 						`,
 					)}
+					<span class="placeholder">${notificationGroup.title}</span>
 				</div>
 
 				<div
@@ -181,6 +181,8 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		const unreadNotifications =
 			this.notificationsStore.unreadNotifications.get();
 		const readNotifications = this.notificationsStore.readNotifications.get();
+		// console.log('hey1', unreadNotifications);
+		// console.log('hey2', readNotifications);
 		if (unreadNotifications.status !== 'completed') return unreadNotifications;
 		if (readNotifications.status !== 'completed') return readNotifications;
 
@@ -194,6 +196,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				this.notificationInfo(key),
 			),
 		);
+		// console.log('hey3', unreadMapResult);
 		if (unreadMapResult.status !== 'completed') return unreadMapResult;
 		if (readMapResult.status !== 'completed') return readMapResult;
 
