@@ -282,6 +282,10 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				if (!persistent && !unread) readNonPersistent.push(notificationsGroup);
 			}
 		}
+		unreadPersistent.sort((a, b) => b.timestamp - a.timestamp);
+		unreadNonPersistent.sort((a, b) => b.timestamp - a.timestamp);
+		readPersistent.sort((a, b) => b.timestamp - a.timestamp);
+		readNonPersistent.sort((a, b) => b.timestamp - a.timestamp);
 
 		return {
 			status: 'completed' as const,
