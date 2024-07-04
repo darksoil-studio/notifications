@@ -18,13 +18,20 @@ import { ActionHash, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { NotificationsClient } from './notifications-client.js';
-import { NotificationsConfig } from './types.js';
+import { NotificationType, NotificationsConfig } from './types.js';
 
 export class NotificationsStore {
 	constructor(
 		public client: NotificationsClient,
 		public notificationsConfig: NotificationsConfig,
 	) {}
+
+	addTypes(notificationsType: Record<string, NotificationType>) {
+		this.notificationsConfig.types = {
+			...this.notificationsConfig.types,
+			...notificationsType,
+		};
+	}
 
 	/** Notification */
 
