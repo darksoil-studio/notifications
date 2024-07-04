@@ -1,3 +1,3 @@
 (function() {var implementors = {
-"notifications_integrity":[["impl EntryDefRegistration for &amp;<a class=\"enum\" href=\"notifications_integrity/enum.EntryTypes.html\" title=\"enum notifications_integrity::EntryTypes\">EntryTypes</a>"],["impl EntryDefRegistration for <a class=\"enum\" href=\"notifications_integrity/enum.EntryTypes.html\" title=\"enum notifications_integrity::EntryTypes\">EntryTypes</a>"]]
+"notifications_integrity":[["impl EntryDefRegistration for <a class=\"enum\" href=\"notifications_integrity/enum.EntryTypes.html\" title=\"enum notifications_integrity::EntryTypes\">EntryTypes</a>"],["impl EntryDefRegistration for &amp;<a class=\"enum\" href=\"notifications_integrity/enum.EntryTypes.html\" title=\"enum notifications_integrity::EntryTypes\">EntryTypes</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

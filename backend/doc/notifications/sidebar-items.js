@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["NotificationsRemoteSignal","Signal"],"fn":["init","post_commit","recv_remote_signal"],"mod":["notification","notifications_settings"]};
+window.SIDEBAR_ITEMS = {"enum":["NotificationsRemoteSignal","Signal"],"fn":["init","post_commit","recv_remote_signal"],"mod":["notification","notifications_settings","utils"]};

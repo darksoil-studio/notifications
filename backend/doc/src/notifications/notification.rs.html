@@ -162,26 +162,48 @@
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdk::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>notifications_integrity::<span class="kw-2">*</span>;
+
+<span class="kw">use crate</span>::{
+	get_entry_for_action,
+	utils::{create_link_relaxed, create_relaxed, delete_link_relaxed, delete_relaxed},
+};
 
 <span class="kw">pub const </span>MAX_TAG_SIZE: usize = <span class="number">1000</span>;
 
 <span class="attr">#[hdk_extern]
-</span><span class="kw">pub fn </span>create_notification(notification: Notification) -&gt; ExternResult&lt;Record&gt; {
-	<span class="kw">let </span>notification_hash = create_entry(<span class="kw-2">&amp;</span>EntryTypes::Notification(notification.clone()))<span class="question-mark">?</span>;
-	<span class="kw">for </span>base <span class="kw">in </span>notification.recipients.clone() {
-		create_link(
-			base,
-			notification_hash.clone(),
-			LinkTypes::RecipientToNotifications,
-			notification.notification_group.clone(),
-		)<span class="question-mark">?</span>;
+</span><span class="kw">pub fn </span>create_notification(notification: Notification) -&gt; ExternResult&lt;()&gt; {
+	create_relaxed(EntryTypes::Notification(notification.clone()))<span class="question-mark">?</span>;
+	<span class="prelude-val">Ok</span>(())
+}
+
+<span class="comment">// Only to be called by post_commit
+</span><span class="attr">#[hdk_extern]
+</span><span class="kw">pub fn </span>create_notification_link(notification_hash: ActionHash) -&gt; ExternResult&lt;()&gt; {
+	<span class="kw">let </span>app_entry = get_entry_for_action(<span class="kw-2">&amp;</span>notification_hash)<span class="question-mark">?</span>;
+	<span class="kw">if let </span><span class="prelude-val">Some</span>(EntryTypes::Notification(notification)) = app_entry {
+		<span class="kw">for </span>base <span class="kw">in </span>notification.recipients.clone() {
+			create_link_relaxed(
+				base,
+				notification_hash.clone(),
+				LinkTypes::RecipientToNotifications,
+				notification.notification_group.clone(),
+			)<span class="question-mark">?</span>;
+		}
 	}
-	<span class="kw">let </span>record = get(notification_hash.clone(), GetOptions::default())<span class="question-mark">?</span>.ok_or(<span class="macro">wasm_error!</span>(
-		WasmErrorInner::Guest(<span class="string">"Could not find the newly created Notification"</span>.to_string())
-	))<span class="question-mark">?</span>;
-	<span class="prelude-val">Ok</span>(record)
+	<span class="prelude-val">Ok</span>(())
 }
 
 <span class="attr">#[hdk_extern]
@@ -216,7 +238,7 @@
 			</span>)))
 		})<span class="question-mark">?</span>;
 
-		create_link(
+		create_link_relaxed(
 			agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
 			agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
 			LinkTypes::ReadNotifications,
@@ -252,24 +274,24 @@
 		<span class="kw">if </span>read_notifications_hashes.<span class="number">0</span>.iter().all(|hash| {
 			notifications_hashes.contains(hash) || !undismissed_notifications_hashes.contains(hash)
 		}) {
-			delete_link(link.create_link_hash)<span class="question-mark">?</span>;
+			delete_link_relaxed(link.create_link_hash)<span class="question-mark">?</span>;
 		}
 	}
 
 	<span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>dismiss_notification(notification_hash: ActionHash) -&gt; ExternResult&lt;ActionHash&gt; {
+<span class="kw">fn </span>dismiss_notification(notification_hash: ActionHash) -&gt; ExternResult&lt;()&gt; {
 	<span class="kw">let </span>links = get_undismissed_notifications(())<span class="question-mark">?</span>;
 
 	<span class="kw">for </span>link <span class="kw">in </span>links {
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(action_hash) = link.target.into_action_hash() {
 			<span class="kw">if </span>action_hash.eq(<span class="kw-2">&amp;</span>notification_hash) {
-				delete_link(link.create_link_hash)<span class="question-mark">?</span>;
+				delete_link_relaxed(link.create_link_hash)<span class="question-mark">?</span>;
 			}
 		}
 	}
-	delete_entry(notification_hash)
+	delete_relaxed(notification_hash)
 }
 
 <span class="attr">#[hdk_extern]

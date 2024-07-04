@@ -291,7 +291,7 @@
 <span class="kw">pub mod </span>notifications_settings;
 <span class="kw">pub use </span>notifications_settings::<span class="kw-2">*</span>;
 
-<span class="attr">#[derive(Serialize, Deserialize)]
+<span class="attr">#[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = <span class="string">"type"</span>)]
 #[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]

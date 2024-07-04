@@ -176,11 +176,25 @@
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdk::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>notifications_integrity::<span class="kw-2">*</span>;
 
 <span class="kw">pub mod </span>notification;
 <span class="kw">pub mod </span>notifications_settings;
+<span class="kw">pub mod </span>utils;
 
 <span class="attr">#[hdk_extern]
 </span><span class="kw">pub fn </span>init(<span class="kw">_</span>: ()) -&gt; ExternResult&lt;InitCallbackResult&gt; {
@@ -296,7 +310,19 @@
 		}
 		Action::Create(_create) =&gt; {
 			<span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(app_entry)) = get_entry_for_action(<span class="kw-2">&amp;</span>action.hashed.hash) {
-				emit_signal(Signal::EntryCreated { action, app_entry })<span class="question-mark">?</span>;
+				emit_signal(Signal::EntryCreated {
+					action: action.clone(),
+					app_entry: app_entry.clone(),
+				})<span class="question-mark">?</span>;
+				<span class="kw">if let </span>EntryTypes::Notification(<span class="kw">_</span>) = app_entry {
+					call_remote(
+						agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
+						zome_info()<span class="question-mark">?</span>.name,
+						<span class="string">"create_notification_link"</span>.into(),
+						<span class="prelude-val">None</span>,
+						action.hashed.hash,
+					)<span class="question-mark">?</span>;
+				}
 			}
 			<span class="prelude-val">Ok</span>(())
 		}
