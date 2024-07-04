@@ -1,4 +1,4 @@
-import{i as w,f as bt,w as pt,x as h,T as Mt,l as rt,m as st}from"./notifications-client.CpCIovZN.js";import{S as Tt}from"./signal-watcher.CC2Zvyu6.js";import{s as It,a,t as Bt}from"./property.D_nCQXDm.js";import{n as Nt}from"./context.BhONzYw-.js";/**
+import{i as w,f as bt,w as pt,x as h,T as Mt,l as rt,m as st}from"./notifications-client.DWs35apZ.js";import{S as Tt}from"./signal-watcher.BZHPfJN7.js";import{s as It,n as a,t as Bt}from"./property.OnNtokYg.js";import{n as Nt}from"./context.Biso4vHN.js";/**
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1119,13 +1119,13 @@ import{i as w,f as bt,w as pt,x as h,T as Mt,l as rt,m as st}from"./notification
 					class="column"
 					style=${dt({flex:"1",gap:s?"0":"8px"})}
 				>
-					<span style="flex: 1">${o.title}</span>
 					${o.notifications.map(i=>h`
 							<div class="row" style="gap: 8px; align-items: center">
 								${s?h``:h`<sl-icon src="${i.contents.iconSrc}"></sl-icon>`}
-								<span class="placeholder">${i.contents.body}</span>
+								<span>${i.contents.body}</span>
 							</div>
 						`)}
+					<span class="placeholder">${o.title}</span>
 				</div>
 
 				<div
