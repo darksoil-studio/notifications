@@ -316,14 +316,15 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		switch (result.status) {
 			case 'pending':
 				return html`<div
-					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; "
+					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; margin: 16px "
 				>
 					${Array.from({ length: count }).map(
-						() => html`
+						(_, i) => html`
 							<sl-skeleton
 								effect="pulse"
-								style="height: 24px; width: 300px; margin: 8px 20px"
+								style="height: 24px; width: 300px;"
 							></sl-skeleton>
+							${i < count - 1 ? html`<sl-divider></sl-divider>` : html``}
 						`,
 					)}
 				</div>`;
