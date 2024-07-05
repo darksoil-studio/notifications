@@ -59,8 +59,8 @@
                 --coordinator-zome-name notifications \
                 --remote-zome-git-url github:darksoil-studio/notifications \
                 --remote-npm-package-name @darksoil-studio/notifications \
-                --remote-npm-package-path ui" \
-                --remote-zome-git-branch main \
+                --remote-npm-package-path ui \
+                --remote-zome-git-branch main"
           '';
         };
       };
