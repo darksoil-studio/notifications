@@ -81,7 +81,7 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 									`
 								: html``}
 						</div>
-						<sl-card style="--padding: 0; width: 500x;">
+						<sl-card style="--padding: 0; width: 500px;">
 							<my-notifications-list style="flex: 1"></my-notifications-list>
 						</sl-card>
 					</sl-dropdown>
