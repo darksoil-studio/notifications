@@ -61,6 +61,7 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 					>
 						<div slot="trigger" style="position: relative;">
 							<sl-icon-button
+								part="icon-button"
 								slot="anchor"
 								style="font-size: 1.5rem"
 								.src=${wrapPathInSvg(mdiBell)}
