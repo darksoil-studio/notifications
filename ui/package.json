@@ -1,57 +1,53 @@
 {
-  "name": "@darksoil-studio/notifications",
-  "version": "0.1.0",
-  "scripts": {
-    "start": "vite --clearScreen false --port $UI_PORT",
-    "build": "pnpm lint && tsc && pnpm analyze",
-    "lint": "eslint src && prettier \"src/**/*.ts\" --check --ignore-path .gitignore",
-    "format": "eslint src --fix && prettier \"src/**/*.ts\" --write --ignore-path .gitignore",
-    "localize:extract": "lit-localize extract",
-    "localize:build": "lit-localize build",
-    "analyze": "cem analyze --litelement --exclude dist",
-    "prepare": "tsc && pnpm localize:build && pnpm analyze"
-  },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "locales",
-    "src"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/darksoil-studio/notifications.git"
-  },
-  "exports": {
-    ".": "./dist/index.js",
-    "./dist/*": "./dist/*",
-    "./locales/*": "./locales/*"
-  },
-  "dependencies": {
-    "@holochain-open-dev/elements": "^0.300.0",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui",
-    "@holochain-open-dev/signals": "^0.300.4",
-    "@holochain-open-dev/utils": "^0.300.0",
-    "@holochain/client": "^0.17.0",
-    "@lit/context": "^1.0.0",
-    "@lit/localize": "^0.12.0",
-    "@mdi/js": "^7.2.0",
-    "@msgpack/msgpack": "^2.8.0",
-    "@shoelace-style/shoelace": "^2.11.0",
-    "lit": "^3.0.0"
-  },
-  "devDependencies": {
-    "@custom-elements-manifest/analyzer": "^0.9.4",
-    "@lit/localize-tools": "^0.6.3",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.5",
-    "vite": "^4.0.0",
-    "vite-plugin-checker": "^0.5.3"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "customElements": "custom-elements.json",
-  "type": "module"
+	"name": "@darksoil-studio/notifications",
+	"version": "0.1.0",
+	"scripts": {
+		"start": "vite --clearScreen false --port $UI_PORT",
+		"build": "pnpm lint && tsc && pnpm analyze",
+		"lint": "eslint src && prettier \"src/**/*.ts\" --check --ignore-path .gitignore",
+		"format": "eslint src --fix && prettier \"src/**/*.ts\" --write --ignore-path .gitignore",
+		"localize:extract": "lit-localize extract",
+		"localize:build": "lit-localize build",
+		"analyze": "cem analyze --litelement --exclude dist",
+		"prepare": "tsc && pnpm localize:build && pnpm analyze"
+	},
+	"main": "dist/index.js",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": ["dist", "locales", "src"],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/darksoil-studio/notifications.git"
+	},
+	"exports": {
+		".": "./dist/index.js",
+		"./dist/*": "./dist/*",
+		"./locales/*": "./locales/*"
+	},
+	"dependencies": {
+		"@holochain-open-dev/elements": "^0.300.1",
+		"@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#0831f1a3450ac23c0f3cae257e67b79600bdd25a&path:ui",
+		"@holochain-open-dev/signals": "^0.300.6",
+		"@holochain-open-dev/utils": "^0.300.2",
+		"@holochain/client": "^0.17.1",
+		"@lit/context": "^1.0.0",
+		"@lit/localize": "^0.12.0",
+		"@mdi/js": "^7.2.0",
+		"@msgpack/msgpack": "^2.8.0",
+		"@shoelace-style/shoelace": "^2.11.0",
+		"lit": "^3.0.0"
+	},
+	"devDependencies": {
+		"@custom-elements-manifest/analyzer": "^0.9.4",
+		"@lit/localize-tools": "^0.6.3",
+		"tslib": "^2.6.2",
+		"typescript": "^5.4.5",
+		"vite": "^4.0.0",
+		"vite-plugin-checker": "^0.5.3"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"customElements": "custom-elements.json",
+	"type": "module"
 }

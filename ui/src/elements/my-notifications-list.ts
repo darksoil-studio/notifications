@@ -311,7 +311,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 	render() {
 		const result = this.getNotificationsGroups();
 
-		let count = this.notificationCount();
+		const count = this.notificationCount();
 
 		switch (result.status) {
 			case 'pending':

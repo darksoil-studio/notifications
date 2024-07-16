@@ -68,6 +68,7 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 				this.notificationsForRecipient.set(recipients, [
 					...existingRecipients,
 					{
+						base: recipients,
 						target: record.signed_action.hashed.hash,
 						author: this.myPubKey,
 						timestamp: Date.now() * 1000,

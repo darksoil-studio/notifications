@@ -303,7 +303,7 @@
               "name": "createNotification",
               "return": {
                 "type": {
-                  "text": "Promise<EntryRecord<Notification>>"
+                  "text": "Promise<void>"
                 }
               },
               "parameters": [
@@ -438,6 +438,18 @@
           "description": "",
           "name": "NotificationsStore",
           "members": [
+            {
+              "kind": "method",
+              "name": "addTypes",
+              "parameters": [
+                {
+                  "name": "notificationsType",
+                  "type": {
+                    "text": "Record<string, NotificationType>"
+                  }
+                }
+              ]
+            },
             {
               "kind": "field",
               "name": "notifications",
@@ -600,6 +612,10 @@
             {
               "kind": "method",
               "name": "getNotificationsGroups"
+            },
+            {
+              "kind": "method",
+              "name": "notificationCount"
             }
           ],
           "mixins": [
