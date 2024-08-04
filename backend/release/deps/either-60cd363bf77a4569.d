@@ -1,9 +1,0 @@
-/home/runner/work/notifications/notifications/docs/public/backend/release/deps/libeither-60cd363bf77a4569.rmeta: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/iterator.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/into_either.rs
-
-/home/runner/work/notifications/notifications/docs/public/backend/release/deps/libeither-60cd363bf77a4569.rlib: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/iterator.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/into_either.rs
-
-/home/runner/work/notifications/notifications/docs/public/backend/release/deps/either-60cd363bf77a4569.d: /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/lib.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/iterator.rs /home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/into_either.rs
-
-/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/lib.rs:
-/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/iterator.rs:
-/home/runner/work/notifications/notifications/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.12.0/src/into_either.rs:
