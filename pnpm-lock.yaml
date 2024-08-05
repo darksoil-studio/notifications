@@ -105,8 +105,8 @@ importers:
         specifier: ^0.300.1
         version: 0.300.1(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#c940dc1d8bd09631c7fc0548910d8200329c3763&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/c940dc1d8bd09631c7fc0548910d8200329c3763#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#6a73e9dbf42c4522c135a237108fa42fb7cb3dc5&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/6a73e9dbf42c4522c135a237108fa42fb7cb3dc5#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.6
         version: 0.300.6(@types/react@18.3.3)
@@ -665,12 +665,12 @@ packages:
   '@holochain-open-dev/elements@0.300.1':
     resolution: {integrity: sha512-i0BYvrM+aKFlyiNQ02mkqTElLxQ4AFM0nBs4whXrb/p7XU/SQm0dApieEGMsTgtZu8cI/ZgmPzi6qQSduXXLPA==}
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a}
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/6a73e9dbf42c4522c135a237108fa42fb7cb3dc5#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/6a73e9dbf42c4522c135a237108fa42fb7cb3dc5}
     version: 0.300.0
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/c940dc1d8bd09631c7fc0548910d8200329c3763#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/c940dc1d8bd09631c7fc0548910d8200329c3763}
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a}
     version: 0.300.0
 
   '@holochain-open-dev/signals@0.300.3':
@@ -3417,11 +3417,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)':
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/6a73e9dbf42c4522c135a237108fa42fb7cb3dc5#path:ui(@types/react@18.3.3)':
     dependencies:
-      '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
-      '@holochain-open-dev/signals': 0.300.3(@types/react@18.3.3)
-      '@holochain-open-dev/utils': 0.300.1
+      '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.6(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.2
       '@holochain/client': 0.17.1
       '@lit/context': 1.1.2
       '@lit/localize': 0.12.1
@@ -3434,11 +3434,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/c940dc1d8bd09631c7fc0548910d8200329c3763#path:ui(@types/react@18.3.3)':
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)':
     dependencies:
-      '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.3)
-      '@holochain-open-dev/signals': 0.300.6(@types/react@18.3.3)
-      '@holochain-open-dev/utils': 0.300.2
+      '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.3(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.1
       '@holochain/client': 0.17.1
       '@lit/context': 1.1.2
       '@lit/localize': 0.12.1
