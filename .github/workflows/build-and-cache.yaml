@@ -30,24 +30,24 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          cachix watch-exec darksoil-studio -- nix develop --accept-flake-config --command bash -c "pnpm i && pnpm t && pnpm -F @darksoil-studio/notifications build"
+          cachix watch-exec darksoil-studio -- nix develop --no-update-lock-file --accept-flake-config --command bash -c "pnpm i && pnpm t && pnpm -F @darksoil-studio/notifications build"
 
       - name: Build zomes
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          nix build --accept-flake-config -L .#notifications_integrity
-          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications_integrity)
-          cachix pin darksoil-studio notifications_integrity_debug $(nix path-info --accept-flake-config .#notifications_integrity)
+          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications_integrity
+          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity | nix run nixpkgs#jq -- -r '.[].path')
+          cachix pin darksoil-studio notifications_integrity_debug $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity | nix run nixpkgs#jq -- -r '.[].path')
 
-          nix build --accept-flake-config -L .#notifications_integrity.meta.release
-          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications_integrity.meta.release)
-          cachix pin darksoil-studio notifications_integrity $(nix path-info --accept-flake-config .#notifications_integrity.meta.release)
+          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications_integrity.meta.release
+          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity.meta.release | nix run nixpkgs#jq -- -r '.[].path')
+          cachix pin darksoil-studio notifications_integrity $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity.meta.release | nix run nixpkgs#jq -- -r '.[].path')
 
-          nix build --accept-flake-config -L .#notifications
-          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications)
-          cachix pin darksoil-studio notifications_debug $(nix path-info --accept-flake-config .#notifications)
+          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications
+          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications | nix run nixpkgs#jq -- -r '.[].path')
+          cachix pin darksoil-studio notifications_debug $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications | nix run nixpkgs#jq -- -r '.[].path')
 
-          nix build --accept-flake-config -L .#notifications.meta.release
-          cachix push darksoil-studio $(nix path-info --accept-flake-config .#notifications.meta.release)
-          cachix pin darksoil-studio notifications $(nix path-info --accept-flake-config .#notifications.meta.release)
+          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications.meta.release
+          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications.meta.release | nix run nixpkgs#jq -- -r '.[].path')
+          cachix pin darksoil-studio notifications $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications.meta.release | nix run nixpkgs#jq -- -r '.[].path')
