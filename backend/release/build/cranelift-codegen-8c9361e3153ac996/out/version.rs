@@ -1,2 +1,2 @@
 /// Version number of this crate. 
-pub const VERSION: &str = "0.91.1-6088d22f0";
+pub const VERSION: &str = "0.91.1-af6b30739";
