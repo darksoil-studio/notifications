@@ -9,11 +9,9 @@ integrity:
     - name: notifications_integrity
       hash: ~
       bundled: "../target/wasm32-unknown-unknown/release/notifications_integrity.wasm"
-      dependencies: ~    
     - name: profiles_integrity
       hash: ~
       bundled: <NIX PACKAGE>
-      dependencies: ~
 coordinator:
   zomes:
     - name: notifications
