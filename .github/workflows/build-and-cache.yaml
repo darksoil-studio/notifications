@@ -63,17 +63,17 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications_integrity.release
-          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity.release | nix run nixpkgs#jq -- -r 'keys[0]')
+          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications_integrity.meta.release
+          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity.meta.release | nix run nixpkgs#jq -- -r 'keys[0]')
 
-          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications.release
-          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications.release | nix run nixpkgs#jq -- -r 'keys[0]')
+          cachix watch-exec darksoil-studio -- nix build --no-update-lock-file --accept-flake-config -L .#notifications.meta.release
+          cachix push darksoil-studio $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications.meta.release | nix run nixpkgs#jq -- -r 'keys[0]')
 
       - name: Pin release zomes
         if: matrix.os == 'ubuntu-latest' && github.event_name != 'pull_request'
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          cachix pin darksoil-studio notifications_integrity $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity.release | nix run nixpkgs#jq -- -r 'keys[0]')
+          cachix pin darksoil-studio notifications_integrity $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications_integrity.meta.release | nix run nixpkgs#jq -- -r 'keys[0]')
 
-          cachix pin darksoil-studio notifications $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications.release | nix run nixpkgs#jq -- -r 'keys[0]')
+          cachix pin darksoil-studio notifications $(nix path-info --json --accept-flake-config --no-warn-dirty .#notifications.meta.release | nix run nixpkgs#jq -- -r 'keys[0]')
