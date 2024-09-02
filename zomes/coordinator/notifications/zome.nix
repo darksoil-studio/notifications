@@ -1,17 +1,17 @@
 { inputs, ... }:
 
 {
-  perSystem = { inputs', self', ... }: {
+  perSystem = { inputs', self', system, ... }: {
     packages.notifications = inputs.hc-infra.outputs.lib.rustZome {
+      inherit system;
       workspacePath = inputs.self.outPath;
-      holochain = inputs'.holochain;
       crateCargoToml = ./Cargo.toml;
     };
 
     # Test only this zome and its integrity in isolation
     checks.notifications = inputs.hc-infra.outputs.lib.sweettest {
+      inherit system;
       workspacePath = inputs.self.outPath;
-      holochain = inputs'.holochain;
       dna = (inputs.hc-infra.outputs.lib.dna {
         dnaManifest = builtins.toFile "dna.yaml" ''
           ---
@@ -32,7 +32,7 @@
                 dylib: ~
         '';
         zomes = inputs.hc-infra.outputs.lib.filterZomes self'.packages;
-        holochain = inputs'.holochain;
+        inherit system;
       });
       crateCargoToml = ./Cargo.toml;
     };

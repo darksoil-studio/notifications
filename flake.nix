@@ -2,16 +2,11 @@
   description = "Template for Holochain app development";
 
   inputs = {
-    versions.url = "github:holochain/holochain?dir=versions/0_3";
+    nixpkgs.follows = "holonix/nixpkgs";
+    holonix.url = "github:holochain/holonix/main-0.3";
 
-    holochain.url = "github:holochain/holochain";
-    holochain.inputs.versions.follows = "versions";
-
-    nixpkgs.follows = "holochain/nixpkgs";
-    flake-parts.follows = "holochain/flake-parts";
-
-    hc-infra = { url = "github:holochain-open-dev/infrastructure"; };
-    scaffolding = { url = "github:holochain-open-dev/templates"; };
+    hc-infra.url = "github:holochain-open-dev/infrastructure";
+    scaffolding.url = "github:holochain-open-dev/templates";
 
     profiles.url = "github:holochain-open-dev/profiles/nixify";
   };
@@ -28,7 +23,7 @@
   };
 
   outputs = inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+    inputs.holonix.inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         ./zomes/integrity/notifications/zome.nix
         ./zomes/coordinator/notifications/zome.nix
@@ -37,12 +32,12 @@
         ./workdir/happ.nix
       ];
 
-      systems = builtins.attrNames inputs.holochain.devShells;
+      systems = builtins.attrNames inputs.holonix.devShells;
       perSystem = { inputs', config, pkgs, system, ... }: {
         devShells.default = pkgs.mkShell {
           inputsFrom = [
             inputs'.hc-infra.devShells.synchronized-pnpm
-            inputs'.holochain.devShells.holonix
+            inputs'.holonix.devShells.default
           ];
 
           packages = [ inputs'.scaffolding.packages.hc-scaffold-zome-template ];
