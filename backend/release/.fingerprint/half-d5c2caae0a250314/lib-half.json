@@ -1,1 +1,0 @@
-{"rustc":3323483500999627516,"features":"[]","declared_features":"","target":2481396505952718149,"profile":1480211792742459436,"path":5931192539110147592,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"release/.fingerprint/half-d5c2caae0a250314/dep-lib-half"}}],"rustflags":["-Clink-arg=-fuse-ld=mold"],"metadata":576232026459312637,"config":2202906307356721367,"compile_kind":0}
