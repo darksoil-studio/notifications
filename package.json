@@ -1,30 +1,29 @@
 {
-  "name": "notifications-dev",
-  "private": true,
-  "scripts": {
-    "start": "AGENTS=2 pnpm network",
-    "network": "hc s clean && pnpm build:happ && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) UI_PORT=8888 concurrently -k \"pnpm -F @darksoil-studio/notifications start\" \"pnpm launch\" \"holochain-playground\" \"pnpm local-services\"",
-    "launch": "echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/notifications_test-debug.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:$BOOTSTRAP_PORT webrtc ws://127.0.0.1:$SIGNAL_PORT",
-    "local-services": "hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT",
-    "test": "pnpm build:happ && pnpm -F tests test",
-    "build:happ": "nix build --no-update-lock-file -L .#notifications_test_app -o workdir/notifications_test-debug.happ"
-  },
-  "devDependencies": {
-    "@holochain-playground/cli": "^0.300.0-rc",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@eslint/js": "^9.0.0",
-    "concurrently": "^6.2.1",
-    "eslint": "^9.0.0",
-    "eslint-config-prettier": "^9.1.0",
-    "gh-pages": "^3.2.3",
-    "new-port-cli": "^1.0.0",
-    "prettier": "^3.2.5",
-    "typescript-eslint": "^7.7.0",
-    "typescript": "^5.4.5"
-  },
-  "type": "module",
-  "engines": {
-    "pnpm": ">=9.0.0"
-  },
-  "packageManager": "pnpm@9.2.0+sha256.94fab213df221c55b6956b14a2264c21c6203cca9f0b3b95ff2fe9b84b120390"
+	"name": "notifications-dev",
+	"private": true,
+	"scripts": {
+		"start": "AGENTS=2 pnpm network",
+		"network": "hc s clean && pnpm build:happ && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) UI_PORT=8888 concurrently -k \"pnpm -F @darksoil-studio/notifications start\" \"pnpm launch\" \"holochain-playground\" \"pnpm local-services\"",
+		"launch": "echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/notifications_test-debug.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:$BOOTSTRAP_PORT webrtc ws://127.0.0.1:$SIGNAL_PORT",
+		"local-services": "hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT",
+		"test": "pnpm build:happ && pnpm -F tests test",
+		"build:happ": "nix build --no-update-lock-file -L .#notifications_test_app.meta.debug -o workdir/notifications_test-debug.happ"
+	},
+	"devDependencies": {
+		"@holochain-playground/cli": "^0.300.0-rc",
+		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
+		"@eslint/js": "^9.0.0",
+		"concurrently": "^6.2.1",
+		"eslint": "^9.0.0",
+		"eslint-config-prettier": "^9.1.0",
+		"gh-pages": "^3.2.3",
+		"new-port-cli": "^1.0.0",
+		"prettier": "^3.2.5",
+		"typescript-eslint": "^7.7.0",
+		"typescript": "^5.4.5"
+	},
+	"type": "module",
+	"engines": {
+		"pnpm": ">=9.0.0"
+	}
 }
