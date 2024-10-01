@@ -575,6 +575,11 @@
           "kind": "class",
           "description": "",
           "name": "MyNotificationsIconButton",
+          "cssParts": [
+            {
+              "name": "icon-button"
+            }
+          ],
           "members": [],
           "mixins": [
             {
