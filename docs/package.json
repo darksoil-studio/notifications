@@ -19,6 +19,7 @@
     "@holochain-open-dev/elements": "^0.300.0",
     "@holochain/client": "^0.17.1",
     "@mdi/js": "^7.2.0",
+    "@msgpack/msgpack": "^2.8.0",
     "@shoelace-style/shoelace": "^2.11.0",
     "@types/node": "^22.7.4",
     "api-viewer-element": "^1.0.0-pre.10",
