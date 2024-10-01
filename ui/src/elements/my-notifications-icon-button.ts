@@ -20,6 +20,7 @@ import './my-notifications-list.js';
 
 /**
  * @element my-notifications-icon-button
+ * @csspart icon-button
  */
 @localized()
 @customElement('my-notifications-icon-button')
