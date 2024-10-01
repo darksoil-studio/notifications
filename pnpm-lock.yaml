@@ -59,6 +59,9 @@ importers:
       '@holochain-open-dev/profiles':
         specifier: github:holochain-open-dev/profiles#nixify&path:ui
         version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/43e97c82887cc3eb91ef92c9ab01b93529693b68#path:ui(@types/react@18.3.10)
+      '@holochain-open-dev/signals':
+        specifier: ^0.300.0
+        version: 0.300.7(@types/react@18.3.10)
       '@holochain/client':
         specifier: ^0.17.1
         version: 0.17.1

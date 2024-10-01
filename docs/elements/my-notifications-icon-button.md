@@ -53,7 +53,7 @@ Here is an interactive demo of the element:
 <script setup>
 import { onMounted } from "vue";
 import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';
-import { wrapPathInSvg } from '@holochain-open-dev/elements';
+import { wrapPathInSvg } from '@holochain-open-dev/elements/dist/icon.js'
 import { mdiBell } from '@mdi/js';
 import { demoProfiles, ProfilesZomeMock } from '@holochain-open-dev/profiles/dist/mocks.js';
 import { decode } from '@msgpack/msgpack';
