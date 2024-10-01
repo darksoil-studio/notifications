@@ -7,12 +7,15 @@ import {
 	decodeEntry,
 	entryState,
 	fakeCreateAction,
+	fakeCreateLinkAction,
 	fakeDeleteEntry,
+	fakeDeleteLinkAction,
 	fakeEntry,
 	fakeRecord,
 	fakeUpdateEntry,
 	hash,
 	pickBy,
+	retype,
 } from '@holochain-open-dev/utils';
 import {
 	ActionHash,
@@ -25,6 +28,7 @@ import {
 	Record,
 	SignedActionHashed,
 	decodeHashFromBase64,
+	encodeHashToBase64,
 	fakeActionHash,
 	fakeAgentPubKey,
 	fakeDnaHash,
@@ -48,6 +52,7 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 		}
 	>();
 	notificationsForRecipient = new HoloHashMap<ActionHash, Link[]>();
+	readNotificationsByRecipient = new HoloHashMap<AgentPubKey, Array<Link>>();
 
 	async create_notification(notification: Notification): Promise<Record> {
 		const entryHash = hash(notification, HashType.ENTRY);
@@ -62,13 +67,13 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 		});
 
 		await Promise.all(
-			notification.recipients.map(async recipients => {
+			notification.recipients.map(async recipient => {
 				const existingRecipients =
-					this.notificationsForRecipient.get(recipients) || [];
-				this.notificationsForRecipient.set(recipients, [
+					this.notificationsForRecipient.get(recipient) || [];
+				this.notificationsForRecipient.set(recipient, [
 					...existingRecipients,
 					{
-						base: recipients,
+						base: recipient,
 						target: record.signed_action.hashed.hash,
 						author: this.myPubKey,
 						timestamp: Date.now() * 1000,
@@ -123,6 +128,95 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 	): Promise<Array<Link>> {
 		return this.notificationsForRecipient.get(recipient) || [];
 	}
+
+	async mark_notifications_as_read(notifications: ActionHash[]) {
+		const readNotifications =
+			this.readNotificationsByRecipient.get(this.myPubKey) || [];
+
+		const link = {
+			base: this.myPubKey,
+			target: this.myPubKey,
+			author: this.myPubKey,
+			timestamp: Date.now() * 1000,
+			zome_index: 0,
+			link_type: 0,
+			tag: encode(notifications),
+			create_link_hash: await fakeActionHash(),
+		};
+		this.readNotificationsByRecipient.set(this.myPubKey, [
+			...readNotifications,
+			link,
+		]);
+		this.emitSignal({
+			type: 'LinkCreated',
+			action: {
+				hashed: {
+					content: await fakeCreateLinkAction(
+						retype(this.myPubKey, HashType.ENTRY),
+						this.myPubKey,
+						1,
+						encode(notifications),
+					),
+					hash: link.create_link_hash,
+				},
+			},
+			link_type: 'ReadNotifications',
+		});
+	}
+
+	async dismiss_notifications(notifications: ActionHash[]) {
+		const undismissedNotifications =
+			this.notificationsForRecipient.get(this.myPubKey) || [];
+
+		const filteredNotifications = undismissedNotifications.filter(
+			link =>
+				!notifications.find(
+					n => encodeHashToBase64(n) === encodeHashToBase64(link.target),
+				),
+		);
+
+		const dismissedNotifications = undismissedNotifications.filter(link =>
+			notifications.find(
+				n => encodeHashToBase64(n) === encodeHashToBase64(link.target),
+			),
+		);
+
+		this.notificationsForRecipient.set(this.myPubKey, filteredNotifications);
+		for (const link of dismissedNotifications) {
+			this.emitSignal({
+				type: 'LinkDeleted',
+				action: {
+					hashed: {
+						content: await fakeDeleteLinkAction(link.create_link_hash),
+						hash: await fakeActionHash(),
+					},
+				},
+				create_link_action: {
+					hashed: {
+						content: await fakeCreateLinkAction(
+							link.base,
+							link.target,
+							link.link_type,
+							link.tag,
+						),
+					},
+				},
+				link_type: 'RecipientToNotifications',
+			});
+		}
+	}
+
+	async get_undismissed_notifications(): Promise<Array<Link>> {
+		return this.notificationsForRecipient.get(this.myPubKey);
+	}
+
+	async get_dismissed_notifications(): Promise<Array<Link>> {
+		return [];
+	}
+
+	async get_read_notifications(): Promise<Array<Link>> {
+		return this.readNotificationsByRecipient.get(this.myPubKey) || [];
+	}
 }
 
 export async function sampleNotification(
@@ -131,12 +225,12 @@ export async function sampleNotification(
 ): Promise<Notification> {
 	return {
 		...{
-			notification_type: 'Lorem ipsum 2',
-			notification_group: 'Lorem ipsum 2',
-			persistent: true,
+			notification_type: 'type1',
+			notification_group: 'Your notifications',
+			persistent: false,
 			recipients: [client.client.myPubKey],
 			content: encode({
-				hi: 'hi2',
+				body: 'Hello world!',
 			}),
 		},
 		...partialNotification,

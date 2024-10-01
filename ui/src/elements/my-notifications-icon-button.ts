@@ -9,6 +9,7 @@ import '@shoelace-style/shoelace/dist/components/badge/badge.js';
 import '@shoelace-style/shoelace/dist/components/card/card.js';
 import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
+import '@shoelace-style/shoelace/dist/components/skeleton/skeleton.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { LitElement, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -37,11 +38,12 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 
 		switch (result.status) {
 			case 'pending':
-				return html`<div
-					style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
-				>
-					<sl-skeleton></sl-skeleton>
-				</div>`;
+				return html`
+					<sl-skeleton
+						style="height: 32px; width: 32px; --border-radius: 8px"
+						effect="pulse"
+					></sl-skeleton>
+				`;
 			case 'error':
 				return html`<display-error
 					tooltip
@@ -54,6 +56,7 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 					<sl-dropdown
 						placement="bottom-end"
 						distance="8"
+						hoist
 						@sl-hide=${() =>
 							this.notificationsStore.client.markNotificationsAsRead(
 								Array.from(unreadNotifications.keys()),

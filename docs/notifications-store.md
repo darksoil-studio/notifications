@@ -1,6 +1,6 @@
 # NotificationsStore
 
-The `NotificationsStore` is a typescript class that contains `svelte` stores, to which you can subscribe to get reactive updates in your elements.
+The `NotificationsStore` is a typescript class that contains [signals](https://github.com/tc39/proposal-signals), to which you can subscribe to get reactive updates in your elements.
 
 ```js
 import { NotificationsStore, NotificationsClient, NotificationsConfig } from "@darksoil-studio/notifications";

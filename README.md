@@ -8,7 +8,7 @@ Enter the nix shell by running this in the root folder of the repository:
 
 ```bash
 nix develop
-npm install
+pnpm install
 ```
 
 **Run all the other instructions in this README from inside this nix shell, otherwise they won't work**.
@@ -16,16 +16,16 @@ npm install
 ## Running 2 agents
  
 ```bash
-npm start
+pnpm start
 ```
 
 This will create a network of 2 nodes connected to each other and their respective UIs.
 It will also bring up the Holochain Playground for advanced introspection of the conductors.
 
-## Running the backend tests
+## Running the tests
 
 ```bash
-npm test
+pnpm test
 ```
 
 ## Bootstrapping a network

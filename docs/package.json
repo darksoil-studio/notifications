@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "pnpm dev",
-    "dev": "pnpm setup:docs && vitepress dev",
+    "dev": "pnpm setup:docs && vitepress dev --open",
     "build": "pnpm setup:docs && vitepress build",
     "setup:docs": "pnpm -F @darksoil-studio/notifications analyze && cp ../ui/custom-elements.json elements && pnpm setup:cargo",
     "setup:cargo": "cargo doc --release --no-deps --target-dir public/backend",
@@ -14,13 +14,16 @@
   "devDependencies": {
     "@api-viewer/demo": "1.0.0-pre.10",
     "@api-viewer/docs": "1.0.0-pre.10",
-    "@holochain/client": "^0.17.1",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#nixify&path:ui",
     "@darksoil-studio/notifications": "workspace:*",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#nixify&path:ui",
+    "@holochain-open-dev/elements": "^0.300.0",
+    "@holochain/client": "^0.17.1",
+    "@mdi/js": "^7.2.0",
     "@shoelace-style/shoelace": "^2.11.0",
+    "@types/node": "^22.7.4",
     "api-viewer-element": "^1.0.0-pre.10",
     "lit": "^3.0.0",
-    "vitepress": "^1.0.1",
+    "vitepress": "^1.3.4",
     "vitepress-plugin-mermaid": "^2.0.16"
   }
 }

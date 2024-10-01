@@ -53,9 +53,13 @@ Here is an interactive demo of the element:
 <script setup>
 import { onMounted } from "vue";
 import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';
+import { wrapPathInSvg } from '@holochain-open-dev/elements';
+import { mdiBell } from '@mdi/js';
 import { demoProfiles, ProfilesZomeMock } from '@holochain-open-dev/profiles/dist/mocks.js';
+import { decode } from '@msgpack/msgpack';
 import { decodeHashFromBase64 } from '@holochain/client';
 import { render, html } from "lit";
+import { Signal } from '@holochain-open-dev/signals';
 
 import { NotificationsZomeMock, sampleNotification } from "../../ui/src/mocks.ts";
 import { NotificationsStore } from "../../ui/src/notifications-store.ts";
@@ -85,12 +89,40 @@ onMounted(async () => {
 
   const record = await mock.create_notification(notification);
 
-  const store = new NotificationsStore(client);
+  const store = new NotificationsStore(client, {
+		types: {
+			type1: {
+				name: 'Hello!',
+				description: 'something',
+				title(group) {
+					return new Signal.State({
+						status: 'completed',
+						value: group,
+					});
+				},
+				onClick: group => alert(`clicked notification of group: ${group}`),
+				contents: n => {
+					const i = decode(n.entry.content);
+					return new Signal.State({
+						status: 'completed',
+						value: {
+							iconSrc: wrapPathInSvg(mdiBell),
+							body: i.body,
+						},
+					});
+				},
+			},
+		},
+  });
   
   render(html`
     <profiles-context .store=${profilesStore}>
       <notifications-context .store=${store}>
         <api-demo src="custom-elements.json" only="my-notifications-icon-button" exclude-knobs="store">
+          <template data-element="my-notifications-icon-button" data-target="host">
+            <my-notifications-icon-button style="height: 250px; width: 500px; display: flex">
+            </my-notifications-icon-button>
+          </template>
         </api-demo>
       </notifications-context>
     </profiles-context>
