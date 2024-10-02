@@ -41,7 +41,7 @@ import { Notification } from './types.js';
 
 export class NotificationsZomeMock extends ZomeMock implements AppClient {
 	constructor(myPubKey?: AgentPubKey) {
-		super('notifications_test', 'notifications', myPubKey);
+		super('notifications_test', 'notifications', myPubKey, 100);
 	}
 	/** Notification */
 	notifications = new HoloHashMap<
