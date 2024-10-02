@@ -1,4 +1,4 @@
-import{i as w,h as mt,R as gt,k as d,D as Nt,m as at,n as lt,l as Bt}from"./notifications-client._qanSsIB.js";import{w as H,b as Ot,c as Pt,d as Dt}from"./mdi.qMXz3qcd.js";import{S as Ft}from"./signal-watcher.OJ8qE2w9.js";import{s as Rt,n as l,t as jt}from"./property.BmfdO238.js";import{n as Ut}from"./context.DAbQH-wj.js";/**
+import{i as w,h as mt,R as gt,k as d,D as Nt,w as H,o as at,p as lt,n as Bt,q as Ot,r as Pt,t as Dt}from"./notifications-client.XQwwljFU.js";import{S as Ft}from"./signal-watcher.w7lzT8DC.js";import{s as Rt,n as l,t as jt}from"./property.cpXOlI5j.js";import{n as Ut}from"./context.fvERXwZ6.js";/**
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1214,4 +1214,4 @@ import{i as w,h as mt,R as gt,k as d,D as Nt,m as at,n as lt,l as Bt}from"./noti
 			sl-icon-button::part(base) {
 				padding: 0 !important;
 			}
-		`];It([qt({context:Ut,subscribe:!0})],V.prototype,"notificationsStore",2);V=It([jt("my-notifications-list")],V);const Oe=Object.freeze(Object.defineProperty({__proto__:null,get MyNotifications(){return V}},Symbol.toStringTag,{value:"Module"}));export{we as H,rt as L,tt as R,m as S,n as _,$t as a,I as b,S as c,g as d,yt as e,qt as f,pt as g,Vt as h,Oe as i,G as m,C as r,Wt as s,p as t,U as w};
+		`];It([qt({context:Ut,subscribe:!0})],V.prototype,"notificationsStore",2);V=It([jt("my-notifications-list")],V);const Be=Object.freeze(Object.defineProperty({__proto__:null,get MyNotifications(){return V}},Symbol.toStringTag,{value:"Module"}));export{we as H,rt as L,tt as R,m as S,n as _,$t as a,I as b,S as c,g as d,yt as e,qt as f,pt as g,Vt as h,Be as i,G as m,C as r,Wt as s,p as t,U as w};
