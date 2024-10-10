@@ -20,19 +20,23 @@ pub struct NotificationsSettings {
 	settings_by_notification_type: HashMap<String, NotificationTypeSettings>,
 	available_notification_providers: HashMap<String, NotificationProvider>,
 }
-
+///Validate for notification settings
 pub fn validate_create_notifications_settings(
 	_action: EntryCreationAction,
 	_notification: NotificationsSettings,
 ) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for updating notification settings
 pub fn validate_update_notifications_settings(
 	_action: Update,
 	_notification: NotificationsSettings,
 ) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for deleting notification settings
 pub fn validate_delete_notifications_settings(
 	_action: Delete,
 ) -> ExternResult<ValidateCallbackResult> {
@@ -40,6 +44,8 @@ pub fn validate_delete_notifications_settings(
 		"NotificationsSettings cannot be deleted",
 	)))
 }
+
+///Validation for creating links between agents and notification settings
 pub fn validate_create_link_agent_to_notifications_settings(
 	_action: CreateLink,
 	_base_address: AnyLinkableHash,
@@ -64,6 +70,8 @@ pub fn validate_create_link_agent_to_notifications_settings(
 	// TODO: add the appropriate validation rules
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for deleting links between agents and notification settings
 pub fn validate_delete_link_agent_to_notifications_settings(
 	_action: DeleteLink,
 	_original_action: CreateLink,

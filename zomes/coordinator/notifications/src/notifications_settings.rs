@@ -2,6 +2,7 @@ use hdk::prelude::*;
 
 use notifications_integrity::*;
 
+///Set notifications setting for agent
 #[hdk_extern]
 pub fn set_notifications_settings(settings: NotificationsSettings) -> ExternResult<()> {
 	let my_pub_key = agent_info()?.agent_latest_pubkey;
@@ -23,12 +24,14 @@ pub fn set_notifications_settings(settings: NotificationsSettings) -> ExternResu
 	Ok(())
 }
 
+///Get notifications setting links for an agent
 pub fn get_notifications_settings_links_for_agent(agent: AgentPubKey) -> ExternResult<Vec<Link>> {
 	get_links(
 		GetLinksInputBuilder::try_new(agent, LinkTypes::AgentToNotificationsSettings)?.build(),
 	)
 }
 
+///Get notifications settings for agent
 #[hdk_extern]
 pub fn get_notifications_settings_for(agent: AgentPubKey) -> ExternResult<Option<Record>> {
 	let links = get_notifications_settings_links_for_agent(agent)?;

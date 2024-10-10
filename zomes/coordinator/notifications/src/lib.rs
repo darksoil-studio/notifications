@@ -5,6 +5,7 @@ pub mod notification;
 pub mod notifications_settings;
 pub mod utils;
 
+///Initializing the app and adding the capability for agents to recieve remote signals
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 	let mut fns: BTreeSet<GrantedFunction> = BTreeSet::new();
@@ -20,6 +21,7 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 	Ok(InitCallbackResult::Pass)
 }
 
+///Signals available in module
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum Signal {
@@ -47,11 +49,13 @@ pub enum Signal {
 	},
 }
 
+///Remote signal for notification
 #[derive(Serialize, Deserialize, Debug, SerializedBytes)]
 pub enum NotificationsRemoteSignal {
 	NewNotification(SignedActionHashed),
 }
 
+///Function for recieving incoming notifications
 #[hdk_extern]
 pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()> {
 	// TODO: take into account wether the recipient has the notification enabled in their settings
@@ -63,6 +67,7 @@ pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()>
 	}
 }
 
+///Handing post commit of actions
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
 	for action in committed_actions {
@@ -71,6 +76,8 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
 		}
 	}
 }
+
+///Doing actions (creating and deleting links and notifications)
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 	match action.hashed.content.clone() {
 		Action::CreateLink(create_link) => {
@@ -162,6 +169,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 	}
 }
 
+///Get entry for a specific action
 fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
 	let record = match get_details(action_hash.clone(), GetOptions::default())? {
 		Some(Details::Record(record_details)) => record_details.record,

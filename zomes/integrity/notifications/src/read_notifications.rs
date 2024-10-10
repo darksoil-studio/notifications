@@ -1,5 +1,6 @@
 use hdi::prelude::*;
 
+///Validation for creating links to read notifications
 pub fn validate_create_link_read_notifications(
 	action: CreateLink,
 	base_address: AnyLinkableHash,
@@ -34,6 +35,8 @@ pub fn validate_create_link_read_notifications(
 
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for deleting links to read notifications
 pub fn validate_delete_link_read_notifications(
 	action: DeleteLink,
 	original_action: CreateLink,

@@ -8,13 +8,14 @@ use crate::{
 
 pub const MAX_TAG_SIZE: usize = 1000;
 
+///Create a notification
 #[hdk_extern]
 pub fn create_notification(notification: Notification) -> ExternResult<()> {
 	create_relaxed(EntryTypes::Notification(notification.clone()))?;
 	Ok(())
 }
 
-// Only to be called by post_commit
+///Create notification link (only to be called by post_commit)
 #[hdk_extern]
 pub fn create_notification_link(notification_hash: ActionHash) -> ExternResult<()> {
 	let app_entry = get_entry_for_action(&notification_hash)?;
@@ -31,6 +32,7 @@ pub fn create_notification_link(notification_hash: ActionHash) -> ExternResult<(
 	Ok(())
 }
 
+///Get notification by hash
 #[hdk_extern]
 pub fn get_notification(notification_hash: ActionHash) -> ExternResult<Option<Record>> {
 	let Some(details) = get_details(notification_hash, GetOptions::default())? else {
@@ -47,6 +49,7 @@ pub fn get_notification(notification_hash: ActionHash) -> ExternResult<Option<Re
 #[derive(Serialize, Deserialize, Debug, SerializedBytes)]
 pub struct ReadNotifications(pub Vec<ActionHash>);
 
+///Mark notifications as read
 #[hdk_extern]
 pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> ExternResult<()> {
 	let hash_size = 39;
@@ -74,6 +77,7 @@ pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> Exte
 	Ok(())
 }
 
+///Dismiss notifications (multiple)
 #[hdk_extern]
 pub fn dismiss_notifications(notifications_hashes: Vec<ActionHash>) -> ExternResult<()> {
 	for hash in notifications_hashes.iter() {
@@ -106,6 +110,7 @@ pub fn dismiss_notifications(notifications_hashes: Vec<ActionHash>) -> ExternRes
 	Ok(())
 }
 
+///Dismiss singular notification
 fn dismiss_notification(notification_hash: ActionHash) -> ExternResult<()> {
 	let links = get_undismissed_notifications(())?;
 
@@ -119,6 +124,7 @@ fn dismiss_notification(notification_hash: ActionHash) -> ExternResult<()> {
 	delete_relaxed(notification_hash)
 }
 
+///Get all deletions of notifications
 #[hdk_extern]
 pub fn get_all_deletes_for_notification(
 	original_notification_hash: ActionHash,
@@ -134,6 +140,7 @@ pub fn get_all_deletes_for_notification(
 	}
 }
 
+///Get all notifications that have not been dismissed
 #[hdk_extern]
 pub fn get_undismissed_notifications() -> ExternResult<Vec<Link>> {
 	get_links(
@@ -145,6 +152,7 @@ pub fn get_undismissed_notifications() -> ExternResult<Vec<Link>> {
 	)
 }
 
+///Get read notifications
 #[hdk_extern]
 pub fn get_read_notifications() -> ExternResult<Vec<Link>> {
 	get_links(
@@ -156,6 +164,7 @@ pub fn get_read_notifications() -> ExternResult<Vec<Link>> {
 	)
 }
 
+///Get dismissed notifications
 #[hdk_extern]
 pub fn get_dismissed_notifications(
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {

@@ -1,4 +1,6 @@
 use hdi::prelude::*;
+
+///Notification properties
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Notification {
@@ -8,12 +10,16 @@ pub struct Notification {
 	pub recipients: Vec<AgentPubKey>,
 	pub content: SerializedBytes,
 }
+
+///Validation for creating a notification
 pub fn validate_create_notification(
 	_action: EntryCreationAction,
 	_notification: Notification,
 ) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for updating a notification
 pub fn validate_update_notification(
 	_action: Update,
 	_notification: Notification,
@@ -22,9 +28,13 @@ pub fn validate_update_notification(
 		"Notifications cannot be updated",
 	)))
 }
+
+///Validation for deleting a notification
 pub fn validate_delete_notification(_action: Delete) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for creating links between recipients and notifications
 pub fn validate_create_link_recipient_to_notifications(
 	_action: CreateLink,
 	_base_address: AnyLinkableHash,
@@ -49,6 +59,8 @@ pub fn validate_create_link_recipient_to_notifications(
 	// TODO: add the appropriate validation rules
 	Ok(ValidateCallbackResult::Valid)
 }
+
+///Validation for deletion of links between recipients and notifications
 pub fn validate_delete_link_recipient_to_notifications(
 	_action: DeleteLink,
 	_original_action: CreateLink,
