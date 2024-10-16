@@ -169,7 +169,59 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 					validate_update_notifications_settings(action, notifications_settings)
 				}
 			},
-			OpRecord::DeleteEntry { action, .. } => validate_delete_notification(action),
+			OpRecord::DeleteEntry {
+				original_action_hash,
+				action,
+				..
+			} => {
+				let original_record = must_get_valid_record(original_action_hash)?;
+				let original_action = original_record.action().clone();
+				let original_action = match original_action {
+					Action::Create(create) => EntryCreationAction::Create(create),
+					Action::Update(update) => EntryCreationAction::Update(update),
+					_ => {
+						return Ok(ValidateCallbackResult::Invalid(
+							"Original action for a delete must be a Create or Update action"
+								.to_string(),
+						));
+					}
+				};
+				let app_entry_type = match original_action.entry_type() {
+					EntryType::App(app_entry_type) => app_entry_type,
+					_ => {
+						return Ok(ValidateCallbackResult::Valid);
+					}
+				};
+				let entry = match original_record.entry().as_option() {
+					Some(entry) => entry,
+					None => {
+						return Ok(ValidateCallbackResult::Invalid(
+							"Original record for a delete must contain an entry".to_string(),
+						));
+					}
+				};
+				let original_app_entry = match EntryTypes::deserialize_from_type(
+					app_entry_type.zome_index,
+					app_entry_type.entry_index,
+					entry,
+				)? {
+					Some(app_entry) => app_entry,
+					None => {
+						return Ok(
+                                ValidateCallbackResult::Invalid(
+                                    "Original app entry must be one of the defined entry types for this zome"
+                                        .to_string(),
+                                ),
+                            );
+					}
+				};
+				match original_app_entry {
+					EntryTypes::Notification(_) => validate_delete_notification(action),
+					EntryTypes::NotificationsSettings(_) => {
+						validate_delete_notifications_settings(action)
+					}
+				}
+			}
 			OpRecord::CreateLink {
 				base_address,
 				target_address,
