@@ -280,6 +280,58 @@
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdi::prelude::<span class="kw-2">*</span>;
 
 <span class="kw">pub mod </span>notification;
@@ -451,7 +503,59 @@
 					validate_update_notifications_settings(action, notifications_settings)
 				}
 			},
-			OpRecord::DeleteEntry { action, .. } =&gt; validate_delete_notification(action),
+			OpRecord::DeleteEntry {
+				original_action_hash,
+				action,
+				..
+			} =&gt; {
+				<span class="kw">let </span>original_record = must_get_valid_record(original_action_hash)<span class="question-mark">?</span>;
+				<span class="kw">let </span>original_action = original_record.action().clone();
+				<span class="kw">let </span>original_action = <span class="kw">match </span>original_action {
+					Action::Create(create) =&gt; EntryCreationAction::Create(create),
+					Action::Update(update) =&gt; EntryCreationAction::Update(update),
+					<span class="kw">_ </span>=&gt; {
+						<span class="kw">return </span><span class="prelude-val">Ok</span>(ValidateCallbackResult::Invalid(
+							<span class="string">"Original action for a delete must be a Create or Update action"
+								</span>.to_string(),
+						));
+					}
+				};
+				<span class="kw">let </span>app_entry_type = <span class="kw">match </span>original_action.entry_type() {
+					EntryType::App(app_entry_type) =&gt; app_entry_type,
+					<span class="kw">_ </span>=&gt; {
+						<span class="kw">return </span><span class="prelude-val">Ok</span>(ValidateCallbackResult::Valid);
+					}
+				};
+				<span class="kw">let </span>entry = <span class="kw">match </span>original_record.entry().as_option() {
+					<span class="prelude-val">Some</span>(entry) =&gt; entry,
+					<span class="prelude-val">None </span>=&gt; {
+						<span class="kw">return </span><span class="prelude-val">Ok</span>(ValidateCallbackResult::Invalid(
+							<span class="string">"Original record for a delete must contain an entry"</span>.to_string(),
+						));
+					}
+				};
+				<span class="kw">let </span>original_app_entry = <span class="kw">match </span>EntryTypes::deserialize_from_type(
+					app_entry_type.zome_index,
+					app_entry_type.entry_index,
+					entry,
+				)<span class="question-mark">? </span>{
+					<span class="prelude-val">Some</span>(app_entry) =&gt; app_entry,
+					<span class="prelude-val">None </span>=&gt; {
+						<span class="kw">return </span><span class="prelude-val">Ok</span>(
+                                ValidateCallbackResult::Invalid(
+                                    <span class="string">"Original app entry must be one of the defined entry types for this zome"
+                                        </span>.to_string(),
+                                ),
+                            );
+					}
+				};
+				<span class="kw">match </span>original_app_entry {
+					EntryTypes::Notification(<span class="kw">_</span>) =&gt; validate_delete_notification(action),
+					EntryTypes::NotificationsSettings(<span class="kw">_</span>) =&gt; {
+						validate_delete_notifications_settings(action)
+					}
+				}
+			}
 			OpRecord::CreateLink {
 				base_address,
 				target_address,
