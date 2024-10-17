@@ -1,6 +1,6 @@
 import { AsyncSignal } from '@holochain-open-dev/signals';
 import { ActionCommittedSignal, EntryRecord } from '@holochain-open-dev/utils';
-import { AgentPubKey } from '@holochain/client';
+import { ActionHash } from '@holochain/client';
 
 export type NotificationsSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -15,7 +15,7 @@ export interface Notification {
 
 	persistent: boolean;
 
-	recipients: Array<AgentPubKey>;
+	recipients_profiles_hashes: Array<ActionHash>;
 
 	content: Uint8Array;
 }
@@ -28,7 +28,7 @@ export interface NotificationsConfig {
 			enabled: boolean;
 			sendEmail: (
 				notification: EntryRecord<Notification>,
-				recipientPubKey: AgentPubKey,
+				recipientProfileHash: ActionHash,
 				recipientEmailAddress: string,
 			) => Promise<void>;
 		};

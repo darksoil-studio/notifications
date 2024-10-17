@@ -1,5 +1,7 @@
 use hdi::prelude::*;
 
+pub mod profiles;
+
 pub mod notification;
 pub use notification::*;
 
@@ -22,7 +24,7 @@ pub enum EntryTypes {
 pub enum LinkTypes {
 	RecipientToNotifications,
 	ReadNotifications,
-	AgentToNotificationsSettings,
+	ProfileToNotificationsSettings,
 }
 #[hdk_extern]
 pub fn genesis_self_check(_data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {
@@ -33,6 +35,17 @@ pub fn validate_agent_joining(
 	_membrane_proof: &Option<MembraneProof>,
 ) -> ExternResult<ValidateCallbackResult> {
 	Ok(ValidateCallbackResult::Valid)
+}
+pub fn action_hash(op: &Op) -> &ActionHash {
+	match op {
+		Op::StoreRecord(StoreRecord { record }) => record.action_address(),
+		Op::StoreEntry(StoreEntry { action, .. }) => &action.hashed.hash,
+		Op::RegisterUpdate(RegisterUpdate { update, .. }) => &update.hashed.hash,
+		Op::RegisterDelete(RegisterDelete { delete, .. }) => &delete.hashed.hash,
+		Op::RegisterAgentActivity(RegisterAgentActivity { action, .. }) => &action.hashed.hash,
+		Op::RegisterCreateLink(RegisterCreateLink { create_link }) => &create_link.hashed.hash,
+		Op::RegisterDeleteLink(RegisterDeleteLink { delete_link, .. }) => &delete_link.hashed.hash,
+	}
 }
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
@@ -137,11 +150,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				target_address,
 				tag,
 			),
-			LinkTypes::ReadNotifications => {
-				validate_create_link_read_notifications(action, base_address, target_address, tag)
-			}
-			LinkTypes::AgentToNotificationsSettings => {
-				validate_create_link_agent_to_notifications_settings(
+			LinkTypes::ReadNotifications => validate_create_link_read_notifications(
+				action_hash(&op).clone(),
+				action,
+				base_address,
+				target_address,
+				tag,
+			),
+			LinkTypes::ProfileToNotificationsSettings => {
+				validate_create_link_profile_to_notifications_settings(
+					action_hash(&op).clone(),
 					action,
 					base_address,
 					target_address,
@@ -165,14 +183,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				tag,
 			),
 			LinkTypes::ReadNotifications => validate_delete_link_read_notifications(
+				action_hash(&op).clone(),
 				action,
 				original_action,
 				base_address,
 				target_address,
 				tag,
 			),
-			LinkTypes::AgentToNotificationsSettings => {
-				validate_delete_link_agent_to_notifications_settings(
+			LinkTypes::ProfileToNotificationsSettings => {
+				validate_delete_link_profile_to_notifications_settings(
+					action_hash(&op).clone(),
 					action,
 					original_action,
 					base_address,
@@ -286,13 +306,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 					)
 				}
 				LinkTypes::ReadNotifications => validate_create_link_read_notifications(
+					action_hash(&op).clone(),
 					action,
 					base_address,
 					target_address,
 					tag,
 				),
-				LinkTypes::AgentToNotificationsSettings => {
-					validate_create_link_agent_to_notifications_settings(
+				LinkTypes::ProfileToNotificationsSettings => {
+					validate_create_link_profile_to_notifications_settings(
+						action_hash(&op).clone(),
 						action,
 						base_address,
 						target_address,
@@ -332,14 +354,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 						)
 					}
 					LinkTypes::ReadNotifications => validate_delete_link_read_notifications(
+						action_hash(&op).clone(),
 						action,
 						create_link.clone(),
 						base_address,
 						create_link.target_address,
 						create_link.tag,
 					),
-					LinkTypes::AgentToNotificationsSettings => {
-						validate_delete_link_agent_to_notifications_settings(
+					LinkTypes::ProfileToNotificationsSettings => {
+						validate_delete_link_profile_to_notifications_settings(
+							action_hash(&op).clone(),
 							action,
 							create_link.clone(),
 							base_address,

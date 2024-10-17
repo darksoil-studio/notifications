@@ -1,5 +1,9 @@
 import { sharedStyles, wrapPathInSvg } from '@holochain-open-dev/elements';
 import {
+	ProfilesStore,
+	profilesStoreContext,
+} from '@holochain-open-dev/profiles';
+import {
 	AsyncResult,
 	SignalWatcher,
 	joinAsync,
@@ -52,8 +56,14 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 	 */
 	@consume({ context: notificationsStoreContext, subscribe: true })
 	notificationsStore!: NotificationsStore;
+	/**
+	 * @internal
+	 */
+	@consume({ context: profilesStoreContext, subscribe: true })
+	profilesStore!: ProfilesStore;
 
 	renderNotificationGroup(
+		myProfileHash: ActionHash,
 		read: boolean,
 		persistent: boolean,
 		notificationGroup: NotificationGroup,
@@ -120,6 +130,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 										id="dismiss-single-notification"
 										@click=${(e: Event) => {
 											this.notificationsStore.client.dismissNotifications(
+												myProfileHash,
 												notificationGroup.notifications.map(
 													n => n.record.actionHash,
 												),
@@ -179,6 +190,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 	}
 
 	getNotificationsGroups() {
+		const myProfile = this.profilesStore.myProfile.get();
 		const unreadNotifications =
 			this.notificationsStore.unreadNotifications.get();
 		const readNotifications = this.notificationsStore.readNotifications.get();
@@ -287,9 +299,12 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		readPersistent.sort((a, b) => b.timestamp - a.timestamp);
 		readNonPersistent.sort((a, b) => b.timestamp - a.timestamp);
 
+		if (myProfile.status !== 'completed') return myProfile;
+
 		return {
 			status: 'completed' as const,
 			value: {
+				myProfileHash: myProfile.value!.profileHash,
 				unreadPersistent,
 				readPersistent,
 				unreadNonPersistent,
@@ -345,6 +360,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 					readPersistent,
 					unreadNonPersistent,
 					readNonPersistent,
+					myProfileHash,
 				} = result.value;
 
 				const nonPersistentNotificationsCount =
@@ -359,6 +375,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 								<div class="column">
 									${unreadPersistent.map((n, i) =>
 										this.renderNotificationGroup(
+											myProfileHash,
 											false,
 											true,
 											n,
@@ -370,6 +387,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 										: html``}
 									${readPersistent.map((n, i) =>
 										this.renderNotificationGroup(
+											myProfileHash,
 											true,
 											true,
 											n,
@@ -390,6 +408,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 														variant="text"
 														@click=${() =>
 															this.notificationsStore.client.dismissNotifications(
+																myProfileHash,
 																[
 																	...Array.from([] as ActionHash[]).concat(
 																		...unreadNonPersistent.map(group =>
@@ -421,6 +440,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 												<div class="column">
 													${unreadNonPersistent.map((n, i) =>
 														this.renderNotificationGroup(
+															myProfileHash,
 															false,
 															false,
 															n,
@@ -435,6 +455,7 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 														: html``}
 													${readNonPersistent.map((n, i) =>
 														this.renderNotificationGroup(
+															myProfileHash,
 															true,
 															false,
 															n,

@@ -1,5 +1,9 @@
 import { sharedStyles, wrapPathInSvg } from '@holochain-open-dev/elements';
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
+import {
+	ProfilesStore,
+	profilesStoreContext,
+} from '@holochain-open-dev/profiles';
 import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import { SignalWatcher, joinAsync } from '@holochain-open-dev/signals';
 import { consume } from '@lit/context';
@@ -31,10 +35,17 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 	@consume({ context: notificationsStoreContext, subscribe: true })
 	notificationsStore!: NotificationsStore;
 
+	/**
+	 * @internal
+	 */
+	@consume({ context: profilesStoreContext, subscribe: true })
+	profilesStore!: ProfilesStore;
+
 	render() {
 		const result = joinAsync([
 			this.notificationsStore.unreadNotifications.get(),
 			this.notificationsStore.readNotifications.get(),
+			this.profilesStore.myProfile.get(),
 		]);
 
 		switch (result.status) {
@@ -60,6 +71,7 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 						hoist
 						@sl-hide=${() =>
 							this.notificationsStore.client.markNotificationsAsRead(
+								result.value[2]!.profileHash,
 								Array.from(unreadNotifications.keys()),
 							)}
 					>

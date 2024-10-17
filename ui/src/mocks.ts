@@ -52,7 +52,7 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 		}
 	>();
 	notificationsForRecipient = new HoloHashMap<ActionHash, Link[]>();
-	readNotificationsByRecipient = new HoloHashMap<AgentPubKey, Array<Link>>();
+	readNotificationsByRecipient = new HoloHashMap<ActionHash, Array<Link>>();
 
 	async create_notification(notification: Notification): Promise<Record> {
 		const entryHash = hash(notification, HashType.ENTRY);
@@ -67,7 +67,7 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 		});
 
 		await Promise.all(
-			notification.recipients.map(async recipient => {
+			notification.recipients_profiles_hashes.map(async recipient => {
 				const existingRecipients =
 					this.notificationsForRecipient.get(recipient) || [];
 				this.notificationsForRecipient.set(recipient, [
@@ -124,26 +124,29 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 	}
 
 	async get_notifications_for_recipient(
-		recipient: AgentPubKey,
+		recipient_prolife_hash: ActionHash,
 	): Promise<Array<Link>> {
-		return this.notificationsForRecipient.get(recipient) || [];
+		return this.notificationsForRecipient.get(recipient_prolife_hash) || [];
 	}
 
-	async mark_notifications_as_read(notifications: ActionHash[]) {
+	async mark_notifications_as_read(input: {
+		notifications_hashes: ActionHash[];
+		my_profile_hash: ActionHash;
+	}) {
 		const readNotifications =
-			this.readNotificationsByRecipient.get(this.myPubKey) || [];
+			this.readNotificationsByRecipient.get(input.my_profile_hash) || [];
 
 		const link = {
-			base: this.myPubKey,
-			target: this.myPubKey,
+			base: input.my_profile_hash,
+			target: input.my_profile_hash,
 			author: this.myPubKey,
 			timestamp: Date.now() * 1000,
 			zome_index: 0,
 			link_type: 0,
-			tag: encode(notifications),
+			tag: encode(input.notifications_hashes),
 			create_link_hash: await fakeActionHash(),
 		};
-		this.readNotificationsByRecipient.set(this.myPubKey, [
+		this.readNotificationsByRecipient.set(input.my_profile_hash, [
 			...readNotifications,
 			link,
 		]);
@@ -152,10 +155,10 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 			action: {
 				hashed: {
 					content: await fakeCreateLinkAction(
-						retype(this.myPubKey, HashType.ENTRY),
-						this.myPubKey,
+						retype(input.my_profile_hash, HashType.ENTRY),
+						input.my_profile_hash,
 						1,
-						encode(notifications),
+						encode(input.notifications_hashes),
 					),
 					hash: link.create_link_hash,
 				},
@@ -164,24 +167,31 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 		});
 	}
 
-	async dismiss_notifications(notifications: ActionHash[]) {
+	async dismiss_notifications(input: {
+		notifications_hashes: ActionHash[];
+		my_profile_hash: ActionHash;
+	}) {
+		const notifications_hashes = input.notifications_hashes;
 		const undismissedNotifications =
-			this.notificationsForRecipient.get(this.myPubKey) || [];
+			this.notificationsForRecipient.get(input.my_profile_hash) || [];
 
 		const filteredNotifications = undismissedNotifications.filter(
 			link =>
-				!notifications.find(
+				!notifications_hashes.find(
 					n => encodeHashToBase64(n) === encodeHashToBase64(link.target),
 				),
 		);
 
 		const dismissedNotifications = undismissedNotifications.filter(link =>
-			notifications.find(
+			notifications_hashes.find(
 				n => encodeHashToBase64(n) === encodeHashToBase64(link.target),
 			),
 		);
 
-		this.notificationsForRecipient.set(this.myPubKey, filteredNotifications);
+		this.notificationsForRecipient.set(
+			input.my_profile_hash,
+			filteredNotifications,
+		);
 		for (const link of dismissedNotifications) {
 			this.emitSignal({
 				type: 'LinkDeleted',
@@ -206,16 +216,22 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 		}
 	}
 
-	async get_undismissed_notifications(): Promise<Array<Link>> {
-		return this.notificationsForRecipient.get(this.myPubKey);
+	async get_undismissed_notifications(
+		myProfileHash: ActionHash,
+	): Promise<Array<Link>> {
+		return this.notificationsForRecipient.get(myProfileHash);
 	}
 
-	async get_dismissed_notifications(): Promise<Array<Link>> {
+	async get_dismissed_notifications(
+		myProfileHash: ActionHash,
+	): Promise<Array<Link>> {
 		return [];
 	}
 
-	async get_read_notifications(): Promise<Array<Link>> {
-		return this.readNotificationsByRecipient.get(this.myPubKey) || [];
+	async get_read_notifications(
+		myProfileHash: ActionHash,
+	): Promise<Array<Link>> {
+		return this.readNotificationsByRecipient.get(myProfileHash) || [];
 	}
 }
 
@@ -228,7 +244,7 @@ export async function sampleNotification(
 			notification_type: 'type1',
 			notification_group: 'Your notifications',
 			persistent: false,
-			recipients: [client.client.myPubKey],
+			recipients_profiles_hashes: [await fakeActionHash()],
 			content: encode({
 				body: 'Hello world!',
 			}),

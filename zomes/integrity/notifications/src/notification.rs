@@ -5,7 +5,7 @@ pub struct Notification {
 	pub notification_type: String,
 	pub notification_group: String,
 	pub persistent: bool,
-	pub recipients: Vec<AgentPubKey>,
+	pub recipients_profiles_hashes: Vec<ActionHash>,
 	pub content: SerializedBytes,
 }
 pub fn validate_create_notification(
@@ -27,7 +27,7 @@ pub fn validate_delete_notification(_action: Delete) -> ExternResult<ValidateCal
 }
 pub fn validate_create_link_recipient_to_notifications(
 	_action: CreateLink,
-	_base_address: AnyLinkableHash,
+	base_address: AnyLinkableHash,
 	target_address: AnyLinkableHash,
 	_tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
@@ -39,14 +39,30 @@ pub fn validate_create_link_recipient_to_notifications(
 				"No action hash associated with link".to_string()
 			)))?;
 	let record = must_get_valid_record(action_hash)?;
-	let _notification: crate::Notification = record
+	let notification: crate::Notification = record
 		.entry()
 		.to_app_option()
 		.map_err(|e| wasm_error!(e))?
 		.ok_or(wasm_error!(WasmErrorInner::Guest(
 			"Linked action must reference an entry".to_string()
 		)))?;
-	// TODO: add the appropriate validation rules
+
+	let profile_hash =
+		base_address
+			.into_action_hash()
+			.ok_or(wasm_error!(WasmErrorInner::Guest(
+				"No action hash associated with link".to_string()
+			)))?;
+
+	if !notification
+		.recipients_profiles_hashes
+		.contains(&profile_hash)
+	{
+		return Ok(ValidateCallbackResult::Invalid(format!(
+			"The base profile hash is not included in the recipients_profiles_hashes"
+		)));
+	}
+
 	Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_recipient_to_notifications(

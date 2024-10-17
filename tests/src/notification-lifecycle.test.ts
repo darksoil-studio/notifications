@@ -1,6 +1,6 @@
 import { toPromise } from '@holochain-open-dev/signals';
 import { EntryRecord } from '@holochain-open-dev/utils';
-import { dhtSync, runScenario } from '@holochain/tryorama';
+import { dhtSync, pause, runScenario } from '@holochain/tryorama';
 import { assert, test } from 'vitest';
 
 import { sampleNotification } from '../../ui/src/mocks.js';
@@ -10,6 +10,18 @@ import { setup } from './setup.js';
 test('create notifications, read it, and dismiss it', async () => {
 	await runScenario(async scenario => {
 		const { alice, bob } = await setup(scenario);
+
+		const aliceProfile =
+			await alice.store.client.profilesStore.client.createProfile({
+				nickname: 'alice',
+				fields: {},
+			});
+
+		const bobProfile =
+			await bob.store.client.profilesStore.client.createProfile({
+				nickname: 'bob',
+				fields: {},
+			});
 
 		// Wait for the created entry to be propagated to the other node.
 		await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
@@ -26,12 +38,12 @@ test('create notifications, read it, and dismiss it', async () => {
 		// Alice creates a Notification
 		await alice.store.client.createNotification(
 			await sampleNotification(alice.store.client, {
-				recipients: [bob.player.agentPubKey],
+				recipients_profiles_hashes: [bobProfile.actionHash],
 			}),
 		);
 		await alice.store.client.createNotification(
 			await sampleNotification(alice.store.client, {
-				recipients: [bob.player.agentPubKey],
+				recipients_profiles_hashes: [bobProfile.actionHash],
 			}),
 		);
 
@@ -92,6 +104,21 @@ test('create notifications and dismiss it directly', async () => {
 	await runScenario(async scenario => {
 		const { alice, bob } = await setup(scenario);
 
+		const aliceProfile =
+			await alice.store.client.profilesStore.client.createProfile({
+				nickname: 'alice',
+				fields: {},
+			});
+
+		const bobProfile =
+			await bob.store.client.profilesStore.client.createProfile({
+				nickname: 'bob',
+				fields: {},
+			});
+
+		// Wait for the created entry to be propagated to the other node.
+		await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
+
 		let unreadNotifications = await toPromise(bob.store.unreadNotifications);
 		assert.equal(unreadNotifications.size, 0);
 		let readNotifications = await toPromise(bob.store.readNotifications);
@@ -104,12 +131,12 @@ test('create notifications and dismiss it directly', async () => {
 		// Alice creates a Notification
 		await alice.store.client.createNotification(
 			await sampleNotification(alice.store.client, {
-				recipients: [bob.player.agentPubKey],
+				recipients_profiles_hashes: [bobProfile.actionHash],
 			}),
 		);
 		await alice.store.client.createNotification(
 			await sampleNotification(alice.store.client, {
-				recipients: [bob.player.agentPubKey],
+				recipients_profiles_hashes: [bobProfile.actionHash],
 			}),
 		);
 

@@ -19,7 +19,7 @@ pub fn create_notification(notification: Notification) -> ExternResult<()> {
 pub fn create_notification_link(notification_hash: ActionHash) -> ExternResult<()> {
 	let app_entry = get_entry_for_action(&notification_hash)?;
 	if let Some(EntryTypes::Notification(notification)) = app_entry {
-		for base in notification.recipients.clone() {
+		for base in notification.recipients_profiles_hashes.clone() {
 			create_link_relaxed(
 				base,
 				notification_hash.clone(),
@@ -47,8 +47,15 @@ pub fn get_notification(notification_hash: ActionHash) -> ExternResult<Option<Re
 #[derive(Serialize, Deserialize, Debug, SerializedBytes)]
 pub struct ReadNotifications(pub Vec<ActionHash>);
 
+#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
+pub struct MarkNotificationsAsReadInput {
+	my_profile_hash: ActionHash,
+	notifications_hashes: Vec<ActionHash>,
+}
+
 #[hdk_extern]
-pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> ExternResult<()> {
+pub fn mark_notifications_as_read(input: MarkNotificationsAsReadInput) -> ExternResult<()> {
+	let notifications_hashes = input.notifications_hashes;
 	let hash_size = 39;
 	let max_hashes_per_link_tag = (MAX_TAG_SIZE / hash_size) - 1;
 
@@ -64,8 +71,8 @@ pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> Exte
 		})?;
 
 		create_link_relaxed(
-			agent_info()?.agent_latest_pubkey,
-			agent_info()?.agent_latest_pubkey,
+			input.my_profile_hash.clone(),
+			input.my_profile_hash.clone(),
 			LinkTypes::ReadNotifications,
 			bytes.bytes().to_vec(),
 		)?;
@@ -74,18 +81,26 @@ pub fn mark_notifications_as_read(notifications_hashes: Vec<ActionHash>) -> Exte
 	Ok(())
 }
 
+#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
+pub struct DismissNotificationsInput {
+	my_profile_hash: ActionHash,
+	notifications_hashes: Vec<ActionHash>,
+}
+
 #[hdk_extern]
-pub fn dismiss_notifications(notifications_hashes: Vec<ActionHash>) -> ExternResult<()> {
+pub fn dismiss_notifications(input: DismissNotificationsInput) -> ExternResult<()> {
+	let notifications_hashes = input.notifications_hashes;
 	for hash in notifications_hashes.iter() {
-		dismiss_notification(hash.clone())?;
+		dismiss_notification(input.my_profile_hash.clone(), hash.clone())?;
 	}
 
-	let read_links = get_read_notifications(())?.into_iter();
+	let read_links = get_read_notifications(input.my_profile_hash.clone())?.into_iter();
 
-	let undismissed_notifications_hashes: HashSet<ActionHash> = get_undismissed_notifications(())?
-		.into_iter()
-		.filter_map(|link| link.target.into_action_hash())
-		.collect();
+	let undismissed_notifications_hashes: HashSet<ActionHash> =
+		get_undismissed_notifications(input.my_profile_hash)?
+			.into_iter()
+			.filter_map(|link| link.target.into_action_hash())
+			.collect();
 
 	// Iterate over the read links
 	for link in read_links {
@@ -106,8 +121,11 @@ pub fn dismiss_notifications(notifications_hashes: Vec<ActionHash>) -> ExternRes
 	Ok(())
 }
 
-fn dismiss_notification(notification_hash: ActionHash) -> ExternResult<()> {
-	let links = get_undismissed_notifications(())?;
+fn dismiss_notification(
+	my_profile_hash: ActionHash,
+	notification_hash: ActionHash,
+) -> ExternResult<()> {
+	let links = get_undismissed_notifications(my_profile_hash)?;
 
 	for link in links {
 		if let Some(action_hash) = link.target.into_action_hash() {
@@ -135,32 +153,24 @@ pub fn get_all_deletes_for_notification(
 }
 
 #[hdk_extern]
-pub fn get_undismissed_notifications() -> ExternResult<Vec<Link>> {
+pub fn get_undismissed_notifications(my_profile_hash: ActionHash) -> ExternResult<Vec<Link>> {
 	get_links(
-		GetLinksInputBuilder::try_new(
-			agent_info()?.agent_latest_pubkey,
-			LinkTypes::RecipientToNotifications,
-		)?
-		.build(),
+		GetLinksInputBuilder::try_new(my_profile_hash, LinkTypes::RecipientToNotifications)?
+			.build(),
 	)
 }
 
 #[hdk_extern]
-pub fn get_read_notifications() -> ExternResult<Vec<Link>> {
-	get_links(
-		GetLinksInputBuilder::try_new(
-			agent_info()?.agent_latest_pubkey,
-			LinkTypes::ReadNotifications,
-		)?
-		.build(),
-	)
+pub fn get_read_notifications(my_profile_hash: ActionHash) -> ExternResult<Vec<Link>> {
+	get_links(GetLinksInputBuilder::try_new(my_profile_hash, LinkTypes::ReadNotifications)?.build())
 }
 
 #[hdk_extern]
 pub fn get_dismissed_notifications(
+	my_profile_hash: ActionHash,
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
 	let details = get_link_details(
-		agent_info()?.agent_latest_pubkey,
+		my_profile_hash,
 		LinkTypes::RecipientToNotifications,
 		None,
 		GetOptions::default(),

@@ -1,10 +1,13 @@
+import { ProfilesStore } from '@holochain-open-dev/profiles';
 import {
 	AsyncComputed,
+	AsyncState,
 	deletedLinksSignal,
 	deletesForEntrySignal,
 	immutableEntrySignal,
 	joinAsyncMap,
 	liveLinksSignal,
+	pipe,
 	uniquify,
 } from '@holochain-open-dev/signals';
 import {
@@ -14,7 +17,7 @@ import {
 	pickBy,
 	slice,
 } from '@holochain-open-dev/utils';
-import { ActionHash, encodeHashToBase64 } from '@holochain/client';
+import { ActionHash, Link, encodeHashToBase64 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { NotificationsClient } from './notifications-client.js';
@@ -44,19 +47,37 @@ export class NotificationsStore {
 		),
 	}));
 
-	private undismissedNotificationsLinks = liveLinksSignal(
-		this.client,
-		this.client.client.myPubKey,
-		() => this.client.getUndismissedNotifications(),
-		'RecipientToNotifications',
-		5000,
+	private myProfileExistsOrPending = pipe(
+		this.client.profilesStore.myProfile,
+		myProfile =>
+			myProfile !== undefined
+				? myProfile
+				: {
+						status: 'pending',
+					},
 	);
 
-	private readNotificationsLinks = liveLinksSignal(
-		this.client,
-		this.client.client.myPubKey,
-		() => this.client.getReadNotifications(),
-		'ReadNotifications',
+	private undismissedNotificationsLinks = pipe(
+		this.myProfileExistsOrPending,
+		myProfile =>
+			liveLinksSignal(
+				this.client,
+				myProfile.profileHash,
+				() => this.client.getUndismissedNotifications(),
+				'RecipientToNotifications',
+				5000,
+			),
+	);
+
+	private readNotificationsLinks = pipe(
+		this.myProfileExistsOrPending,
+		myProfile =>
+			liveLinksSignal(
+				this.client,
+				myProfile.profileHash,
+				() => this.client.getReadNotifications(),
+				'ReadNotifications',
+			),
 	);
 
 	readNotifications = new AsyncComputed(() => {
@@ -145,11 +166,13 @@ export class NotificationsStore {
 		};
 	});
 
-	deletedNotificationsLinks = deletedLinksSignal(
-		this.client,
-		this.client.client.myPubKey,
-		() => this.client.getDismissedNotifications(),
-		'RecipientToNotifications',
+	deletedNotificationsLinks = pipe(this.myProfileExistsOrPending, myProfile =>
+		deletedLinksSignal(
+			this.client,
+			myProfile.profileHash,
+			() => this.client.getDismissedNotifications(),
+			'RecipientToNotifications',
+		),
 	);
 
 	dismissedNotifications = new AsyncComputed(() => {

@@ -1,51 +1,77 @@
 use hdi::prelude::*;
+use profiles_types::validate_profile_for_agent;
+
+use crate::profiles::profiles_zome_name;
 
 pub fn validate_create_link_read_notifications(
+	action_hash: ActionHash,
 	action: CreateLink,
 	base_address: AnyLinkableHash,
 	target_address: AnyLinkableHash,
 	_tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
 	// Check the entry type for the given action hash
-	let base_agent =
+	let base_profile_hash =
 		base_address
-			.into_agent_pub_key()
+			.into_action_hash()
 			.ok_or(wasm_error!(WasmErrorInner::Guest(
-				"Base of a ReadNotifications link must be an agent".to_string()
+				"Base of a ReadNotifications link must be a profile ActionHash".to_string()
 			)))?;
-	let target_agent =
+	let target_profile_hash =
 		target_address
-			.into_agent_pub_key()
+			.into_action_hash()
 			.ok_or(wasm_error!(WasmErrorInner::Guest(
-				"Target of a ReadNotifications link must be an agent".to_string()
+				"Target of a ReadNotifications link must be a profile ActionHash".to_string()
 			)))?;
 
-	if !base_agent.eq(&target_agent) {
+	if !target_profile_hash.eq(&base_profile_hash) {
 		return Ok(ValidateCallbackResult::Invalid(String::from(
 			"Base and target must be the same for a ReadNotifications link.",
 		)));
 	}
 
-	if !base_agent.eq(&action.author) {
+	let result = validate_profile_for_agent(
+		action.author,
+		action_hash,
+		base_profile_hash,
+		&profiles_zome_name(),
+	)?;
+
+	let ValidateCallbackResult::Valid = result else {
 		return Ok(ValidateCallbackResult::Invalid(String::from(
-			"Only a given agent can mark their own notifications as read.",
+			"Only agents with the same associated profile can mark their notifications as read.",
 		)));
-	}
+	};
 
 	Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_read_notifications(
+	action_hash: ActionHash,
 	action: DeleteLink,
 	original_action: CreateLink,
 	_base: AnyLinkableHash,
 	_target: AnyLinkableHash,
 	_tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-	if !action.author.eq(&original_action.author) {
+	// Check the entry type for the given action hash
+	let profile_hash = original_action
+		.base_address
+		.into_action_hash()
+		.ok_or(wasm_error!(WasmErrorInner::Guest(
+			"Base of a ReadNotifications link must be a profile ActionHash".to_string()
+		)))?;
+
+	let result = validate_profile_for_agent(
+		action.author,
+		action_hash,
+		profile_hash,
+		&profiles_zome_name(),
+	)?;
+	let ValidateCallbackResult::Valid = result else {
 		return Ok(ValidateCallbackResult::Invalid(String::from(
-			"Only a given agent can delete their own ReadNotifications links.",
+			"Only the agents with the same associated profile can mark their notifications as read.",
 		)));
-	}
+	};
 
 	Ok(ValidateCallbackResult::Valid)
 }

@@ -140,7 +140,7 @@
             {
               "kind": "field",
               "name": "readNotificationsByRecipient",
-              "default": "new HoloHashMap<AgentPubKey, Array<Link>>()"
+              "default": "new HoloHashMap<ActionHash, Array<Link>>()"
             },
             {
               "kind": "method",
@@ -237,9 +237,9 @@
               },
               "parameters": [
                 {
-                  "name": "recipient",
+                  "name": "recipient_prolife_hash",
                   "type": {
-                    "text": "AgentPubKey"
+                    "text": "ActionHash"
                   }
                 }
               ]
@@ -249,9 +249,9 @@
               "name": "mark_notifications_as_read",
               "parameters": [
                 {
-                  "name": "notifications",
+                  "name": "input",
                   "type": {
-                    "text": "ActionHash[]"
+                    "text": "{\n\t\tnotifications_hashes: ActionHash[];\n\t\tmy_profile_hash: ActionHash;\n\t}"
                   }
                 }
               ]
@@ -261,9 +261,9 @@
               "name": "dismiss_notifications",
               "parameters": [
                 {
-                  "name": "notifications",
+                  "name": "input",
                   "type": {
-                    "text": "ActionHash[]"
+                    "text": "{\n\t\tnotifications_hashes: ActionHash[];\n\t\tmy_profile_hash: ActionHash;\n\t}"
                   }
                 }
               ]
@@ -275,7 +275,15 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
             },
             {
               "kind": "method",
@@ -284,7 +292,15 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
             },
             {
               "kind": "method",
@@ -293,7 +309,15 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
             }
           ],
           "superclass": {
@@ -399,6 +423,12 @@
               },
               "parameters": [
                 {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                },
+                {
                   "name": "notificationsHashes",
                   "type": {
                     "text": "ActionHash[]"
@@ -415,6 +445,12 @@
                 }
               },
               "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                },
                 {
                   "name": "notificationsHashes",
                   "type": {
@@ -447,7 +483,15 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
             },
             {
               "kind": "method",
@@ -456,7 +500,15 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
             },
             {
               "kind": "method",
@@ -465,7 +517,15 @@
                 "type": {
                   "text": "Promise<\n\t\tArray<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>\n\t>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                }
+              ]
             }
           ],
           "superclass": {
@@ -511,6 +571,11 @@
               "name": "notifications",
               "default": "new LazyHoloHashMap((notificationHash: ActionHash) => ({\n\t\tentry: immutableEntrySignal(() =>\n\t\t\tthis.client.getNotification(notificationHash),\n\t\t),\n\t\tdeletes: deletesForEntrySignal(this.client, notificationHash, () =>\n\t\t\tthis.client.getAllDeletesForNotification(notificationHash),\n\t\t),\n\t}))",
               "description": "Notification"
+            },
+            {
+              "kind": "field",
+              "name": "myProfileExistsOrPending",
+              "privacy": "private"
             },
             {
               "kind": "field",
@@ -627,6 +692,12 @@
               "kind": "method",
               "name": "renderNotificationGroup",
               "parameters": [
+                {
+                  "name": "myProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                },
                 {
                   "name": "read",
                   "type": {
