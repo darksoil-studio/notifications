@@ -1,4 +1,7 @@
 use hdi::prelude::*;
+use profiles_types::validate_profile_for_agent;
+
+use crate::profiles::profiles_zome_name;
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Notification {
@@ -66,12 +69,31 @@ pub fn validate_create_link_recipient_to_notifications(
 	Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_recipient_to_notifications(
-	_action: DeleteLink,
+	action_hash: ActionHash,
+	action: DeleteLink,
 	_original_action: CreateLink,
-	_base: AnyLinkableHash,
+	base: AnyLinkableHash,
 	_target: AnyLinkableHash,
 	_tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-	// TODO: add the appropriate validation rules
+	let profile_hash = base
+		.into_action_hash()
+		.ok_or(wasm_error!(WasmErrorInner::Guest(
+			"No action hash associated with link".to_string()
+		)))?;
+
+	let result = validate_profile_for_agent(
+		action.author,
+		action_hash,
+		profile_hash,
+		&profiles_zome_name(),
+	)?;
+
+	let ValidateCallbackResult::Valid = result else {
+		return Ok(ValidateCallbackResult::Invalid(String::from(
+			"Only agents with the same associated profile can dismiss their notifications.",
+		)));
+	};
+
 	Ok(ValidateCallbackResult::Valid)
 }

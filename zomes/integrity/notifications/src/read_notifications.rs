@@ -48,14 +48,13 @@ pub fn validate_create_link_read_notifications(
 pub fn validate_delete_link_read_notifications(
 	action_hash: ActionHash,
 	action: DeleteLink,
-	original_action: CreateLink,
-	_base: AnyLinkableHash,
+	_original_action: CreateLink,
+	base: AnyLinkableHash,
 	_target: AnyLinkableHash,
 	_tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
 	// Check the entry type for the given action hash
-	let profile_hash = original_action
-		.base_address
+	let profile_hash = base
 		.into_action_hash()
 		.ok_or(wasm_error!(WasmErrorInner::Guest(
 			"Base of a ReadNotifications link must be a profile ActionHash".to_string()

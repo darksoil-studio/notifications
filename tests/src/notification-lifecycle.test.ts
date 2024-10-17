@@ -1,7 +1,7 @@
 import { toPromise } from '@holochain-open-dev/signals';
 import { EntryRecord } from '@holochain-open-dev/utils';
 import { dhtSync, pause, runScenario } from '@holochain/tryorama';
-import { assert, test } from 'vitest';
+import { assert, expect, test } from 'vitest';
 
 import { sampleNotification } from '../../ui/src/mocks.js';
 import { Notification } from '../../ui/src/types.js';
@@ -60,6 +60,13 @@ test('create notifications, read it, and dismiss it', async () => {
 		const notification1Hash = Array.from(unreadNotifications.keys())[0];
 		const notification2Hash = Array.from(unreadNotifications.keys())[1];
 
+		await expect(() =>
+			(alice.store.client as any).callZome('mark_notifications_as_read', {
+				my_profile_hash: bobProfile.actionHash,
+				notifications_hashes: [notification1Hash],
+			}),
+		).rejects.toThrowError();
+
 		await bob.store.client.markNotificationsAsRead([notification1Hash]);
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
@@ -80,6 +87,13 @@ test('create notifications, read it, and dismiss it', async () => {
 
 		// Bob deletes the Notification
 		await bob.store.client.dismissNotifications([notification2Hash]);
+
+		await expect(() =>
+			(alice.store.client as any).callZome('dismiss_notifications', {
+				my_profile_hash: bobProfile.actionHash,
+				notifications_hashes: [notification2Hash],
+			}),
+		).rejects.toThrowError();
 
 		unreadNotifications = await toPromise(bob.store.unreadNotifications);
 		assert.equal(unreadNotifications.size, 0);

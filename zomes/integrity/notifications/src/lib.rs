@@ -176,6 +176,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			action,
 		} => match link_type {
 			LinkTypes::RecipientToNotifications => validate_delete_link_recipient_to_notifications(
+				action_hash(&op).clone(),
 				action,
 				original_action,
 				base_address,
@@ -346,6 +347,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				match link_type {
 					LinkTypes::RecipientToNotifications => {
 						validate_delete_link_recipient_to_notifications(
+							action_hash(&op).clone(),
 							action,
 							create_link.clone(),
 							base_address,
