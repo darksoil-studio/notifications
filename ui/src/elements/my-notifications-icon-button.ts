@@ -45,7 +45,6 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 		const result = joinAsync([
 			this.notificationsStore.unreadNotifications.get(),
 			this.notificationsStore.readNotifications.get(),
-			this.profilesStore.myProfile.get(),
 		]);
 
 		switch (result.status) {
@@ -71,7 +70,6 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 						hoist
 						@sl-hide=${() =>
 							this.notificationsStore.client.markNotificationsAsRead(
-								result.value[2]!.profileHash,
 								Array.from(unreadNotifications.keys()),
 							)}
 					>

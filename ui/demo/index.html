@@ -41,6 +41,7 @@
 				ProfilesStore,
 				profilesStoreContext,
 			} from '@holochain-open-dev/profiles';
+			import '@holochain-open-dev/profiles/dist/elements/link-agent-recipient.js';
 			import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
 			import {
 				Signal,
@@ -70,7 +71,6 @@
 
 				async firstUpdated() {
 					this._client = await AppWebsocket.connect();
-					this._client.on('signal', s => console.log('heeey', s));
 
 					await this.initStores(this._client);
 
@@ -85,7 +85,11 @@
 					new ContextProvider(this, profilesStoreContext, this.profilesStore);
 
 					this._notificationsStore = new NotificationsStore(
-						new NotificationsClient(appClient, 'notifications_test'),
+						new NotificationsClient(
+							this.profilesStore,
+							appClient,
+							'notifications_test',
+						),
 						{
 							types: {
 								type1: {
@@ -114,16 +118,16 @@
 						},
 					);
 					const interval = setInterval(async () => {
-						const allAgentsWithProfile =
-							await this.profilesStore.client.getAgentsWithProfile();
-						const otherAgent = allAgentsWithProfile.find(
+						const allProfilesLinks =
+							await this.profilesStore.client.getAllProfiles();
+						const otherAgentLink = allProfilesLinks.find(
 							link =>
 								link.author.toString() !==
 								this._notificationsStore.client.client.myPubKey.toString(),
 						);
-						if (otherAgent) {
-							console.log(otherAgent);
-							this.peer = otherAgent.author;
+						if (otherAgentLink) {
+							console.log(otherAgentLink);
+							this.peer = otherAgentLink.target;
 							this.requestUpdate();
 							clearInterval(interval);
 						}
@@ -131,6 +135,14 @@
 				}
 
 				renderContent() {
+					if (this.linkAgent)
+						return html`<link-agent-recipient
+							@agent-linked=${() => {
+								this.linkAgent = false;
+								this.requestUpdate();
+							}}
+						></link-agent-recipient>`;
+
 					const result = joinAsync([
 						this._notificationsStore.unreadNotifications.get(),
 						this._notificationsStore.readNotifications.get(),
@@ -151,7 +163,7 @@
 											notification_group:
 												this.shadowRoot.getElementById('group').value,
 											persistent: true,
-											recipients: [this.peer],
+											recipients_profiles_hashes: [this.peer],
 											content: encode({ body: "what's up?" }),
 										});
 									}}
@@ -165,7 +177,7 @@
 											notification_group:
 												this.shadowRoot.getElementById('group').value,
 											persistent: false,
-											recipients: [this.peer],
+											recipients_profiles_hashes: [this.peer],
 											content: encode({ body: "what's up2?" }),
 										});
 									}}
@@ -177,6 +189,13 @@
 											undismissedNotifications,
 										)}
 									>Clear all notifications</sl-button
+								>
+								<sl-button
+									@click=${() => {
+										this.linkAgent = true;
+										this.requestUpdate();
+									}}
+									>Link device</sl-button
 								>
 							</div>
 							<span>Group</span>
