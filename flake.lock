@@ -2546,11 +2546,11 @@
         "playground": "playground"
       },
       "locked": {
-        "lastModified": 1729159398,
-        "narHash": "sha256-nuO7oqBoKT1XY20mDQJe9HCuPnyApXX/7EgrRzGxwLM=",
+        "lastModified": 1729174037,
+        "narHash": "sha256-7omacWWeGN8weXZBREjc48V6RxgyYhfdUZ8/HSMfzMc=",
         "owner": "holochain-open-dev",
         "repo": "profiles",
-        "rev": "3c854292c1d30247d05764b974ccb145350b144a",
+        "rev": "4889ea139d506f76560ca75b24fb34b555c6fec6",
         "type": "github"
       },
       "original": {
