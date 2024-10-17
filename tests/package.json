@@ -10,7 +10,7 @@
     "@holochain/tryorama": "^v0.16.0",
     "@holochain-open-dev/signals": "^0.300.9",
     "@holochain-open-dev/utils": "^0.300.3",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#3c854292c1d30247d05764b974ccb145350b144a&path:ui",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#4889ea139d506f76560ca75b24fb34b555c6fec6&path:ui",
     "typescript": "^5.4.5",
     "vitest": "^1.4.0"
   },
