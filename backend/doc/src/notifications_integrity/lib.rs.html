@@ -380,7 +380,35 @@
 <a href="#378" id="378">378</a>
 <a href="#379" id="379">379</a>
 <a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdi::prelude::<span class="kw-2">*</span>;
+
+<span class="kw">pub mod </span>profiles;
 
 <span class="kw">pub mod </span>notification;
 <span class="kw">pub use </span>notification::<span class="kw-2">*</span>;
@@ -404,7 +432,7 @@
 </span><span class="kw">pub enum </span>LinkTypes {
 	RecipientToNotifications,
 	ReadNotifications,
-	AgentToNotificationsSettings,
+	ProfileToNotificationsSettings,
 }
 <span class="attr">#[hdk_extern]
 </span><span class="kw">pub fn </span>genesis_self_check(_data: GenesisSelfCheckData) -&gt; ExternResult&lt;ValidateCallbackResult&gt; {
@@ -415,6 +443,17 @@
 	_membrane_proof: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;MembraneProof&gt;,
 ) -&gt; ExternResult&lt;ValidateCallbackResult&gt; {
 	<span class="prelude-val">Ok</span>(ValidateCallbackResult::Valid)
+}
+<span class="kw">pub fn </span>action_hash(op: <span class="kw-2">&amp;</span>Op) -&gt; <span class="kw-2">&amp;</span>ActionHash {
+	<span class="kw">match </span>op {
+		Op::StoreRecord(StoreRecord { record }) =&gt; record.action_address(),
+		Op::StoreEntry(StoreEntry { action, .. }) =&gt; <span class="kw-2">&amp;</span>action.hashed.hash,
+		Op::RegisterUpdate(RegisterUpdate { update, .. }) =&gt; <span class="kw-2">&amp;</span>update.hashed.hash,
+		Op::RegisterDelete(RegisterDelete { delete, .. }) =&gt; <span class="kw-2">&amp;</span>delete.hashed.hash,
+		Op::RegisterAgentActivity(RegisterAgentActivity { action, .. }) =&gt; <span class="kw-2">&amp;</span>action.hashed.hash,
+		Op::RegisterCreateLink(RegisterCreateLink { create_link }) =&gt; <span class="kw-2">&amp;</span>create_link.hashed.hash,
+		Op::RegisterDeleteLink(RegisterDeleteLink { delete_link, .. }) =&gt; <span class="kw-2">&amp;</span>delete_link.hashed.hash,
+	}
 }
 <span class="attr">#[hdk_extern]
 </span><span class="kw">pub fn </span>validate(op: Op) -&gt; ExternResult&lt;ValidateCallbackResult&gt; {
@@ -519,11 +558,16 @@
 				target_address,
 				tag,
 			),
-			LinkTypes::ReadNotifications =&gt; {
-				validate_create_link_read_notifications(action, base_address, target_address, tag)
-			}
-			LinkTypes::AgentToNotificationsSettings =&gt; {
-				validate_create_link_agent_to_notifications_settings(
+			LinkTypes::ReadNotifications =&gt; validate_create_link_read_notifications(
+				action_hash(<span class="kw-2">&amp;</span>op).clone(),
+				action,
+				base_address,
+				target_address,
+				tag,
+			),
+			LinkTypes::ProfileToNotificationsSettings =&gt; {
+				validate_create_link_profile_to_notifications_settings(
+					action_hash(<span class="kw-2">&amp;</span>op).clone(),
 					action,
 					base_address,
 					target_address,
@@ -540,6 +584,7 @@
 			action,
 		} =&gt; <span class="kw">match </span>link_type {
 			LinkTypes::RecipientToNotifications =&gt; validate_delete_link_recipient_to_notifications(
+				action_hash(<span class="kw-2">&amp;</span>op).clone(),
 				action,
 				original_action,
 				base_address,
@@ -547,14 +592,16 @@
 				tag,
 			),
 			LinkTypes::ReadNotifications =&gt; validate_delete_link_read_notifications(
+				action_hash(<span class="kw-2">&amp;</span>op).clone(),
 				action,
 				original_action,
 				base_address,
 				target_address,
 				tag,
 			),
-			LinkTypes::AgentToNotificationsSettings =&gt; {
-				validate_delete_link_agent_to_notifications_settings(
+			LinkTypes::ProfileToNotificationsSettings =&gt; {
+				validate_delete_link_profile_to_notifications_settings(
+					action_hash(<span class="kw-2">&amp;</span>op).clone(),
 					action,
 					original_action,
 					base_address,
@@ -668,13 +715,15 @@
 					)
 				}
 				LinkTypes::ReadNotifications =&gt; validate_create_link_read_notifications(
+					action_hash(<span class="kw-2">&amp;</span>op).clone(),
 					action,
 					base_address,
 					target_address,
 					tag,
 				),
-				LinkTypes::AgentToNotificationsSettings =&gt; {
-					validate_create_link_agent_to_notifications_settings(
+				LinkTypes::ProfileToNotificationsSettings =&gt; {
+					validate_create_link_profile_to_notifications_settings(
+						action_hash(<span class="kw-2">&amp;</span>op).clone(),
 						action,
 						base_address,
 						target_address,
@@ -706,6 +755,7 @@
 				<span class="kw">match </span>link_type {
 					LinkTypes::RecipientToNotifications =&gt; {
 						validate_delete_link_recipient_to_notifications(
+							action_hash(<span class="kw-2">&amp;</span>op).clone(),
 							action,
 							create_link.clone(),
 							base_address,
@@ -714,14 +764,16 @@
 						)
 					}
 					LinkTypes::ReadNotifications =&gt; validate_delete_link_read_notifications(
+						action_hash(<span class="kw-2">&amp;</span>op).clone(),
 						action,
 						create_link.clone(),
 						base_address,
 						create_link.target_address,
 						create_link.tag,
 					),
-					LinkTypes::AgentToNotificationsSettings =&gt; {
-						validate_delete_link_agent_to_notifications_settings(
+					LinkTypes::ProfileToNotificationsSettings =&gt; {
+						validate_delete_link_profile_to_notifications_settings(
+							action_hash(<span class="kw-2">&amp;</span>op).clone(),
 							action,
 							create_link.clone(),
 							base_address,

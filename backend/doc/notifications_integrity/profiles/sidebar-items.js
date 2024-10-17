@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["profiles_zome_name"]};

@@ -173,6 +173,16 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdk::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>notifications_integrity::<span class="kw-2">*</span>;
 
@@ -194,7 +204,7 @@
 </span><span class="kw">pub fn </span>create_notification_link(notification_hash: ActionHash) -&gt; ExternResult&lt;()&gt; {
 	<span class="kw">let </span>app_entry = get_entry_for_action(<span class="kw-2">&amp;</span>notification_hash)<span class="question-mark">?</span>;
 	<span class="kw">if let </span><span class="prelude-val">Some</span>(EntryTypes::Notification(notification)) = app_entry {
-		<span class="kw">for </span>base <span class="kw">in </span>notification.recipients.clone() {
+		<span class="kw">for </span>base <span class="kw">in </span>notification.recipients_profiles_hashes.clone() {
 			create_link_relaxed(
 				base,
 				notification_hash.clone(),
@@ -222,8 +232,15 @@
 <span class="attr">#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
 </span><span class="kw">pub struct </span>ReadNotifications(<span class="kw">pub </span>Vec&lt;ActionHash&gt;);
 
+<span class="attr">#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
+</span><span class="kw">pub struct </span>MarkNotificationsAsReadInput {
+	my_profile_hash: ActionHash,
+	notifications_hashes: Vec&lt;ActionHash&gt;,
+}
+
 <span class="attr">#[hdk_extern]
-</span><span class="kw">pub fn </span>mark_notifications_as_read(notifications_hashes: Vec&lt;ActionHash&gt;) -&gt; ExternResult&lt;()&gt; {
+</span><span class="kw">pub fn </span>mark_notifications_as_read(input: MarkNotificationsAsReadInput) -&gt; ExternResult&lt;()&gt; {
+	<span class="kw">let </span>notifications_hashes = input.notifications_hashes;
 	<span class="kw">let </span>hash_size = <span class="number">39</span>;
 	<span class="kw">let </span>max_hashes_per_link_tag = (MAX_TAG_SIZE / hash_size) - <span class="number">1</span>;
 
@@ -239,8 +256,8 @@
 		})<span class="question-mark">?</span>;
 
 		create_link_relaxed(
-			agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
-			agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
+			input.my_profile_hash.clone(),
+			input.my_profile_hash.clone(),
 			LinkTypes::ReadNotifications,
 			bytes.bytes().to_vec(),
 		)<span class="question-mark">?</span>;
@@ -249,18 +266,26 @@
 	<span class="prelude-val">Ok</span>(())
 }
 
+<span class="attr">#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
+</span><span class="kw">pub struct </span>DismissNotificationsInput {
+	my_profile_hash: ActionHash,
+	notifications_hashes: Vec&lt;ActionHash&gt;,
+}
+
 <span class="attr">#[hdk_extern]
-</span><span class="kw">pub fn </span>dismiss_notifications(notifications_hashes: Vec&lt;ActionHash&gt;) -&gt; ExternResult&lt;()&gt; {
+</span><span class="kw">pub fn </span>dismiss_notifications(input: DismissNotificationsInput) -&gt; ExternResult&lt;()&gt; {
+	<span class="kw">let </span>notifications_hashes = input.notifications_hashes;
 	<span class="kw">for </span>hash <span class="kw">in </span>notifications_hashes.iter() {
-		dismiss_notification(hash.clone())<span class="question-mark">?</span>;
+		dismiss_notification(input.my_profile_hash.clone(), hash.clone())<span class="question-mark">?</span>;
 	}
 
-	<span class="kw">let </span>read_links = get_read_notifications(())<span class="question-mark">?</span>.into_iter();
+	<span class="kw">let </span>read_links = get_read_notifications(input.my_profile_hash.clone())<span class="question-mark">?</span>.into_iter();
 
-	<span class="kw">let </span>undismissed_notifications_hashes: HashSet&lt;ActionHash&gt; = get_undismissed_notifications(())<span class="question-mark">?
-		</span>.into_iter()
-		.filter_map(|link| link.target.into_action_hash())
-		.collect();
+	<span class="kw">let </span>undismissed_notifications_hashes: HashSet&lt;ActionHash&gt; =
+		get_undismissed_notifications(input.my_profile_hash)<span class="question-mark">?
+			</span>.into_iter()
+			.filter_map(|link| link.target.into_action_hash())
+			.collect();
 
 	<span class="comment">// Iterate over the read links
 	</span><span class="kw">for </span>link <span class="kw">in </span>read_links {
@@ -281,8 +306,11 @@
 	<span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>dismiss_notification(notification_hash: ActionHash) -&gt; ExternResult&lt;()&gt; {
-	<span class="kw">let </span>links = get_undismissed_notifications(())<span class="question-mark">?</span>;
+<span class="kw">fn </span>dismiss_notification(
+	my_profile_hash: ActionHash,
+	notification_hash: ActionHash,
+) -&gt; ExternResult&lt;()&gt; {
+	<span class="kw">let </span>links = get_undismissed_notifications(my_profile_hash)<span class="question-mark">?</span>;
 
 	<span class="kw">for </span>link <span class="kw">in </span>links {
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(action_hash) = link.target.into_action_hash() {
@@ -310,32 +338,24 @@
 }
 
 <span class="attr">#[hdk_extern]
-</span><span class="kw">pub fn </span>get_undismissed_notifications() -&gt; ExternResult&lt;Vec&lt;Link&gt;&gt; {
+</span><span class="kw">pub fn </span>get_undismissed_notifications(my_profile_hash: ActionHash) -&gt; ExternResult&lt;Vec&lt;Link&gt;&gt; {
 	get_links(
-		GetLinksInputBuilder::try_new(
-			agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
-			LinkTypes::RecipientToNotifications,
-		)<span class="question-mark">?
-		</span>.build(),
+		GetLinksInputBuilder::try_new(my_profile_hash, LinkTypes::RecipientToNotifications)<span class="question-mark">?
+			</span>.build(),
 	)
 }
 
 <span class="attr">#[hdk_extern]
-</span><span class="kw">pub fn </span>get_read_notifications() -&gt; ExternResult&lt;Vec&lt;Link&gt;&gt; {
-	get_links(
-		GetLinksInputBuilder::try_new(
-			agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
-			LinkTypes::ReadNotifications,
-		)<span class="question-mark">?
-		</span>.build(),
-	)
+</span><span class="kw">pub fn </span>get_read_notifications(my_profile_hash: ActionHash) -&gt; ExternResult&lt;Vec&lt;Link&gt;&gt; {
+	get_links(GetLinksInputBuilder::try_new(my_profile_hash, LinkTypes::ReadNotifications)<span class="question-mark">?</span>.build())
 }
 
 <span class="attr">#[hdk_extern]
 </span><span class="kw">pub fn </span>get_dismissed_notifications(
+	my_profile_hash: ActionHash,
 ) -&gt; ExternResult&lt;Vec&lt;(SignedActionHashed, Vec&lt;SignedActionHashed&gt;)&gt;&gt; {
 	<span class="kw">let </span>details = get_link_details(
-		agent_info()<span class="question-mark">?</span>.agent_latest_pubkey,
+		my_profile_hash,
 		LinkTypes::RecipientToNotifications,
 		<span class="prelude-val">None</span>,
 		GetOptions::default(),

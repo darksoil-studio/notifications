@@ -51,54 +51,104 @@
 <a href="#49" id="49">49</a>
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
+<a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>hdi::prelude::<span class="kw-2">*</span>;
+<span class="kw">use </span>profiles_types::validate_profile_for_agent;
+
+<span class="kw">use </span><span class="kw">crate</span>::profiles::profiles_zome_name;
 
 <span class="kw">pub fn </span>validate_create_link_read_notifications(
+	action_hash: ActionHash,
 	action: CreateLink,
 	base_address: AnyLinkableHash,
 	target_address: AnyLinkableHash,
 	_tag: LinkTag,
 ) -&gt; ExternResult&lt;ValidateCallbackResult&gt; {
 	<span class="comment">// Check the entry type for the given action hash
-	</span><span class="kw">let </span>base_agent =
+	</span><span class="kw">let </span>base_profile_hash =
 		base_address
-			.into_agent_pub_key()
+			.into_action_hash()
 			.ok_or(<span class="macro">wasm_error!</span>(WasmErrorInner::Guest(
-				<span class="string">"Base of a ReadNotifications link must be an agent"</span>.to_string()
+				<span class="string">"Base of a ReadNotifications link must be a profile ActionHash"</span>.to_string()
 			)))<span class="question-mark">?</span>;
-	<span class="kw">let </span>target_agent =
+	<span class="kw">let </span>target_profile_hash =
 		target_address
-			.into_agent_pub_key()
+			.into_action_hash()
 			.ok_or(<span class="macro">wasm_error!</span>(WasmErrorInner::Guest(
-				<span class="string">"Target of a ReadNotifications link must be an agent"</span>.to_string()
+				<span class="string">"Target of a ReadNotifications link must be a profile ActionHash"</span>.to_string()
 			)))<span class="question-mark">?</span>;
 
-	<span class="kw">if </span>!base_agent.eq(<span class="kw-2">&amp;</span>target_agent) {
+	<span class="kw">if </span>!target_profile_hash.eq(<span class="kw-2">&amp;</span>base_profile_hash) {
 		<span class="kw">return </span><span class="prelude-val">Ok</span>(ValidateCallbackResult::Invalid(String::from(
 			<span class="string">"Base and target must be the same for a ReadNotifications link."</span>,
 		)));
 	}
 
-	<span class="kw">if </span>!base_agent.eq(<span class="kw-2">&amp;</span>action.author) {
+	<span class="kw">let </span>result = validate_profile_for_agent(
+		action.author,
+		action_hash,
+		base_profile_hash,
+		<span class="kw-2">&amp;</span>profiles_zome_name(),
+	)<span class="question-mark">?</span>;
+
+	<span class="kw">let </span>ValidateCallbackResult::Valid = result <span class="kw">else </span>{
 		<span class="kw">return </span><span class="prelude-val">Ok</span>(ValidateCallbackResult::Invalid(String::from(
-			<span class="string">"Only a given agent can mark their own notifications as read."</span>,
+			<span class="string">"Only agents with the same associated profile can mark their notifications as read."</span>,
 		)));
-	}
+	};
 
 	<span class="prelude-val">Ok</span>(ValidateCallbackResult::Valid)
 }
 <span class="kw">pub fn </span>validate_delete_link_read_notifications(
+	action_hash: ActionHash,
 	action: DeleteLink,
-	original_action: CreateLink,
-	_base: AnyLinkableHash,
+	_original_action: CreateLink,
+	base: AnyLinkableHash,
 	_target: AnyLinkableHash,
 	_tag: LinkTag,
 ) -&gt; ExternResult&lt;ValidateCallbackResult&gt; {
-	<span class="kw">if </span>!action.author.eq(<span class="kw-2">&amp;</span>original_action.author) {
+	<span class="comment">// Check the entry type for the given action hash
+	</span><span class="kw">let </span>profile_hash = base
+		.into_action_hash()
+		.ok_or(<span class="macro">wasm_error!</span>(WasmErrorInner::Guest(
+			<span class="string">"Base of a ReadNotifications link must be a profile ActionHash"</span>.to_string()
+		)))<span class="question-mark">?</span>;
+
+	<span class="kw">let </span>result = validate_profile_for_agent(
+		action.author,
+		action_hash,
+		profile_hash,
+		<span class="kw-2">&amp;</span>profiles_zome_name(),
+	)<span class="question-mark">?</span>;
+	<span class="kw">let </span>ValidateCallbackResult::Valid = result <span class="kw">else </span>{
 		<span class="kw">return </span><span class="prelude-val">Ok</span>(ValidateCallbackResult::Invalid(String::from(
-			<span class="string">"Only a given agent can delete their own ReadNotifications links."</span>,
+			<span class="string">"Only the agents with the same associated profile can mark their notifications as read."</span>,
 		)));
-	}
+	};
 
 	<span class="prelude-val">Ok</span>(ValidateCallbackResult::Valid)
 }

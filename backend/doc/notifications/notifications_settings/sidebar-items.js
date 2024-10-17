@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["get_notifications_settings_for","get_notifications_settings_links_for_agent","set_notifications_settings"]};
+window.SIDEBAR_ITEMS = {"fn":["get_notifications_settings_for","get_notifications_settings_links_for_agent","set_notifications_settings"],"struct":["SetNotificationsSettingsInput"]};
