@@ -7,12 +7,18 @@ import {
 	CreateLink,
 	Delete,
 	DeleteLink,
+	EntryHash,
+	EntryHashB64,
+	Record as HolochainRecord,
 	Link,
-	Record,
 	SignedActionHashed,
 } from '@holochain/client';
 
-import { Notification } from './types.js';
+import {
+	Notification,
+	NotificationContents,
+	NotificationStatus,
+} from './types.js';
 import { NotificationsSignal } from './types.js';
 
 export class NotificationsClient extends ZomeClient<NotificationsSignal> {
@@ -30,63 +36,28 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 		await this.callZome('create_notification', notification);
 	}
 
-	async getNotification(
-		notificationHash: ActionHash,
-	): Promise<EntryRecord<Notification> | undefined> {
-		const record: Record = await this.callZome(
-			'get_notification',
-			notificationHash,
-		);
-		return record ? new EntryRecord(record) : undefined;
-	}
-
-	private async myProfileHash() {
-		const myProfile = await toPromise(this.profilesStore.myProfile);
-		if (myProfile === undefined) throw new Error('Could not find my profile');
-		return myProfile.profileHash;
-	}
-
-	async markNotificationsAsRead(
-		notificationsHashes: ActionHash[],
-	): Promise<void> {
-		const myProfileHash = await this.myProfileHash();
-		return this.callZome('mark_notifications_as_read', {
-			my_profile_hash: myProfileHash,
-			notifications_hashes: notificationsHashes,
+	async changeNotificationsStatus(
+		statusChanges: Record<EntryHashB64, NotificationStatus>,
+	) {
+		return this.callZome('change_notifications_status', {
+			status_changes: statusChanges,
 		});
 	}
 
-	async dismissNotifications(notificationsHashes: ActionHash[]): Promise<void> {
-		const myProfileHash = await this.myProfileHash();
-		return this.callZome('dismiss_notifications', {
-			my_profile_hash: myProfileHash,
-			notifications_hashes: notificationsHashes,
+	async queryNotificationsWithStatus(
+		statusFilter: NotificationStatus,
+	): Promise<Record<EntryHashB64, Notification>> {
+		return this.callZome('query_notifications_with_status', statusFilter);
+	}
+
+	async getNotificationContents(
+		notification: Notification,
+	): Promise<NotificationContents> {
+		return this.client.callZome({
+			role_name: this.roleName,
+			zome_name: notification.zome_name,
+			fn_name: 'get_notification_contents',
+			payload: notification,
 		});
-	}
-
-	getAllDeletesForNotification(
-		originalNotificationHash: ActionHash,
-	): Promise<Array<SignedActionHashed<Delete>> | undefined> {
-		return this.callZome(
-			'get_all_deletes_for_notification',
-			originalNotificationHash,
-		);
-	}
-
-	async getUndismissedNotifications(): Promise<Array<Link>> {
-		const myProfileHash = await this.myProfileHash();
-		return this.callZome('get_undismissed_notifications', myProfileHash);
-	}
-
-	async getReadNotifications(): Promise<Array<Link>> {
-		const myProfileHash = await this.myProfileHash();
-		return this.callZome('get_read_notifications', myProfileHash);
-	}
-
-	async getDismissedNotifications(): Promise<
-		Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
-	> {
-		const myProfileHash = await this.myProfileHash();
-		return this.callZome('get_dismissed_notifications', myProfileHash);
 	}
 }

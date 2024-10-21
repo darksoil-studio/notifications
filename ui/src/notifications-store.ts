@@ -2,8 +2,10 @@ import { ProfilesStore } from '@holochain-open-dev/profiles';
 import {
 	AsyncComputed,
 	AsyncState,
+	Signal,
 	deletedLinksSignal,
 	deletesForEntrySignal,
+	fromPromise,
 	immutableEntrySignal,
 	joinAsyncMap,
 	liveLinksSignal,
@@ -11,232 +13,302 @@ import {
 	uniquify,
 } from '@holochain-open-dev/signals';
 import {
+	HoloHashMap,
 	LazyHoloHashMap,
 	LazyMap,
 	mapValues,
 	pickBy,
 	slice,
 } from '@holochain-open-dev/utils';
-import { ActionHash, Link, encodeHashToBase64 } from '@holochain/client';
+import {
+	ActionHash,
+	EntryHash,
+	EntryHashB64,
+	Link,
+	encodeHashToBase64,
+} from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { NotificationsClient } from './notifications-client.js';
-import { NotificationType, NotificationsConfig } from './types.js';
+import {
+	Notification,
+	NotificationContents,
+	NotificationStatus,
+	NotificationsConfig,
+} from './types.js';
 
 export class NotificationsStore {
 	constructor(
 		public client: NotificationsClient,
-		public notificationsConfig: NotificationsConfig,
+		// public notificationsConfig: NotificationsConfig,
 	) {}
 
-	addTypes(notificationsType: Record<string, NotificationType>) {
-		this.notificationsConfig.types = {
-			...this.notificationsConfig.types,
-			...notificationsType,
-		};
+	// addTypes(notificationsType: Record<string, NotificationType>) {
+	// 	this.notificationsConfig.types = {
+	// 		...this.notificationsConfig.types,
+	// 		...notificationsType,
+	// 	};
+	// }
+
+	/** Notifications */
+	private buildQueryNotificationsWithStatusSignal(
+		statusFilter: NotificationStatus,
+	) {
+		let unsubscribe: undefined | (() => void);
+		const signal = new AsyncState<Record<EntryHashB64, Notification>>(
+			{ status: 'pending' },
+			{
+				[Signal.subtle.watched]: async () => {
+					try {
+						const notifications =
+							await this.client.queryNotificationsWithStatus(statusFilter);
+						signal.set({
+							status: 'completed',
+							value: notifications,
+						});
+						unsubscribe = this.client.onSignal(async () => {
+							const notifications =
+								await this.client.queryNotificationsWithStatus(statusFilter);
+							signal.set({
+								status: 'completed',
+								value: notifications,
+							});
+						});
+					} catch (error) {
+						signal.set({
+							status: 'error',
+							error,
+						});
+					}
+				},
+				[Signal.subtle.unwatched]: () => {
+					if (unsubscribe) unsubscribe();
+					signal.set({
+						status: 'pending',
+					});
+				},
+			},
+		);
+
+		return signal;
 	}
 
-	/** Notification */
+	_notificationContents = new HoloHashMap<EntryHash, NotificationContents>();
+	async notificationContents(
+		notificationHash: EntryHash,
+		notification: Notification,
+	) {
+		if (!this._notificationContents.has(notificationHash)) {
+			const contents = await this.client.getNotificationContents(notification);
+			this._notificationContents.set(notificationHash, contents);
+		}
+		return this._notificationContents.get(notificationHash);
+	}
 
-	notifications = new LazyHoloHashMap((notificationHash: ActionHash) => ({
-		entry: immutableEntrySignal(() =>
-			this.client.getNotification(notificationHash),
-		),
-		deletes: deletesForEntrySignal(this.client, notificationHash, () =>
-			this.client.getAllDeletesForNotification(notificationHash),
-		),
-	}));
+	unreadNotifications = this.buildQueryNotificationsWithStatusSignal('Unread');
 
-	private myProfileExistsOrPending = pipe(
-		this.client.profilesStore.myProfile,
-		myProfile =>
-			myProfile !== undefined
-				? myProfile
-				: {
-						status: 'pending',
-					},
-	);
+	readNotifications = this.buildQueryNotificationsWithStatusSignal('Read');
 
-	private undismissedNotificationsLinks = pipe(
-		this.myProfileExistsOrPending,
-		myProfile =>
-			liveLinksSignal(
-				this.client,
-				myProfile.profileHash,
-				() => this.client.getUndismissedNotifications(),
-				'RecipientToNotifications',
-				5000,
-			),
-	);
+	dismissedNotifications = this.buildQueryNotificationsWithStatusSignal('Read');
+	// notifications = new LazyHoloHashMap((notificationHash: ActionHash) => ({
+	// 	entry: immutableEntrySignal(() =>
+	// 		this.client.getNotification(notificationHash),
+	// 	),
+	// 	deletes: deletesForEntrySignal(this.client, notificationHash, () =>
+	// 		this.client.getAllDeletesForNotification(notificationHash),
+	// 	),
+	// }));
 
-	private readNotificationsLinks = pipe(
-		this.myProfileExistsOrPending,
-		myProfile =>
-			liveLinksSignal(
-				this.client,
-				myProfile.profileHash,
-				() => this.client.getReadNotifications(),
-				'ReadNotifications',
-			),
-	);
+	// private myProfileExistsOrPending = pipe(
+	// 	this.client.profilesStore.myProfile,
+	// 	myProfile =>
+	// 		myProfile !== undefined
+	// 			? myProfile
+	// 			: {
+	// 					status: 'pending',
+	// 				},
+	// );
 
-	readNotifications = new AsyncComputed(() => {
-		const readNotificationsLinks = this.readNotificationsLinks.get();
-		const undismissedNotifications = this.undismissedNotificationsLinks.get();
-		if (readNotificationsLinks.status !== 'completed')
-			return readNotificationsLinks;
-		if (undismissedNotifications.status !== 'completed')
-			return undismissedNotifications;
+	// private undismissedNotificationsLinks = pipe(
+	// 	this.myProfileExistsOrPending,
+	// 	myProfile =>
+	// 		liveLinksSignal(
+	// 			this.client,
+	// 			myProfile.profileHash,
+	// 			() => this.client.getUndismissedNotifications(),
+	// 			'RecipientToNotifications',
+	// 			5000,
+	// 		),
+	// );
 
-		/** Aggregate the read notification hashes and filter them by whether they've been dismissed */
+	// private readNotificationsLinks = pipe(
+	// 	this.myProfileExistsOrPending,
+	// 	myProfile =>
+	// 		liveLinksSignal(
+	// 			this.client,
+	// 			myProfile.profileHash,
+	// 			() => this.client.getReadNotifications(),
+	// 			'ReadNotifications',
+	// 		),
+	// );
 
-		const allReadNotificationsHashes = uniquify(
-			Array.from([] as ActionHash[]).concat(
-				...readNotificationsLinks.value.map(
-					link => decode(link.tag) as ActionHash[],
-				),
-			),
-		);
+	// readNotifications = new AsyncComputed(() => {
+	// 	const readNotificationsLinks = this.readNotificationsLinks.get();
+	// 	const undismissedNotifications = this.undismissedNotificationsLinks.get();
+	// 	if (readNotificationsLinks.status !== 'completed')
+	// 		return readNotificationsLinks;
+	// 	if (undismissedNotifications.status !== 'completed')
+	// 		return undismissedNotifications;
 
-		const undismissedNotificationsHashes = undismissedNotifications.value.map(
-			l => encodeHashToBase64(l.target),
-		);
+	// 	/** Aggregate the read notification hashes and filter them by whether they've been dismissed */
 
-		const notificationsHashes = allReadNotificationsHashes.filter(hash =>
-			undismissedNotificationsHashes.includes(encodeHashToBase64(hash)),
-		);
+	// 	const allReadNotificationsHashes = uniquify(
+	// 		Array.from([] as ActionHash[]).concat(
+	// 			...readNotificationsLinks.value.map(
+	// 				link => decode(link.tag) as ActionHash[],
+	// 			),
+	// 		),
+	// 	);
 
-		/* If a notification was persistent and has been read but was deleted (usually by someone else performing the action that the notification required), then we dismiss the notification */
+	// 	const undismissedNotificationsHashes = undismissedNotifications.value.map(
+	// 		l => encodeHashToBase64(l.target),
+	// 	);
 
-		// const deletes = joinAsync(
-		// 	notificationsHashes.map(hash =>
-		// 		this.notifications.get(hash).deletes.get(),
-		// 	),
-		// );
-		// const entries = joinAsync(
-		// 	notificationsHashes.map(hash =>
-		// 		this.notifications.get(hash).entry.get(),
-		// 	),
-		// );
-		// if (entries.status !== 'completed') return entries;
-		// if (deletes.status !== 'completed') return deletes;
+	// 	const notificationsHashes = allReadNotificationsHashes.filter(hash =>
+	// 		undismissedNotificationsHashes.includes(encodeHashToBase64(hash)),
+	// 	);
 
-		// const nonDeletedNotificationHashes: ActionHash[] = [];
-		// const notificationsToDismiss: ActionHash[] = [];
+	// 	/* If a notification was persistent and has been read but was deleted (usually by someone else performing the action that the notification required), then we dismiss the notification */
 
-		// for (let i = 0; i < notificationsHashes.length; i++) {
-		// 	if (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {
-		// 		nonDeletedNotificationHashes.push(notificationsHashes[i]);
-		// 	} else {
-		// 		notificationsToDismiss.push(notificationsHashes[i]);
-		// 	}
-		// }
+	// 	// const deletes = joinAsync(
+	// 	// 	notificationsHashes.map(hash =>
+	// 	// 		this.notifications.get(hash).deletes.get(),
+	// 	// 	),
+	// 	// );
+	// 	// const entries = joinAsync(
+	// 	// 	notificationsHashes.map(hash =>
+	// 	// 		this.notifications.get(hash).entry.get(),
+	// 	// 	),
+	// 	// );
+	// 	// if (entries.status !== 'completed') return entries;
+	// 	// if (deletes.status !== 'completed') return deletes;
 
-		// if (notificationsToDismiss.length > 0) {
-		// 	this.client.dismissNotifications(notificationsToDismiss);
-		// }
+	// 	// const nonDeletedNotificationHashes: ActionHash[] = [];
+	// 	// const notificationsToDismiss: ActionHash[] = [];
 
-		const value = slice(this.notifications, notificationsHashes);
-		return {
-			status: 'completed',
-			value,
-		};
-	});
+	// 	// for (let i = 0; i < notificationsHashes.length; i++) {
+	// 	// 	if (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {
+	// 	// 		nonDeletedNotificationHashes.push(notificationsHashes[i]);
+	// 	// 	} else {
+	// 	// 		notificationsToDismiss.push(notificationsHashes[i]);
+	// 	// 	}
+	// 	// }
 
-	unreadNotifications = new AsyncComputed(() => {
-		const readNotifications = this.readNotifications.get();
-		const undismissedNotifications = this.undismissedNotificationsLinks.get();
+	// 	// if (notificationsToDismiss.length > 0) {
+	// 	// 	this.client.dismissNotifications(notificationsToDismiss);
+	// 	// }
 
-		if (readNotifications.status !== 'completed') return readNotifications;
-		if (undismissedNotifications.status !== 'completed')
-			return undismissedNotifications;
+	// 	const value = slice(this.notifications, notificationsHashes);
+	// 	return {
+	// 		status: 'completed',
+	// 		value,
+	// 	};
+	// });
 
-		const readNotificationsHashes = Array.from(
-			readNotifications.value.keys(),
-		).map(h => encodeHashToBase64(h));
+	// unreadNotifications = new AsyncComputed(() => {
+	// 	const readNotifications = this.readNotifications.get();
+	// 	const undismissedNotifications = this.undismissedNotificationsLinks.get();
 
-		const links = undismissedNotifications.value.filter(
-			link =>
-				!readNotificationsHashes.includes(encodeHashToBase64(link.target)),
-		);
-		const value = slice(this.notifications, uniquify(links.map(l => l.target)));
-		return {
-			status: 'completed',
-			value,
-		};
-	});
+	// 	if (readNotifications.status !== 'completed') return readNotifications;
+	// 	if (undismissedNotifications.status !== 'completed')
+	// 		return undismissedNotifications;
 
-	deletedNotificationsLinks = pipe(this.myProfileExistsOrPending, myProfile =>
-		deletedLinksSignal(
-			this.client,
-			myProfile.profileHash,
-			() => this.client.getDismissedNotifications(),
-			'RecipientToNotifications',
-		),
-	);
+	// 	const readNotificationsHashes = Array.from(
+	// 		readNotifications.value.keys(),
+	// 	).map(h => encodeHashToBase64(h));
 
-	dismissedNotifications = new AsyncComputed(() => {
-		const deletedLinks = this.deletedNotificationsLinks.get();
-		if (deletedLinks.status !== 'completed') return deletedLinks;
+	// 	const links = undismissedNotifications.value.filter(
+	// 		link =>
+	// 			!readNotificationsHashes.includes(encodeHashToBase64(link.target)),
+	// 	);
+	// 	const value = slice(this.notifications, uniquify(links.map(l => l.target)));
+	// 	return {
+	// 		status: 'completed',
+	// 		value,
+	// 	};
+	// });
 
-		const value = slice(
-			this.notifications,
-			deletedLinks.value.map(l => l[0].hashed.content.target_address),
-		);
+	// deletedNotificationsLinks = pipe(this.myProfileExistsOrPending, myProfile =>
+	// 	deletedLinksSignal(
+	// 		this.client,
+	// 		myProfile.profileHash,
+	// 		() => this.client.getDismissedNotifications(),
+	// 		'RecipientToNotifications',
+	// 	),
+	// );
 
-		return {
-			status: 'completed',
-			value,
-		};
-	});
+	// dismissedNotifications = new AsyncComputed(() => {
+	// 	const deletedLinks = this.deletedNotificationsLinks.get();
+	// 	if (deletedLinks.status !== 'completed') return deletedLinks;
+
+	// 	const value = slice(
+	// 		this.notifications,
+	// 		deletedLinks.value.map(l => l[0].hashed.content.target_address),
+	// 	);
+
+	// 	return {
+	// 		status: 'completed',
+	// 		value,
+	// 	};
+	// });
 
 	/** Helpers for consuming UIs */
 
-	notificationsByTypeAndGroup = new LazyMap(
-		(notificationType: string) =>
-			new LazyMap((notificationGroup: string) => ({
-				read: new AsyncComputed(() => {
-					const notifications = this.readNotifications.get();
-					if (notifications.status !== 'completed') return notifications;
+	// notificationsByTypeAndGroup = new LazyMap(
+	// 	(notificationType: string) =>
+	// 		new LazyMap((notificationGroup: string) => ({
+	// 			read: new AsyncComputed(() => {
+	// 				const notifications = this.readNotifications.get();
+	// 				if (notifications.status !== 'completed') return notifications;
 
-					const entries = joinAsyncMap(
-						mapValues(notifications.value, n => n.entry.get()),
-					);
-					if (entries.status !== 'completed') return entries;
+	// 				const entries = joinAsyncMap(
+	// 					mapValues(notifications.value, n => n.entry.get()),
+	// 				);
+	// 				if (entries.status !== 'completed') return entries;
 
-					const value = pickBy(
-						entries.value,
-						n =>
-							n.entry.notification_type === notificationType &&
-							n.entry.notification_group === notificationGroup,
-					);
+	// 				const value = pickBy(
+	// 					entries.value,
+	// 					n =>
+	// 						n.entry.notification_type === notificationType &&
+	// 						n.entry.notification_group === notificationGroup,
+	// 				);
 
-					return {
-						status: 'completed',
-						value,
-					};
-				}),
-				unread: new AsyncComputed(() => {
-					const notifications = this.unreadNotifications.get();
-					if (notifications.status !== 'completed') return notifications;
+	// 				return {
+	// 					status: 'completed',
+	// 					value,
+	// 				};
+	// 			}),
+	// 			unread: new AsyncComputed(() => {
+	// 				const notifications = this.unreadNotifications.get();
+	// 				if (notifications.status !== 'completed') return notifications;
 
-					const entries = joinAsyncMap(
-						mapValues(notifications.value, n => n.entry.get()),
-					);
-					if (entries.status !== 'completed') return entries;
+	// 				const entries = joinAsyncMap(
+	// 					mapValues(notifications.value, n => n.entry.get()),
+	// 				);
+	// 				if (entries.status !== 'completed') return entries;
 
-					const value = pickBy(
-						entries.value,
-						n =>
-							n.entry.notification_type === notificationType &&
-							n.entry.notification_group === notificationGroup,
-					);
+	// 				const value = pickBy(
+	// 					entries.value,
+	// 					n =>
+	// 						n.entry.notification_type === notificationType &&
+	// 						n.entry.notification_group === notificationGroup,
+	// 				);
 
-					return {
-						status: 'completed',
-						value,
-					};
-				}),
-			})),
-	);
+	// 				return {
+	// 					status: 'completed',
+	// 					value,
+	// 				};
+	// 			}),
+	// 		})),
+	// );
 }

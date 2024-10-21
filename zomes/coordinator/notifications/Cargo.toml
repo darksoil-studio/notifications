@@ -12,5 +12,5 @@ hdk = { workspace = true }
 
 serde = { workspace = true }
 
-notifications_types = { path = "../../../notifications_types" }
+notifications_types = { path = "../../../crates/notifications_types" }
 notifications_integrity = { path = "../../integrity/notifications", package = "notifications_integrity" }

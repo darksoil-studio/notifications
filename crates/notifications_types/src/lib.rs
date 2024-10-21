@@ -16,21 +16,20 @@ pub struct Notification {
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct NotificationsStatusChanges {
-	pub status_changes: BTreeMap<EntryHash, NotificationStatus>,
+	pub status_changes: BTreeMap<EntryHashB64, NotificationStatus>,
 	pub timestamp: Timestamp,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(tag = "type")]
 pub enum NotificationStatus {
 	Unread,
 	Read,
 	Dismissed,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, SerializedBytes, Debug, Clone, PartialEq)]
 #[serde(tag = "type")]
 pub enum NotificationsEncryptedMessage {
 	Notification(Notification),
-	NotificationStatusChanges(NotificationsStatusChanges),
+	NotificationsStatusChanges(NotificationsStatusChanges),
 }

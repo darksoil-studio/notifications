@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 
-use example_integrity::*;
 use hc_zome_trait_notifications::*;
 use hc_zome_traits::implement_zome_trait_as_externs;
 use hdk::prelude::*;
@@ -22,6 +21,7 @@ impl NotificationsZomeTrait for ExampleNotifications {
 		Ok(NotificationContents {
 			title: String::from("Hiii"),
 			body: String::from("aaaa"),
+			icon_src: String::from("aaaa"),
 			url_path_to_navigate_to_on_click: String::from("/someurl"),
 		})
 	}

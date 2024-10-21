@@ -5,9 +5,9 @@ use notifications_integrity::*;
 use notifications_types::*;
 
 use crate::{
-	encrypted_message::create_encrypted_message, get_entry_for_action, 
-	profiles::{get_agent_profile_hash, get_agents_for_profile, get_my_profile_hash}, 
-	utils::{create_link_relaxed, create_relaxed, delete_link_relaxed, delete_relaxed}
+	encrypted_message::{commit_my_pending_encrypted_messages, create_encrypted_message},
+	profiles::{get_agent_profile_hash, get_agents_for_profile, get_my_profile_hash},
+	utils::create_relaxed,
 };
 
 // pub const MAX_TAG_SIZE: usize = 1000;
@@ -17,12 +17,17 @@ fn scheduled_synchronize_with_other_agents_for_my_profile(_: Option<Schedule>) -
 	if let Err(err) = synchronize_with_other_agents_for_my_profile() {
 		error!("Failed to synchronize with other agents: {err:?}");
 	}
+	if let Err(err) = commit_my_pending_encrypted_messages() {
+		error!("Failed to commit my encrypted messages: {err:?}");
+	}
 
 	Some(Schedule::Persisted("*/3 * * * *".into())) // Every three minutes
 }
 
 pub fn synchronize_with_other_agents_for_my_profile() -> ExternResult<()> {
-	let my_profile_hash = get_my_profile_hash()?;
+	let Some(my_profile_hash) = get_my_profile_hash()? else {
+		return Ok(());
+	};
 
 	let my_pub_key = agent_info()?.agent_latest_pubkey;
 
@@ -30,81 +35,129 @@ pub fn synchronize_with_other_agents_for_my_profile() -> ExternResult<()> {
 	let other_agents = agents.into_iter().filter(|a| a.ne(&my_pub_key));
 
 	let notifications_records = query_notifications_records()?;
-	let notifications= notifications_records.into_iter().map(|record| {
-		let Some(entry) = record.entry().as_option() else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: no entry found"))));
-		};
-		let notifications_status_changes = Notification::try_from(entry.clone()) else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: entry is not a notification"))));
-		};
-		let Some(entry_hash)= record.action().entry_hash() else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: entry hash is None"))));
-		};
-		Ok((entry_hash,notifications_status_changes))
-	}).collect::<ExternResult<Vec<(EntryHash, Notification)>>>()?;
+	let notifications = notifications_records
+		.into_iter()
+		.map(|record| {
+			let Some(entry) = record.entry().as_option() else {
+				return Err(wasm_error!(WasmErrorInner::Guest(format!(
+					"Invalid notification record: no entry found"
+				))));
+			};
+			let Ok(notification) = Notification::try_from(entry.clone()) else {
+				return Err(wasm_error!(WasmErrorInner::Guest(format!(
+					"Invalid notification record: entry is not a notification"
+				))));
+			};
+			let Some(entry_hash) = record.action().entry_hash() else {
+				return Err(wasm_error!(WasmErrorInner::Guest(format!(
+					"Invalid notification record: entry hash is None"
+				))));
+			};
+			Ok((entry_hash.clone(), notification))
+		})
+		.collect::<ExternResult<Vec<(EntryHash, Notification)>>>()?;
 
-	let notifications_status_changes = query_notifications_status_changes_records()?;
+	let notifications_status_changes = query_notifications_status_changes()?;
 
 	let notifications_filter = ChainQueryFilter::new()
-		.entry_type(UnitEntryTypes::Notification).include_entries(false).action_type(ActionType::Create);
+		.entry_type(UnitEntryTypes::Notification.try_into()?)
+		.include_entries(false)
+		.action_type(ActionType::Create);
 
 	let notifications_status_changes_filter = ChainQueryFilter::new()
-		.entry_type(UnitEntryTypes::NotificationsStatusChanges).include_entries(false).action_type(ActionType::Create);
+		.entry_type(UnitEntryTypes::NotificationsStatusChanges.try_into()?)
+		.include_entries(false)
+		.action_type(ActionType::Create);
 
 	for agent in other_agents {
-		let notifications_agent_activity = get_agent_activity(agent, notifications_filter, ActivityRequest::Full)?;
+		let notifications_agent_activity = get_agent_activity(
+			agent.clone(),
+			notifications_filter.clone(),
+			ActivityRequest::Full,
+		)?;
 
-		let actions_get_inputs = notifications_agent_activity.valid_activity.into_iter()
-			.map(|(_,action_hash)| GetInput::new(action_hash.into(), GetOptions::network())).collect();
+		let actions_get_inputs = notifications_agent_activity
+			.valid_activity
+			.into_iter()
+			.map(|(_, action_hash)| GetInput::new(action_hash.into(), GetOptions::network()))
+			.collect();
 
 		let records = HDK.with(|hdk| hdk.borrow().get(actions_get_inputs))?;
-		let existing_notifications_hashes: HashSet<EntryHash> = records.into_iter().filter_map(|r| r)
-			.filter_map(|r| r.action().entry_hash()).collect();
+		let existing_notifications_hashes: HashSet<EntryHash> = records
+			.into_iter()
+			.filter_map(|r| r)
+			.filter_map(|r| r.action().entry_hash().cloned())
+			.collect();
 
-		let missing_notifications = notifications.iter()
+		let missing_notifications: Vec<(EntryHash, Notification)> = notifications
+			.clone()
+			.into_iter()
 			.filter(|(entry_hash, _)| !existing_notifications_hashes.contains(entry_hash))
 			.collect();
 
 		for (_, notification) in missing_notifications {
 			let response = call_remote(
-				agent,
+				agent.clone(),
 				zome_info()?.name,
 				"receive_notification".into(),
 				None,
-				notification,
+				notification.clone(),
 			)?;
 
-			let ZomeCallResponse::Ok(_) else {
-				create_encrypted_message(agent, NotificationsEncryptedMessage::Notification(notification.clone()))?;
+			let ZomeCallResponse::Ok(_) = response else {
+				create_encrypted_message(
+					agent.clone(),
+					NotificationsEncryptedMessage::Notification(notification.clone()),
+				)?;
+				continue;
 			};
 		}
-		
-		let notifications_status_changes_agent_activity = get_agent_activity(agent, 
-			notifications_status_changes_filter, ActivityRequest::Full)?;
 
-		let actions_get_inputs = notifications_status_changes_agent_activity.valid_activity.into_iter()
-			.map(|(_,action_hash)| GetInput::new(action_hash.into(), GetOptions::network())).collect();
+		let notifications_status_changes_agent_activity = get_agent_activity(
+			agent.clone(),
+			notifications_status_changes_filter.clone(),
+			ActivityRequest::Full,
+		)?;
+
+		let actions_get_inputs = notifications_status_changes_agent_activity
+			.valid_activity
+			.into_iter()
+			.map(|(_, action_hash)| GetInput::new(action_hash.into(), GetOptions::network()))
+			.collect();
 
 		let records = HDK.with(|hdk| hdk.borrow().get(actions_get_inputs))?;
-		let existing_notifications_status_changes_hashes: HashSet<EntryHash> = records.into_iter().filter_map(|r| r)
-			.filter_map(|r| r.action().entry_hash()).collect();
-
-		let missing_notifications_status_changes = notifications_status_changes.iter()
-			.filter(|(entry_hash, _)| !existing_notifications_status_changes_hashes.contains(entry_hash))
+		let existing_notifications_status_changes_hashes: HashSet<EntryHash> = records
+			.into_iter()
+			.filter_map(|r| r)
+			.filter_map(|r| r.action().entry_hash().cloned())
 			.collect();
+
+		let missing_notifications_status_changes: Vec<(EntryHash, NotificationsStatusChanges)> =
+			notifications_status_changes
+				.clone()
+				.into_iter()
+				.filter(|(entry_hash, _)| {
+					!existing_notifications_status_changes_hashes.contains(entry_hash)
+				})
+				.collect();
 
 		for (_, notifications_status_changes) in missing_notifications_status_changes {
 			let response = call_remote(
-				agent,
+				agent.clone(),
 				zome_info()?.name,
 				"receive_change_notifications_status".into(),
 				None,
-				notifications_status_changes
+				notifications_status_changes.clone(),
 			)?;
 
-			let ZomeCallResponse::Ok(_) else {
-				create_encrypted_message(agent, 
-					NotificationsEncryptedMessage::NotificationStatusChanges(notifications_status_changes.clone()))?;
+			let ZomeCallResponse::Ok(_) = response else {
+				create_encrypted_message(
+					agent.clone(),
+					NotificationsEncryptedMessage::NotificationsStatusChanges(
+						notifications_status_changes.clone(),
+					),
+				)?;
+				continue;
 			};
 		}
 	}
@@ -114,21 +167,25 @@ pub fn synchronize_with_other_agents_for_my_profile() -> ExternResult<()> {
 
 #[hdk_extern]
 pub fn send_notification(notification: Notification) -> ExternResult<()> {
-	let recipient = notification.recipient_profile_hash;
+	let recipient = notification.recipient_profile_hash.clone();
 
 	let agents = get_agents_for_profile(recipient)?;
 
 	for agent in agents {
 		let response = call_remote(
-			agent,
+			agent.clone(),
 			zome_info()?.name,
 			"receive_notification".into(),
 			None,
-			notification,
+			notification.clone(),
 		)?;
 
-		let ZomeCallResponse::Ok(_) else {
-			create_encrypted_message(agent, NotificationsEncryptedMessage::Notification(notification.clone()))?;
+		let ZomeCallResponse::Ok(_) = response else {
+			create_encrypted_message(
+				agent,
+				NotificationsEncryptedMessage::Notification(notification.clone()),
+			)?;
+			continue;
 		};
 	}
 
@@ -137,20 +194,20 @@ pub fn send_notification(notification: Notification) -> ExternResult<()> {
 
 #[hdk_extern]
 pub fn receive_notification(notification: Notification) -> ExternResult<()> {
-
 	let notifications = query_notifications_records()?;
 
-let entry_hash = hash_entry(notification)?;
+	let entry_hash = hash_entry(&notification)?;
 
-let existing_notification = notifications.iter()
-	.filter_map(|record| record.action().entry_hash())
-	.find(|hash| hash.eq(&entry_hash));
+	let existing_notification = notifications
+		.iter()
+		.filter_map(|record| record.action().entry_hash())
+		.find(|hash| hash.eq(&&entry_hash));
 
 	let None = existing_notification else {
 		// We already have this notification committed
 		return Ok(());
 	};
-	
+
 	create_relaxed(EntryTypes::Notification(notification))?;
 
 	Ok(())
@@ -158,96 +215,111 @@ let existing_notification = notifications.iter()
 
 #[hdk_extern]
 pub fn change_notifications_status(
-	status_changes: BTreeMap<EntryHash, NotificationStatus>,
+	status_changes: BTreeMap<EntryHashB64, NotificationStatus>,
 ) -> ExternResult<()> {
-	let notifications_status_change = NotificationsStatusChage { 
+	let notifications_status_change = NotificationsStatusChanges {
 		status_changes,
-		timestamp: sys_time()?
+		timestamp: sys_time()?,
 	};
-	
-	let my_profile_hash = get_my_profile_hash()?;
+
+	create_relaxed(EntryTypes::NotificationsStatusChanges(
+		notifications_status_change.clone(),
+	))?;
+
+	let Some(my_profile_hash) = get_my_profile_hash()? else {
+		return Ok(());
+	};
 
 	let agents = get_agents_for_profile(my_profile_hash)?;
 
 	for agent in agents {
 		let response = call_remote(
-			agent,
+			agent.clone(),
 			zome_info()?.name,
 			"receive_change_notifications_status".into(),
 			None,
-			notification,
+			notifications_status_change.clone(),
 		)?;
 
-		let ZomeCallResponse::Ok(_) else {
-			create_encrypted_message(agent, 
-				NotificationsEncryptedMessage::NotificationsStatusChange(notifications_status_change.clone())
+		let ZomeCallResponse::Ok(_) = response else {
+			create_encrypted_message(
+				agent,
+				NotificationsEncryptedMessage::NotificationsStatusChanges(
+					notifications_status_change.clone(),
+				),
 			)?;
+			continue;
 		};
 	}
-	
-	create_relaxed(EntryTypes::NotificationsStatusChanges(notifications_status_change))?;
 
 	Ok(())
 }
 
 #[hdk_extern]
 pub fn receive_change_notifications_status(
-	notifications_status_change: NotificationsStatusChange
+	notifications_status_changes: NotificationsStatusChanges,
 ) -> ExternResult<()> {
 	let caller = agent_info()?.agent_latest_pubkey;
 	let my_profile_hash = get_my_profile_hash()?;
 	let caller_profile_hash = get_agent_profile_hash(caller)?;
 
 	if caller_profile_hash.ne(&my_profile_hash) {
-		return Err(wasm_error!(
-			WasmErrorInner::Guest(format!("Only agents with the same profile can send change notifications status"))
-		));
+		return Err(wasm_error!(WasmErrorInner::Guest(format!(
+			"Only agents with the same profile can send change notifications status"
+		))));
 	}
 
-	let notifications_status_changes = query_notifications_status_changes_records()?;
+	let existing_notifications_status_changes = query_notifications_status_changes()?;
 
-let entry_hash = hash_entry(notifications_status_change)?;
+	let entry_hash = hash_entry(&notifications_status_changes)?;
 
-let existing_notifications_status_change = notifications_status_changes.iter()
-	.filter_map(|record| record.action().entry_hash()).find(|hash| hash.eq(&entry_hash));
+	let existing_notifications_status_change = existing_notifications_status_changes
+		.iter()
+		.find(|(hash, _)| hash.eq(&&entry_hash));
 
 	let None = existing_notifications_status_change else {
 		// We already have this status committed
 		return Ok(());
 	};
-	
-	create_relaxed(EntryTypes::NotificationsStatusChanges(notifications_status_change))?;
+
+	create_relaxed(EntryTypes::NotificationsStatusChanges(
+		notifications_status_changes,
+	))?;
 
 	Ok(())
 }
 
 fn query_notifications_status_changes_records() -> ExternResult<Vec<Record>> {
 	let filter = ChainQueryFilter::new()
-		.entry_type(UnitEntryTypes::NotificationsStatusChanges)
-		.include_entries(true).action_type(ActionType::Create);
+		.entry_type(UnitEntryTypes::NotificationsStatusChanges.try_into()?)
+		.include_entries(true)
+		.action_type(ActionType::Create);
 	query(filter)
 }
-fn query_notifications_status_changes() -> ExternResult<Vec<(EntryHash,NotificationsStatusChanges)>> {
-	let notifications_status_changes_records = query_notifications_status_changes_records()?;	
+fn query_notifications_status_changes() -> ExternResult<Vec<(EntryHash, NotificationsStatusChanges)>>
+{
+	let notifications_status_changes_records = query_notifications_status_changes_records()?;
 	let notifications_status_changes = notifications_status_changes_records.into_iter().map(|record| {
 		let Some(entry) = record.entry().as_option() else {
 			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification s tatus changes record: no entry found"))));
 		};
-		let notifications_status_changes = NotificationsStatusChanges::try_from(entry.clone()) else {
+		let Ok(notifications_status_changes) = NotificationsStatusChanges::try_from(entry.clone()) else {
 			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification status changes record: entry is not a NotificationsStatusChanges"))));
 		};
 		let Some(entry_hash)= record.action().entry_hash() else {
 			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification status changes record: entry hash is None"))));
 		};
-		Ok((entry_hash, notifications_status_changes))
+
+ 	Ok((entry_hash.clone(), notifications_status_changes))
 	}).collect::<ExternResult<Vec<(EntryHash,NotificationsStatusChanges)>>>()?;
 	Ok(notifications_status_changes)
 }
 
 fn query_notifications_records() -> ExternResult<Vec<Record>> {
 	let filter = ChainQueryFilter::new()
-		.entry_type(UnitEntryTypes::Notification)
-		.include_entries(true).action_type(ActionType::Create);
+		.entry_type(UnitEntryTypes::Notification.try_into()?)
+		.include_entries(true)
+		.action_type(ActionType::Create);
 	query(filter)
 }
 
@@ -257,40 +329,63 @@ pub struct NotificationWithStatus {
 	status: NotificationStatus,
 }
 #[hdk_extern]
-pub fn query_notifications() -> ExternResult<BTreeMap<EntryHash, NotificationWithStatus>> {
+pub fn query_notifications() -> ExternResult<BTreeMap<EntryHashB64, NotificationWithStatus>> {
 	let notifications = query_notifications_records()?;
 	let notifications_status_changes_records = query_notifications_status_changes_records()?;
 
-	let mut result: BTreeMap<EntryHash, NotificationWithStatus> = BTreeMap::new();
+	let mut result: BTreeMap<EntryHashB64, NotificationWithStatus> = BTreeMap::new();
 
 	for notification_record in notifications {
 		let action = notification_record.action();
 		let Some(entry) = notification_record.entry().as_option() else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: no entry found"))));
+			return Err(wasm_error!(WasmErrorInner::Guest(format!(
+				"Invalid notification record: no entry found"
+			))));
 		};
-		let notification = Notification::try_from(entry.clone()) else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: entry is not a notification"))));
+		let Ok(notification) = Notification::try_from(entry.clone()) else {
+			return Err(wasm_error!(WasmErrorInner::Guest(format!(
+				"Invalid notification record: entry is not a notification"
+			))));
 		};
 		let Some(notification_hash) = action.entry_hash() else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: no entry hash found"))));
+			return Err(wasm_error!(WasmErrorInner::Guest(format!(
+				"Invalid notification record: no entry hash found"
+			))));
 		};
-		result.insert(notification_hash, NotificationWithStatus { notification, status: NotificationStaus::Unread });
+		result.insert(
+			notification_hash.clone().into(),
+			NotificationWithStatus {
+				notification,
+				status: NotificationStatus::Unread,
+			},
+		);
 	}
 
-	let notifications_status_changes = notifications_status_changes_records.into_iter().map(|record| {
-		let Some(entry) = record.entry().as_option() else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: no entry found"))));
-		};
-		let notifications_status_changes = NotificationsStatusChanges::try_from(entry.clone()) else {
-			return Err(wasm_error!(WasmErrorInner::Guest(format!("Invalid notification record: entry is not a notification"))));
-		};
-		Ok(notifications_status_changes)
-	}).collect::<ExternResult<Vec<NotificationsStatusChanges>>>()?;
+	let mut notifications_status_changes = notifications_status_changes_records
+		.into_iter()
+		.map(|record| {
+			let Some(entry) = record.entry().as_option() else {
+				return Err(wasm_error!(WasmErrorInner::Guest(format!(
+					"Invalid notification record: no entry found"
+				))));
+			};
+			let Ok(notifications_status_changes) =
+				NotificationsStatusChanges::try_from(entry.clone())
+			else {
+				return Err(wasm_error!(WasmErrorInner::Guest(format!(
+					"Invalid notification record: entry is not a notification"
+				))));
+			};
+			Ok(notifications_status_changes)
+		})
+		.collect::<ExternResult<Vec<NotificationsStatusChanges>>>()?;
 
-	let ordered_notifications_status_changes = notifications_status_changes.sort_by(|a, b| a.timestamp.cmp(b.timestamp));
-	for notifications_status_changes in ordered_notifications_status_changes {
-		for (notification_hash, new_notification_status) in notifications_status_changes.status_changes {
-			let Some(notification_with_status) = result.get_mut(notification_hash) else {
+	notifications_status_changes.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+	for notifications_status_changes in notifications_status_changes {
+		for (notification_hash, new_notification_status) in
+			notifications_status_changes.status_changes
+		{
+			let Some(notification_with_status) = result.get_mut(&notification_hash) else {
 				continue;
 			};
 			notification_with_status.status = new_notification_status;
@@ -301,11 +396,14 @@ pub fn query_notifications() -> ExternResult<BTreeMap<EntryHash, NotificationWit
 }
 
 #[hdk_extern]
-pub fn query_notifications_with_status(status_filter: NotificationStatus) -> ExternResult<BTreeMap<EntryHash, Notification>> {
+pub fn query_notifications_with_status(
+	status_filter: NotificationStatus,
+) -> ExternResult<BTreeMap<EntryHashB64, Notification>> {
 	let notifications = query_notifications(())?;
 
-	let filtered: BTreeMap<EntryHash, Notification> = notifications.into_iter()
-		.filter(|(entry_hash, notification_with_status)| notification_with_status.eq(status_filter))
+	let filtered: BTreeMap<EntryHashB64, Notification> = notifications
+		.into_iter()
+		.filter(|(_, notification_with_status)| notification_with_status.status.eq(&status_filter))
 		.map(|(hash, notification_with_status)| (hash, notification_with_status.notification))
 		.collect();
 	Ok(filtered)

@@ -13,6 +13,7 @@ pub struct NotificationType {
 pub struct NotificationContents {
 	pub title: String,
 	pub body: String,
+	pub icon_src: String,
 	pub url_path_to_navigate_to_on_click: String,
 }
 

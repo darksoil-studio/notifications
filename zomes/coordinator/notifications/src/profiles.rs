@@ -18,7 +18,7 @@ pub fn get_agents_for_profile(profile_hash: ActionHash) -> ExternResult<Vec<Agen
 
 	match response {
 		ZomeCallResponse::Ok(result) => {
-			let links: Vec<Link> = result.decode()?;
+			let links: Vec<Link> = result.decode().map_err(|err| wasm_error!(err))?;
 			let agents: Vec<AgentPubKey> = links
 				.into_iter()
 				.filter_map(|link| link.target.into_agent_pub_key())
@@ -42,12 +42,12 @@ pub fn get_agent_profile_hash(agent: AgentPubKey) -> ExternResult<Option<ActionH
 
 	match response {
 		ZomeCallResponse::Ok(result) => {
-			let links: Vec<Link> = result.decode()?;
+			let links: Vec<Link> = result.decode().map_err(|err| wasm_error!(err))?;
 			let profile_hashes: Vec<ActionHash> = links
 				.into_iter()
 				.filter_map(|link| link.target.into_action_hash())
 				.collect();
-			Ok(profile_hashes.first())
+			Ok(profile_hashes.first().cloned())
 		}
 		_ => Err(wasm_error!(WasmErrorInner::Guest(format!(
 			"Failed to get_agents_for_profile: {response:?}"
