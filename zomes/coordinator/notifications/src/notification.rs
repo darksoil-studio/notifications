@@ -21,7 +21,7 @@ fn scheduled_synchronize_with_other_agents_for_my_profile(_: Option<Schedule>) -
 		error!("Failed to commit my encrypted messages: {err:?}");
 	}
 
-	Some(Schedule::Persisted("*/3 * * * *".into())) // Every three minutes
+	Some(Schedule::Persisted("* * * * *".into())) // Every three minutes
 }
 
 pub fn synchronize_with_other_agents_for_my_profile() -> ExternResult<()> {

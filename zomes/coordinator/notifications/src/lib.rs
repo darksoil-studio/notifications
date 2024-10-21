@@ -26,7 +26,7 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 	};
 	create_cap_grant(cap_grant)?;
 
-	schedule("synchronize_with_other_agents_for_my_profile")?;
+	schedule("scheduled_synchronize_with_other_agents_for_my_profile")?;
 
 	Ok(InitCallbackResult::Pass)
 }

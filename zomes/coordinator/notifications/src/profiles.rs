@@ -35,7 +35,7 @@ pub fn get_agent_profile_hash(agent: AgentPubKey) -> ExternResult<Option<ActionH
 	let response = call(
 		CallTargetCell::Local,
 		profiles_zome_name(),
-		"get_profile_for_agent".into(),
+		"get_agent_profile".into(),
 		None,
 		agent,
 	)?;

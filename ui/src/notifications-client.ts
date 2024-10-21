@@ -12,6 +12,7 @@ import {
 	Record as HolochainRecord,
 	Link,
 	SignedActionHashed,
+	encodeHashToBase64,
 } from '@holochain/client';
 
 import {
@@ -23,7 +24,6 @@ import { NotificationsSignal } from './types.js';
 
 export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	constructor(
-		public profilesStore: ProfilesStore,
 		public client: AppClient,
 		public roleName: string,
 		public zomeName = 'notifications',
@@ -32,8 +32,24 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	}
 	/** Notification */
 
-	async createNotification(notification: Notification): Promise<void> {
-		await this.callZome('create_notification', notification);
+	async sendNotification(notification: Notification): Promise<void> {
+		await this.callZome('send_notification', notification);
+	}
+
+	async markNotificationsAsRead(notificationsHashes: EntryHash[]) {
+		const statusChanges: Record<EntryHashB64, NotificationStatus> = {};
+		for (const notificationHash of notificationsHashes) {
+			statusChanges[encodeHashToBase64(notificationHash)] = 'Read';
+		}
+		return this.changeNotificationsStatus(statusChanges);
+	}
+
+	async dismissNotifications(notificationsHashes: EntryHash[]) {
+		const statusChanges: Record<EntryHashB64, NotificationStatus> = {};
+		for (const notificationHash of notificationsHashes) {
+			statusChanges[encodeHashToBase64(notificationHash)] = 'Dismissed';
+		}
+		return this.changeNotificationsStatus(statusChanges);
 	}
 
 	async changeNotificationsStatus(

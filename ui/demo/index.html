@@ -86,36 +86,35 @@
 
 					this._notificationsStore = new NotificationsStore(
 						new NotificationsClient(
-							this.profilesStore,
 							appClient,
 							'notifications_test',
 						),
-						{
-							types: {
-								type1: {
-									name: 'Hii',
-									description: 'something',
-									title(group) {
-										return new Signal.State({
-											status: 'completed',
-											value: group,
-										});
-									},
-									onClick: group => console.log('clicked', group),
-									contents: n => {
-										const i = decode(n.entry.content);
+					//	{
+					//		types: {
+					//			type1: {
+					//				name: 'Hii',
+					//				description: 'something',
+					//				title(group) {
+					//					return new Signal.State({
+					//						status: 'completed',
+					//						value: group,
+					//					});
+					//				},
+					//				onClick: group => console.log('clicked', group),
+					//				contents: n => {
+					//					const i = decode(n.entry.content);
 
-										return new Signal.State({
-											status: 'completed',
-											value: {
-												iconSrc: wrapPathInSvg(mdiBell),
-												body: i.body,
-											},
-										});
-									},
-								},
-							},
-						},
+					//					return new Signal.State({
+					//						status: 'completed',
+					//						value: {
+					//							iconSrc: wrapPathInSvg(mdiBell),
+					//							body: i.body,
+					//						},
+					//					});
+					//				},
+					//			},
+					//		},
+					//	},
 					);
 					const interval = setInterval(async () => {
 						const allProfilesLinks =
@@ -158,30 +157,16 @@
 							<div>
 								<sl-button
 									@click=${e => {
-										this._notificationsStore.client.createNotification({
+										this._notificationsStore.client.sendNotification({
+											zome_name: "example"
 											notification_type: 'type1',
 											notification_group:
 												this.shadowRoot.getElementById('group').value,
-											persistent: true,
-											recipients_profiles_hashes: [this.peer],
+											recipient_profile_hash: this.peer,
 											content: encode({ body: "what's up?" }),
 										});
 									}}
-									>Create persistent notification</sl-button
-								>
-								<sl-button
-									@click=${e => {
-										console.log(e);
-										this._notificationsStore.client.createNotification({
-											notification_type: 'type1',
-											notification_group:
-												this.shadowRoot.getElementById('group').value,
-											persistent: false,
-											recipients_profiles_hashes: [this.peer],
-											content: encode({ body: "what's up2?" }),
-										});
-									}}
-									>Create non-persistent notification</sl-button
+									>Create notification</sl-button
 								>
 								<sl-button
 									@click=${() =>

@@ -33,9 +33,9 @@ export async function setup(scenario: Scenario) {
 		.authorizeSigningCredentials(bob.cells[0].cell_id);
 	patchCallZome(bob.appWs as AppWebsocket);
 
-	const config: NotificationsConfig = {
-		types: {},
-	};
+	// const config: NotificationsConfig = {
+	// 	types: {},
+	// };
 
 	const aliceProfilesStore = new ProfilesStore(
 		new ProfilesClient(alice.appWs as any, 'notifications_test', 'profiles'),
@@ -43,12 +43,10 @@ export async function setup(scenario: Scenario) {
 
 	const aliceStore = new NotificationsStore(
 		new NotificationsClient(
-			aliceProfilesStore,
 			alice.appWs as any,
 			'notifications_test',
 			'notifications',
 		),
-		config,
 	);
 
 	const bobProfilesStore = new ProfilesStore(
@@ -57,12 +55,10 @@ export async function setup(scenario: Scenario) {
 
 	const bobStore = new NotificationsStore(
 		new NotificationsClient(
-			bobProfilesStore,
 			bob.appWs as any,
 			'notifications_test',
 			'notifications',
 		),
-		config,
 	);
 
 	// Shortcut peer discovery through gossip and register all agents in every
@@ -70,17 +66,19 @@ export async function setup(scenario: Scenario) {
 	await scenario.shareAllAgents();
 
 	// Prevent race condition when two zome calls are made instantly at the beginning of the lifecycle that cause a ChainHeadMoved error because they trigger 2 parallel init workflows
-	await aliceStore.client.profilesStore.client.getAllProfiles();
-	await bobStore.client.profilesStore.client.getAllProfiles();
+	await aliceStore.client.changeNotificationsStatus({});
+	await bobStore.client.changeNotificationsStatus({});
 
 	return {
 		alice: {
 			player: alice,
 			store: aliceStore,
+			profilesStore: aliceProfilesStore,
 		},
 		bob: {
 			player: bob,
 			store: bobStore,
+			profilesStore: bobProfilesStore,
 		},
 	};
 }
