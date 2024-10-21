@@ -415,6 +415,11 @@
             },
             {
               "kind": "method",
+              "name": "myProfileHash",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
               "name": "markNotificationsAsRead",
               "return": {
                 "type": {
@@ -422,12 +427,6 @@
                 }
               },
               "parameters": [
-                {
-                  "name": "myProfileHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                },
                 {
                   "name": "notificationsHashes",
                   "type": {
@@ -445,12 +444,6 @@
                 }
               },
               "parameters": [
-                {
-                  "name": "myProfileHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                },
                 {
                   "name": "notificationsHashes",
                   "type": {
@@ -483,15 +476,7 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              },
-              "parameters": [
-                {
-                  "name": "myProfileHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
+              }
             },
             {
               "kind": "method",
@@ -500,15 +485,7 @@
                 "type": {
                   "text": "Promise<Array<Link>>"
                 }
-              },
-              "parameters": [
-                {
-                  "name": "myProfileHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
+              }
             },
             {
               "kind": "method",
@@ -517,15 +494,7 @@
                 "type": {
                   "text": "Promise<\n\t\tArray<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>\n\t>"
                 }
-              },
-              "parameters": [
-                {
-                  "name": "myProfileHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
+              }
             }
           ],
           "superclass": {
@@ -692,12 +661,6 @@
               "kind": "method",
               "name": "renderNotificationGroup",
               "parameters": [
-                {
-                  "name": "myProfileHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                },
                 {
                   "name": "read",
                   "type": {

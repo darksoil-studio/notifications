@@ -1,21 +1,32 @@
 use hdk::prelude::*;
 use notifications_integrity::*;
 
+pub mod encrypted_message;
 pub mod notification;
 pub mod notifications_settings;
+pub mod profiles;
 pub mod utils;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 	let mut fns: BTreeSet<GrantedFunction> = BTreeSet::new();
-	fns.insert((zome_info()?.name, FunctionName::from("recv_remote_signal")));
+	fns.insert((
+		zome_info()?.name,
+		FunctionName::from("receive_notification"),
+	));
+	fns.insert((
+		zome_info()?.name,
+		FunctionName::from("receive_change_notifications_status"),
+	));
 	let functions = GrantedFunctions::Listed(fns);
 	let cap_grant = ZomeCallCapGrant {
-		tag: String::from("recv_remote_signal"),
+		tag: String::from("receive_notifications_calls"),
 		access: CapAccess::Unrestricted,
 		functions,
 	};
 	create_cap_grant(cap_grant)?;
+
+	schedule("synchronize_with_other_agents_for_my_profile")?;
 
 	Ok(InitCallbackResult::Pass)
 }
@@ -47,21 +58,16 @@ pub enum Signal {
 	},
 }
 
-#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
-pub enum NotificationsRemoteSignal {
-	NewNotification(SignedActionHashed),
-}
-
-#[hdk_extern]
-pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()> {
-	// TODO: take into account wether the recipient has the notification enabled in their settings
-	match signal {
-		NotificationsRemoteSignal::NewNotification(action) => emit_signal(Signal::LinkCreated {
-			action,
-			link_type: LinkTypes::RecipientToNotifications,
-		}),
-	}
-}
+// #[hdk_extern]
+// pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()> {
+// 	// TODO: take into account wether the recipient has the notification enabled in their settings
+// 	match signal {
+// 		NotificationsRemoteSignal::NewNotification(action) => emit_signal(Signal::LinkCreated {
+// 			action,
+// 			link_type: LinkTypes::RecipientToNotifications,
+// 		}),
+// 	}
+// }
 
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
@@ -81,15 +87,6 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 					action: action.clone(),
 					link_type,
 				})?;
-
-				if let LinkTypes::RecipientToNotifications = link_type {
-					if let Some(notifiee) = create_link.base_address.into_agent_pub_key() {
-						send_remote_signal(
-							NotificationsRemoteSignal::NewNotification(action),
-							vec![notifiee],
-						)?;
-					}
-				}
 			}
 			Ok(())
 		}
@@ -123,15 +120,6 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
 					action: action.clone(),
 					app_entry: app_entry.clone(),
 				})?;
-				if let EntryTypes::Notification(_) = app_entry {
-					call_remote(
-						agent_info()?.agent_latest_pubkey,
-						zome_info()?.name,
-						"create_notification_link".into(),
-						None,
-						action.hashed.hash,
-					)?;
-				}
 			}
 			Ok(())
 		}

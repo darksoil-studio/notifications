@@ -11,4 +11,5 @@ name = "notifications_integrity"
 hdi = { workspace = true }
 
 serde = { workspace = true }
+notifications_types = { path = "../../../crates/notifications_types" }
 profiles_types = { git = "https://github.com/holochain-open-dev/profiles", branch = "nixify" }

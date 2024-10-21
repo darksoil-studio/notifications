@@ -5,7 +5,7 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = ["zomes/coordinator/*", "zomes/integrity/*"]
+members = ["zomes/coordinator/*", "zomes/integrity/*", "crates/*"]
 resolver = "2"
 
 [workspace.dependencies]

@@ -1,0 +1,17 @@
+[package]
+name = "example"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "example"
+
+[dependencies]
+hdk = { workspace = true }
+
+serde = { workspace = true }
+
+example_integrity = { path = "../../integrity/example" }
+hc_zome_trait_notifications = { path = "../../../crates/hc_zome_trait_notifications" }
+hc_zome_traits = { git = "https://github.com/holochain-open-dev/zome-traits", branch = "main" }

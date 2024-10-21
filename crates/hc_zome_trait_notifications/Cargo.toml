@@ -1,0 +1,10 @@
+[package]
+name = "hc_zome_trait_notifications"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hc_zome_traits = { git = "https://github.com/holochain-open-dev/zome-traits", branch = "main" }
+notifications_types = { path = "../notifications_types" } 
+hdk = { workspace = true }
+serde = { workspace = true }

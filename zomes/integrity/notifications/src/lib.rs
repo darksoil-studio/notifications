@@ -1,12 +1,16 @@
 use hdi::prelude::*;
+use notifications_types::*;
 
 pub mod profiles;
 
 pub mod notification;
 pub use notification::*;
 
-pub mod read_notifications;
-pub use read_notifications::*;
+pub mod notifications_status_change;
+pub use notifications_status_change::*;
+
+pub mod agent_encrypted_message;
+pub use agent_encrypted_message::*;
 
 pub mod notifications_settings;
 pub use notifications_settings::*;
@@ -16,14 +20,16 @@ pub use notifications_settings::*;
 #[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
+	#[entry_type(visibility = "private")]
 	Notification(Notification),
+	#[entry_type(visibility = "private")]
+	NotificationsStatusChanges(NotificationsStatusChanges),
 	NotificationsSettings(NotificationsSettings),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
-	RecipientToNotifications,
-	ReadNotifications,
+	AgentEncryptedMessage,
 	ProfileToNotificationsSettings,
 }
 #[hdk_extern]
@@ -55,6 +61,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				EntryTypes::Notification(notification) => {
 					validate_create_notification(EntryCreationAction::Create(action), notification)
 				}
+				EntryTypes::NotificationsStatusChanges(notification_status_change) => {
+					validate_create_notifications_status_change(
+						EntryCreationAction::Create(action),
+						notification_status_change,
+					)
+				}
 				EntryTypes::NotificationsSettings(notifications_settings) => {
 					validate_create_notifications_settings(
 						EntryCreationAction::Create(action),
@@ -67,6 +79,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			} => match app_entry {
 				EntryTypes::Notification(notification) => {
 					validate_create_notification(EntryCreationAction::Update(action), notification)
+				}
+				EntryTypes::NotificationsStatusChanges(notifications_status_change) => {
+					validate_create_notifications_status_change(
+						EntryCreationAction::Update(action),
+						notifications_status_change,
+					)
 				}
 				EntryTypes::NotificationsSettings(notifications_settings) => {
 					validate_create_notifications_settings(
@@ -81,6 +99,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			OpUpdate::Entry { app_entry, action } => match app_entry {
 				EntryTypes::Notification(notification) => {
 					validate_update_notification(action, notification)
+				}
+				EntryTypes::NotificationsStatusChanges(notifications_status_change) => {
+					validate_update_notifications_status_change(action, notifications_status_change)
 				}
 				EntryTypes::NotificationsSettings(notifications_settings) => {
 					validate_update_notifications_settings(action, notifications_settings)
@@ -132,6 +153,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			};
 			match original_app_entry {
 				EntryTypes::Notification(_) => validate_delete_notification(action),
+				EntryTypes::NotificationsStatusChanges(_) => {
+					validate_delete_notifications_status_change(action)
+				}
 				EntryTypes::NotificationsSettings(_) => {
 					validate_delete_notifications_settings(action)
 				}
@@ -144,14 +168,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			tag,
 			action,
 		} => match link_type {
-			LinkTypes::RecipientToNotifications => validate_create_link_recipient_to_notifications(
-				action,
-				base_address,
-				target_address,
-				tag,
-			),
-			LinkTypes::ReadNotifications => validate_create_link_read_notifications(
-				action_hash(&op).clone(),
+			LinkTypes::AgentEncryptedMessage => validate_create_link_agent_encrypted_message(
 				action,
 				base_address,
 				target_address,
@@ -175,15 +192,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 			original_action,
 			action,
 		} => match link_type {
-			LinkTypes::RecipientToNotifications => validate_delete_link_recipient_to_notifications(
-				action_hash(&op).clone(),
-				action,
-				original_action,
-				base_address,
-				target_address,
-				tag,
-			),
-			LinkTypes::ReadNotifications => validate_delete_link_read_notifications(
+			LinkTypes::AgentEncryptedMessage => validate_delete_link_agent_encrypted_message(
 				action_hash(&op).clone(),
 				action,
 				original_action,
@@ -207,6 +216,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				EntryTypes::Notification(notification) => {
 					validate_create_notification(EntryCreationAction::Create(action), notification)
 				}
+				EntryTypes::NotificationsStatusChanges(notifications_status_change) => {
+					validate_create_notifications_status_change(
+						EntryCreationAction::Create(action),
+						notifications_status_change,
+					)
+				}
 				EntryTypes::NotificationsSettings(notifications_settings) => {
 					validate_create_notifications_settings(
 						EntryCreationAction::Create(action),
@@ -226,6 +241,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 						return Ok(result);
 					};
 					validate_update_notification(action, notification)
+				}
+				EntryTypes::NotificationsStatusChanges(notifications_status_change) => {
+					let result = validate_create_notifications_status_change(
+						EntryCreationAction::Update(action.clone()),
+						notifications_status_change.clone(),
+					)?;
+					let ValidateCallbackResult::Valid = result else {
+						return Ok(result);
+					};
+					validate_update_notifications_status_change(action, notifications_status_change)
 				}
 				EntryTypes::NotificationsSettings(notifications_settings) => {
 					let result = validate_create_notifications_settings(
@@ -286,6 +311,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				};
 				match original_app_entry {
 					EntryTypes::Notification(_) => validate_delete_notification(action),
+					EntryTypes::NotificationsStatusChanges(_) => {
+						validate_delete_notifications_status_change(action)
+					}
 					EntryTypes::NotificationsSettings(_) => {
 						validate_delete_notifications_settings(action)
 					}
@@ -298,16 +326,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 				link_type,
 				action,
 			} => match link_type {
-				LinkTypes::RecipientToNotifications => {
-					validate_create_link_recipient_to_notifications(
-						action,
-						base_address,
-						target_address,
-						tag,
-					)
-				}
-				LinkTypes::ReadNotifications => validate_create_link_read_notifications(
-					action_hash(&op).clone(),
+				LinkTypes::AgentEncryptedMessage => validate_create_link_agent_encrypted_message(
 					action,
 					base_address,
 					target_address,
@@ -345,8 +364,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 						}
 					};
 				match link_type {
-					LinkTypes::RecipientToNotifications => {
-						validate_delete_link_recipient_to_notifications(
+					LinkTypes::AgentEncryptedMessage => {
+						validate_delete_link_agent_encrypted_message(
 							action_hash(&op).clone(),
 							action,
 							create_link.clone(),
@@ -355,14 +374,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
 							create_link.tag,
 						)
 					}
-					LinkTypes::ReadNotifications => validate_delete_link_read_notifications(
-						action_hash(&op).clone(),
-						action,
-						create_link.clone(),
-						base_address,
-						create_link.target_address,
-						create_link.tag,
-					),
 					LinkTypes::ProfileToNotificationsSettings => {
 						validate_delete_link_profile_to_notifications_settings(
 							action_hash(&op).clone(),
