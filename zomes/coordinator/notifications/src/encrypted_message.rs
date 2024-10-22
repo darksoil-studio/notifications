@@ -3,8 +3,9 @@ use notifications_integrity::{EntryTypes, LinkTypes};
 use notifications_types::NotificationsEncryptedMessage;
 
 use crate::{
+	notification::{query_notifications, query_notifications_status_changes},
 	profiles::{get_agent_profile_hash, get_my_profile_hash},
-	utils::{create_link_relaxed, create_relaxed},
+	utils::{create_link_relaxed, create_relaxed, delete_link_relaxed},
 };
 
 #[derive(Serialize, Deserialize, Debug, SerializedBytes)]
@@ -41,6 +42,16 @@ pub fn commit_my_pending_encrypted_messages() -> ExternResult<()> {
 			.build(),
 	)?;
 	let my_profile_hash = get_my_profile_hash()?;
+	let notifications = query_notifications()?;
+	let notifications_status_changes = query_notifications_status_changes()?;
+	let notifications_entry_hashes: Vec<EntryHash> = notifications
+		.into_iter()
+		.map(|(entry_hash, _)| entry_hash)
+		.collect();
+	let notifications_status_changes_entry_hashes: Vec<EntryHash> = notifications_status_changes
+		.into_iter()
+		.map(|(entry_hash, _)| entry_hash)
+		.collect();
 
 	for link in links {
 		let tag = link.tag;
@@ -62,24 +73,33 @@ pub fn commit_my_pending_encrypted_messages() -> ExternResult<()> {
 
 		match message {
 			NotificationsEncryptedMessage::Notification(notification) => {
-				create_relaxed(EntryTypes::Notification(notification))?;
+				let notification_hash = hash_entry(&notification)?;
+				if !notifications_entry_hashes.contains(&notification_hash) {
+					create_relaxed(EntryTypes::Notification(notification))?;
+				}
 			}
 			NotificationsEncryptedMessage::NotificationsStatusChanges(
 				notifications_status_changes,
 			) => {
-				let caller_profile_hash = get_agent_profile_hash(link.author)?;
+				let notifications_status_changes_hash = hash_entry(&notifications_status_changes)?;
+				if !notifications_status_changes_entry_hashes
+					.contains(&notifications_status_changes_hash)
+				{
+					let caller_profile_hash = get_agent_profile_hash(link.author)?;
 
-				if caller_profile_hash.ne(&my_profile_hash) {
-					return Err(wasm_error!(WasmErrorInner::Guest(format!(
-						"Only agents with the same profile can send change notifications status"
-					))));
+					if caller_profile_hash.ne(&my_profile_hash) {
+						return Err(wasm_error!(WasmErrorInner::Guest(format!(
+							"Only agents with the same profile can send change notifications status"
+						))));
+					}
+					create_relaxed(EntryTypes::NotificationsStatusChanges(
+						notifications_status_changes,
+					))?;
 				}
-
-				create_relaxed(EntryTypes::NotificationsStatusChanges(
-					notifications_status_changes,
-				))?;
 			}
 		}
+
+		delete_link_relaxed(link.create_link_hash)?;
 	}
 
 	Ok(())

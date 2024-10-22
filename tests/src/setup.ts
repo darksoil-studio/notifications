@@ -15,7 +15,8 @@ export async function setup(scenario: Scenario) {
 
 	// Add 2 players with the test hApp to the Scenario. The returned players
 	// can be destructured.
-	const [alice, bob] = await scenario.addPlayersWithApps([
+	const [alice, bob, bob2] = await scenario.addPlayersWithApps([
+		{ appBundleSource: { path: testHappUrl } },
 		{ appBundleSource: { path: testHappUrl } },
 		{ appBundleSource: { path: testHappUrl } },
 	]);
@@ -32,6 +33,11 @@ export async function setup(scenario: Scenario) {
 		.adminWs()
 		.authorizeSigningCredentials(bob.cells[0].cell_id);
 	patchCallZome(bob.appWs as AppWebsocket);
+
+	await bob2.conductor
+		.adminWs()
+		.authorizeSigningCredentials(bob2.cells[0].cell_id);
+	patchCallZome(bob2.appWs as AppWebsocket);
 
 	// const config: NotificationsConfig = {
 	// 	types: {},
@@ -61,6 +67,18 @@ export async function setup(scenario: Scenario) {
 		),
 	);
 
+	const bob2ProfilesStore = new ProfilesStore(
+		new ProfilesClient(bob.appWs as any, 'notifications_test', 'profiles'),
+	);
+
+	const bob2Store = new NotificationsStore(
+		new NotificationsClient(
+			bob2.appWs as any,
+			'notifications_test',
+			'notifications',
+		),
+	);
+
 	// Shortcut peer discovery through gossip and register all agents in every
 	// conductor of the scenario.
 	await scenario.shareAllAgents();
@@ -68,6 +86,7 @@ export async function setup(scenario: Scenario) {
 	// Prevent race condition when two zome calls are made instantly at the beginning of the lifecycle that cause a ChainHeadMoved error because they trigger 2 parallel init workflows
 	await aliceStore.client.queryNotificationsWithStatus('Unread');
 	await bobStore.client.queryNotificationsWithStatus('Unread');
+	await bob2Store.client.queryNotificationsWithStatus('Unread');
 
 	return {
 		alice: {
@@ -79,6 +98,22 @@ export async function setup(scenario: Scenario) {
 			player: bob,
 			store: bobStore,
 			profilesStore: bobProfilesStore,
+		},
+		bob2: {
+			player: bob2,
+			store: bob2Store,
+			profilesStore: bob2ProfilesStore,
+			startUp: async () => {
+				await bob2.conductor.startUp();
+				const port = await bob2.conductor.attachAppInterface();
+				const issued = await bob2.conductor
+					.adminWs()
+					.issueAppAuthenticationToken({
+						installed_app_id: bob2.appId,
+					});
+				const appWs = await bob2.conductor.connectAppWs(issued.token, port);
+				bob2Store.client = new NotificationsClient(appWs, 'notifications_test');
+			},
 		},
 	};
 }

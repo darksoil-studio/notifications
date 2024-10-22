@@ -66,13 +66,15 @@ export class NotificationsStore {
 							status: 'completed',
 							value: notifications,
 						});
-						unsubscribe = this.client.onSignal(async () => {
-							const notifications =
-								await this.client.queryNotificationsWithStatus(statusFilter);
-							signal.set({
-								status: 'completed',
-								value: notifications,
-							});
+						unsubscribe = this.client.onSignal(async notificationsSignal => {
+							if (notificationsSignal.type === 'EntryCreated') {
+								const notifications =
+									await this.client.queryNotificationsWithStatus(statusFilter);
+								signal.set({
+									status: 'completed',
+									value: notifications,
+								});
+							}
 						});
 					} catch (error) {
 						signal.set({

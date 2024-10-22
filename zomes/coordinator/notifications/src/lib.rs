@@ -1,5 +1,7 @@
 use hdk::prelude::*;
+use notification::{receive_change_notifications_status, receive_notification};
 use notifications_integrity::*;
+use notifications_types::{Notification, NotificationsStatusChanges};
 
 pub mod encrypted_message;
 pub mod notification;
@@ -10,14 +12,7 @@ pub mod utils;
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 	let mut fns: BTreeSet<GrantedFunction> = BTreeSet::new();
-	fns.insert((
-		zome_info()?.name,
-		FunctionName::from("receive_notification"),
-	));
-	fns.insert((
-		zome_info()?.name,
-		FunctionName::from("receive_change_notifications_status"),
-	));
+	fns.insert((zome_info()?.name, FunctionName::from("recv_remote_signal")));
 	let functions = GrantedFunctions::Listed(fns);
 	let cap_grant = ZomeCallCapGrant {
 		tag: String::from("receive_notifications_calls"),
@@ -58,16 +53,22 @@ pub enum Signal {
 	},
 }
 
-// #[hdk_extern]
-// pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()> {
-// 	// TODO: take into account wether the recipient has the notification enabled in their settings
-// 	match signal {
-// 		NotificationsRemoteSignal::NewNotification(action) => emit_signal(Signal::LinkCreated {
-// 			action,
-// 			link_type: LinkTypes::RecipientToNotifications,
-// 		}),
-// 	}
-// }
+#[derive(Serialize, Deserialize, Debug)]
+pub enum NotificationsRemoteSignal {
+	Notification(Notification),
+	NotificationsStatusChanges(NotificationsStatusChanges),
+}
+
+#[hdk_extern]
+pub fn recv_remote_signal(signal: NotificationsRemoteSignal) -> ExternResult<()> {
+	// TODO: take into account wether the recipient has the notification enabled in their settings
+	match signal {
+		NotificationsRemoteSignal::Notification(notification) => receive_notification(notification),
+		NotificationsRemoteSignal::NotificationsStatusChanges(notifications_status_changes) => {
+			receive_change_notifications_status(notifications_status_changes)
+		}
+	}
+}
 
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
