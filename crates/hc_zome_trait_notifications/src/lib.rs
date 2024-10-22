@@ -19,8 +19,8 @@ pub struct NotificationContents {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetNotificationContentsInput {
-	notification: Notification,
-	locale: String,
+	pub notification: Notification,
+	pub locale: String,
 }
 
 #[zome_trait]
