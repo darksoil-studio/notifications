@@ -1,6 +1,6 @@
 import { AsyncSignal } from '@holochain-open-dev/signals';
 import { ActionCommittedSignal, EntryRecord } from '@holochain-open-dev/utils';
-import { ActionHash } from '@holochain/client';
+import { ActionHash, EntryHashB64 } from '@holochain/client';
 
 export type NotificationsSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -22,6 +22,11 @@ export interface Notification {
 }
 
 export type NotificationStatus = 'Unread' | 'Read' | 'Dismissed';
+
+export interface NotificationsStatusChanges {
+	status_changes: Record<EntryHashB64, NotificationStatus>;
+	timestamp: number;
+}
 
 export interface NotificationsConfig {
 	// types: Record<string, NotificationType>;

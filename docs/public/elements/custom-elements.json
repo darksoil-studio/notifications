@@ -4,62 +4,6 @@
   "modules": [
     {
       "kind": "javascript-module",
-      "path": "locales/locales.js",
-      "declarations": [
-        {
-          "kind": "variable",
-          "name": "sourceLocale",
-          "default": "`en`",
-          "description": "The locale code that templates in this source code are written in."
-        },
-        {
-          "kind": "variable",
-          "name": "targetLocales",
-          "type": {
-            "text": "array"
-          },
-          "default": "[\n  ,\n]",
-          "description": "The other locale codes that this application is localized into. Sorted\nlexicographically."
-        },
-        {
-          "kind": "variable",
-          "name": "allLocales",
-          "type": {
-            "text": "array"
-          },
-          "default": "[\n  `en`,\n]",
-          "description": "All valid project locale codes. Sorted lexicographically."
-        }
-      ],
-      "exports": [
-        {
-          "kind": "js",
-          "name": "sourceLocale",
-          "declaration": {
-            "name": "sourceLocale",
-            "module": "locales/locales.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "targetLocales",
-          "declaration": {
-            "name": "targetLocales",
-            "module": "locales/locales.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "allLocales",
-          "declaration": {
-            "name": "allLocales",
-            "module": "locales/locales.js"
-          }
-        }
-      ]
-    },
-    {
-      "kind": "javascript-module",
       "path": "src/context.ts",
       "declarations": [
         {
@@ -129,25 +73,20 @@
             {
               "kind": "field",
               "name": "notifications",
-              "default": "new HoloHashMap<\n\t\tActionHash,\n\t\t{\n\t\t\tdeletes: Array<SignedActionHashed<Delete>>;\n\t\t\trevisions: Array<Record>;\n\t\t}\n\t>()",
+              "default": "new HoloHashMap<EntryHash, Notification>()",
               "description": "Notification"
             },
             {
               "kind": "field",
-              "name": "notificationsForRecipient",
-              "default": "new HoloHashMap<ActionHash, Link[]>()"
-            },
-            {
-              "kind": "field",
-              "name": "readNotificationsByRecipient",
-              "default": "new HoloHashMap<AgentPubKey, Array<Link>>()"
+              "name": "notificationsStatusChanges",
+              "default": "new HoloHashMap<\n\t\tEntryHash,\n\t\tNotificationsStatusChanges\n\t>()"
             },
             {
               "kind": "method",
-              "name": "create_notification",
+              "name": "send_notification",
               "return": {
                 "type": {
-                  "text": "Promise<Record>"
+                  "text": "Promise<void>"
                 }
               },
               "parameters": [
@@ -161,169 +100,59 @@
             },
             {
               "kind": "method",
-              "name": "get_notification",
+              "name": "change_notifications_status",
+              "parameters": [
+                {
+                  "name": "status_changes",
+                  "type": {
+                    "text": "Record<EntryHashB64, NotificationStatus>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "query_notifications_and_status",
               "return": {
                 "type": {
-                  "text": "Promise<Record | undefined>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "get_all_deletes_for_notification",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<SignedActionHashed<Delete>> | undefined>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "get_oldest_delete_for_notification",
-              "return": {
-                "type": {
-                  "text": "Promise<SignedActionHashed<Delete> | undefined>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "delete_notification",
-              "return": {
-                "type": {
-                  "text": "Promise<ActionHash>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "original_notification_hash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "get_notifications_for_recipient",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<Link>>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "recipient",
-                  "type": {
-                    "text": "AgentPubKey"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "mark_notifications_as_read",
-              "parameters": [
-                {
-                  "name": "notifications",
-                  "type": {
-                    "text": "ActionHash[]"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "dismiss_notifications",
-              "parameters": [
-                {
-                  "name": "notifications",
-                  "type": {
-                    "text": "ActionHash[]"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "get_undismissed_notifications",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<Link>>"
+                  "text": "Promise<\n\t\tRecord<\n\t\t\tEntryHashB64,\n\t\t\t{ notification: Notification; status: NotificationStatus }\n\t\t>\n\t>"
                 }
               }
             },
             {
               "kind": "method",
-              "name": "get_dismissed_notifications",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<Link>>"
+              "name": "query_notifications_with_status",
+              "parameters": [
+                {
+                  "name": "notificationStatus",
+                  "type": {
+                    "text": "NotificationStatus"
+                  }
                 }
-              }
+              ]
             },
             {
               "kind": "method",
-              "name": "get_read_notifications",
+              "name": "get_notification_contents",
               "return": {
                 "type": {
-                  "text": "Promise<Array<Link>>"
+                  "text": "Promise<NotificationContents>"
                 }
-              }
+              },
+              "parameters": [
+                {
+                  "name": "notification",
+                  "type": {
+                    "text": "Notification"
+                  }
+                }
+              ]
             }
           ],
           "superclass": {
             "name": "ZomeMock",
             "package": "@holochain-open-dev/utils"
           }
-        },
-        {
-          "kind": "function",
-          "name": "sampleNotification",
-          "return": {
-            "type": {
-              "text": "Promise<Notification>"
-            }
-          },
-          "parameters": [
-            {
-              "name": "client",
-              "type": {
-                "text": "NotificationsClient"
-              }
-            },
-            {
-              "name": "partialNotification",
-              "default": "{}",
-              "type": {
-                "text": "Partial<Notification>"
-              }
-            }
-          ]
         }
       ],
       "exports": [
@@ -332,14 +161,6 @@
           "name": "NotificationsZomeMock",
           "declaration": {
             "name": "NotificationsZomeMock",
-            "module": "src/mocks.ts"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "sampleNotification",
-          "declaration": {
-            "name": "sampleNotification",
             "module": "src/mocks.ts"
           }
         }
@@ -356,10 +177,105 @@
           "members": [
             {
               "kind": "method",
-              "name": "createNotification",
+              "name": "sendNotification",
               "return": {
                 "type": {
                   "text": "Promise<void>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "recipientProfileHash",
+                  "type": {
+                    "text": "ActionHash"
+                  }
+                },
+                {
+                  "name": "zomeName",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "notificationType",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "notificationGroup",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "content",
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ],
+              "description": "Notification"
+            },
+            {
+              "kind": "method",
+              "name": "markNotificationsAsRead",
+              "parameters": [
+                {
+                  "name": "notificationsHashes",
+                  "type": {
+                    "text": "EntryHash[]"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "dismissNotifications",
+              "parameters": [
+                {
+                  "name": "notificationsHashes",
+                  "type": {
+                    "text": "EntryHash[]"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "changeNotificationsStatus",
+              "parameters": [
+                {
+                  "name": "statusChanges",
+                  "type": {
+                    "text": "Record<EntryHashB64, NotificationStatus>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "queryNotificationsWithStatus",
+              "return": {
+                "type": {
+                  "text": "Promise<Record<EntryHashB64, Notification>>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "statusFilter",
+                  "type": {
+                    "text": "NotificationStatus"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getNotificationContents",
+              "return": {
+                "type": {
+                  "text": "Promise<NotificationContents>"
                 }
               },
               "parameters": [
@@ -369,103 +285,7 @@
                     "text": "Notification"
                   }
                 }
-              ],
-              "description": "Notification"
-            },
-            {
-              "kind": "method",
-              "name": "getNotification",
-              "return": {
-                "type": {
-                  "text": "Promise<EntryRecord<Notification> | undefined>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
               ]
-            },
-            {
-              "kind": "method",
-              "name": "markNotificationsAsRead",
-              "return": {
-                "type": {
-                  "text": "Promise<void>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationsHashes",
-                  "type": {
-                    "text": "ActionHash[]"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "dismissNotifications",
-              "return": {
-                "type": {
-                  "text": "Promise<void>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationsHashes",
-                  "type": {
-                    "text": "ActionHash[]"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "getAllDeletesForNotification",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<SignedActionHashed<Delete>> | undefined>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "originalNotificationHash",
-                  "type": {
-                    "text": "ActionHash"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "getUndismissedNotifications",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<Link>>"
-                }
-              }
-            },
-            {
-              "kind": "method",
-              "name": "getReadNotifications",
-              "return": {
-                "type": {
-                  "text": "Promise<Array<Link>>"
-                }
-              }
-            },
-            {
-              "kind": "method",
-              "name": "getDismissedNotifications",
-              "return": {
-                "type": {
-                  "text": "Promise<\n\t\tArray<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>\n\t>"
-                }
-              }
             }
           ],
           "superclass": {
@@ -496,56 +316,53 @@
           "members": [
             {
               "kind": "method",
-              "name": "addTypes",
+              "name": "buildQueryNotificationsWithStatusSignal",
+              "privacy": "private",
               "parameters": [
                 {
-                  "name": "notificationsType",
+                  "name": "statusFilter",
                   "type": {
-                    "text": "Record<string, NotificationType>"
+                    "text": "NotificationStatus"
+                  }
+                }
+              ],
+              "description": "Notifications"
+            },
+            {
+              "kind": "field",
+              "name": "_notificationContents",
+              "privacy": "private",
+              "default": "new HoloHashMap<\n\t\tEntryHash,\n\t\tAsyncSignal<NotificationContents>\n\t>()"
+            },
+            {
+              "kind": "method",
+              "name": "notificationContents",
+              "parameters": [
+                {
+                  "name": "notificationHash",
+                  "type": {
+                    "text": "EntryHash"
+                  }
+                },
+                {
+                  "name": "notification",
+                  "type": {
+                    "text": "Notification"
                   }
                 }
               ]
             },
             {
               "kind": "field",
-              "name": "notifications",
-              "default": "new LazyHoloHashMap((notificationHash: ActionHash) => ({\n\t\tentry: immutableEntrySignal(() =>\n\t\t\tthis.client.getNotification(notificationHash),\n\t\t),\n\t\tdeletes: deletesForEntrySignal(this.client, notificationHash, () =>\n\t\t\tthis.client.getAllDeletesForNotification(notificationHash),\n\t\t),\n\t}))",
-              "description": "Notification"
+              "name": "unreadNotifications"
             },
             {
               "kind": "field",
-              "name": "undismissedNotificationsLinks",
-              "privacy": "private"
+              "name": "readNotifications"
             },
             {
               "kind": "field",
-              "name": "readNotificationsLinks",
-              "privacy": "private"
-            },
-            {
-              "kind": "field",
-              "name": "readNotifications",
-              "default": "new AsyncComputed(() => {\n\t\tconst readNotificationsLinks = this.readNotificationsLinks.get();\n\t\tconst undismissedNotifications = this.undismissedNotificationsLinks.get();\n\t\tif (readNotificationsLinks.status !== 'completed')\n\t\t\treturn readNotificationsLinks;\n\t\tif (undismissedNotifications.status !== 'completed')\n\t\t\treturn undismissedNotifications;\n\n\t\t/** Aggregate the read notification hashes and filter them by whether they've been dismissed */\n\n\t\tconst allReadNotificationsHashes = uniquify(\n\t\t\tArray.from([] as ActionHash[]).concat(\n\t\t\t\t...readNotificationsLinks.value.map(\n\t\t\t\t\tlink => decode(link.tag) as ActionHash[],\n\t\t\t\t),\n\t\t\t),\n\t\t);\n\n\t\tconst undismissedNotificationsHashes = undismissedNotifications.value.map(\n\t\t\tl => encodeHashToBase64(l.target),\n\t\t);\n\n\t\tconst notificationsHashes = allReadNotificationsHashes.filter(hash =>\n\t\t\tundismissedNotificationsHashes.includes(encodeHashToBase64(hash)),\n\t\t);\n\n\t\t/* If a notification was persistent and has been read but was deleted (usually by someone else performing the action that the notification required), then we dismiss the notification */\n\n\t\t// const deletes = joinAsync(\n\t\t// \tnotificationsHashes.map(hash =>\n\t\t// \t\tthis.notifications.get(hash).deletes.get(),\n\t\t// \t),\n\t\t// );\n\t\t// const entries = joinAsync(\n\t\t// \tnotificationsHashes.map(hash =>\n\t\t// \t\tthis.notifications.get(hash).entry.get(),\n\t\t// \t),\n\t\t// );\n\t\t// if (entries.status !== 'completed') return entries;\n\t\t// if (deletes.status !== 'completed') return deletes;\n\n\t\t// const nonDeletedNotificationHashes: ActionHash[] = [];\n\t\t// const notificationsToDismiss: ActionHash[] = [];\n\n\t\t// for (let i = 0; i < notificationsHashes.length; i++) {\n\t\t// \tif (!entries.value[i].entry.persistent || deletes.value[i].length === 0) {\n\t\t// \t\tnonDeletedNotificationHashes.push(notificationsHashes[i]);\n\t\t// \t} else {\n\t\t// \t\tnotificationsToDismiss.push(notificationsHashes[i]);\n\t\t// \t}\n\t\t// }\n\n\t\t// if (notificationsToDismiss.length > 0) {\n\t\t// \tthis.client.dismissNotifications(notificationsToDismiss);\n\t\t// }\n\n\t\tconst value = slice(this.notifications, notificationsHashes);\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
-            },
-            {
-              "kind": "field",
-              "name": "unreadNotifications",
-              "default": "new AsyncComputed(() => {\n\t\tconst readNotifications = this.readNotifications.get();\n\t\tconst undismissedNotifications = this.undismissedNotificationsLinks.get();\n\n\t\tif (readNotifications.status !== 'completed') return readNotifications;\n\t\tif (undismissedNotifications.status !== 'completed')\n\t\t\treturn undismissedNotifications;\n\n\t\tconst readNotificationsHashes = Array.from(\n\t\t\treadNotifications.value.keys(),\n\t\t).map(h => encodeHashToBase64(h));\n\n\t\tconst links = undismissedNotifications.value.filter(\n\t\t\tlink =>\n\t\t\t\t!readNotificationsHashes.includes(encodeHashToBase64(link.target)),\n\t\t);\n\t\tconst value = slice(this.notifications, uniquify(links.map(l => l.target)));\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
-            },
-            {
-              "kind": "field",
-              "name": "deletedNotificationsLinks"
-            },
-            {
-              "kind": "field",
-              "name": "dismissedNotifications",
-              "default": "new AsyncComputed(() => {\n\t\tconst deletedLinks = this.deletedNotificationsLinks.get();\n\t\tif (deletedLinks.status !== 'completed') return deletedLinks;\n\n\t\tconst value = slice(\n\t\t\tthis.notifications,\n\t\t\tdeletedLinks.value.map(l => l[0].hashed.content.target_address),\n\t\t);\n\n\t\treturn {\n\t\t\tstatus: 'completed',\n\t\t\tvalue,\n\t\t};\n\t})"
-            },
-            {
-              "kind": "field",
-              "name": "notificationsByTypeAndGroup",
-              "default": "new LazyMap(\n\t\t(notificationType: string) =>\n\t\t\tnew LazyMap((notificationGroup: string) => ({\n\t\t\t\tread: new AsyncComputed(() => {\n\t\t\t\t\tconst notifications = this.readNotifications.get();\n\t\t\t\t\tif (notifications.status !== 'completed') return notifications;\n\n\t\t\t\t\tconst entries = joinAsyncMap(\n\t\t\t\t\t\tmapValues(notifications.value, n => n.entry.get()),\n\t\t\t\t\t);\n\t\t\t\t\tif (entries.status !== 'completed') return entries;\n\n\t\t\t\t\tconst value = pickBy(\n\t\t\t\t\t\tentries.value,\n\t\t\t\t\t\tn =>\n\t\t\t\t\t\t\tn.entry.notification_type === notificationType &&\n\t\t\t\t\t\t\tn.entry.notification_group === notificationGroup,\n\t\t\t\t\t);\n\n\t\t\t\t\treturn {\n\t\t\t\t\t\tstatus: 'completed',\n\t\t\t\t\t\tvalue,\n\t\t\t\t\t};\n\t\t\t\t}),\n\t\t\t\tunread: new AsyncComputed(() => {\n\t\t\t\t\tconst notifications = this.unreadNotifications.get();\n\t\t\t\t\tif (notifications.status !== 'completed') return notifications;\n\n\t\t\t\t\tconst entries = joinAsyncMap(\n\t\t\t\t\t\tmapValues(notifications.value, n => n.entry.get()),\n\t\t\t\t\t);\n\t\t\t\t\tif (entries.status !== 'completed') return entries;\n\n\t\t\t\t\tconst value = pickBy(\n\t\t\t\t\t\tentries.value,\n\t\t\t\t\t\tn =>\n\t\t\t\t\t\t\tn.entry.notification_type === notificationType &&\n\t\t\t\t\t\t\tn.entry.notification_group === notificationGroup,\n\t\t\t\t\t);\n\n\t\t\t\t\treturn {\n\t\t\t\t\t\tstatus: 'completed',\n\t\t\t\t\t\tvalue,\n\t\t\t\t\t};\n\t\t\t\t}),\n\t\t\t})),\n\t)",
-              "description": "Helpers for consuming UIs"
+              "name": "dismissedNotifications"
             }
           ]
         }
@@ -566,6 +383,62 @@
       "path": "src/types.ts",
       "declarations": [],
       "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "locales/locales.js",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "sourceLocale",
+          "default": "`en`",
+          "description": "The locale code that templates in this source code are written in."
+        },
+        {
+          "kind": "variable",
+          "name": "targetLocales",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  ,\n]",
+          "description": "The other locale codes that this application is localized into. Sorted\nlexicographically."
+        },
+        {
+          "kind": "variable",
+          "name": "allLocales",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  `en`,\n]",
+          "description": "All valid project locale codes. Sorted lexicographically."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "sourceLocale",
+          "declaration": {
+            "name": "sourceLocale",
+            "module": "locales/locales.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "targetLocales",
+          "declaration": {
+            "name": "targetLocales",
+            "module": "locales/locales.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "allLocales",
+          "declaration": {
+            "name": "allLocales",
+            "module": "locales/locales.js"
+          }
+        }
+      ]
     },
     {
       "kind": "javascript-module",
@@ -634,12 +507,6 @@
                   }
                 },
                 {
-                  "name": "persistent",
-                  "type": {
-                    "text": "boolean"
-                  }
-                },
-                {
                   "name": "notificationGroup",
                   "type": {
                     "text": "NotificationGroup"
@@ -649,23 +516,6 @@
                   "name": "last",
                   "type": {
                     "text": "boolean"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "notificationInfo",
-              "return": {
-                "type": {
-                  "text": "AsyncResult<NotificationInfo>"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "notificationHash",
-                  "type": {
-                    "text": "ActionHash"
                   }
                 }
               ]

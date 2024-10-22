@@ -59,9 +59,9 @@ import { mdiBell } from '@mdi/js';
 import { decode } from '@msgpack/msgpack';
 import { decodeHashFromBase64 } from '@holochain/client';
 import { render, html } from "lit";
-import { Signal } from '@holochain-open-dev/signals';
+import { Signal, toPromise } from '@holochain-open-dev/signals';
 
-import { NotificationsZomeMock, sampleNotification } from "../../ui/src/mocks.ts";
+import { NotificationsZomeMock } from "../../ui/src/mocks.ts";
 import { NotificationsStore } from "../../ui/src/notifications-store.ts";
 import { NotificationsClient } from "../../ui/src/notifications-client.ts";
 
@@ -82,38 +82,16 @@ onMounted(async () => {
   );
   const profilesStore = new ProfilesStore(new ProfilesClient(profilesMock, "notifications_test"));
 
+	const myProfile = await toPromise(profilesStore.myProfile);
+
   const mock = new NotificationsZomeMock();
   const client = new NotificationsClient(mock, "notifications_test");
 
-  const notification = await sampleNotification(client);
+  const record = await client.sendNotification(myProfile.profileHash, 'example', 'type1', 'group1', {
+		Hello: 'world!'
+	});
 
-  const record = await mock.create_notification(notification);
-
-  const store = new NotificationsStore(client, {
-		types: {
-			type1: {
-				name: 'Hello!',
-				description: 'something',
-				title(group) {
-					return new Signal.State({
-						status: 'completed',
-						value: group,
-					});
-				},
-				onClick: group => alert(`clicked notification of group: ${group}`),
-				contents: n => {
-					const i = decode(n.entry.content);
-					return new Signal.State({
-						status: 'completed',
-						value: {
-							iconSrc: wrapPathInSvg(mdiBell),
-							body: i.body,
-						},
-					});
-				},
-			},
-		},
-  });
+  const store = new NotificationsStore(client);
   
   render(html`
     <profiles-context .store=${profilesStore}>

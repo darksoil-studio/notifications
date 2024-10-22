@@ -320,9 +320,10 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 									effect="pulse"
 									style="height: 16px; min-width: 250px;"
 								></sl-skeleton>
+								<div style="flex: 1"></div>
 								<sl-skeleton
 									effect="pulse"
-									style="height: 16px; width: 32px;"
+									style="height: 16px; width: 100px;"
 								></sl-skeleton>
 							</div>
 							${i < count - 1 ? html`<sl-divider></sl-divider>` : html``}

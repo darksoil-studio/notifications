@@ -4,7 +4,6 @@ import { decodeHashFromBase64 } from '@holochain/client';
 import { dhtSync, pause, runScenario } from '@holochain/tryorama';
 import { assert, expect, test } from 'vitest';
 
-import { sampleNotification } from '../../ui/src/mocks.js';
 import { Notification } from '../../ui/src/types.js';
 import { setup } from './setup.js';
 

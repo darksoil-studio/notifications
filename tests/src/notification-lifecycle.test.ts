@@ -3,8 +3,6 @@ import { EntryRecord } from '@holochain-open-dev/utils';
 import { dhtSync, pause, runScenario } from '@holochain/tryorama';
 import { assert, expect, test } from 'vitest';
 
-import { sampleNotification } from '../../ui/src/mocks.js';
-import { Notification } from '../../ui/src/types.js';
 import { setup } from './setup.js';
 
 test('create notifications, read it, and dismiss it', async () => {

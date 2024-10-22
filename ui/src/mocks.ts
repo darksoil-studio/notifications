@@ -1,254 +1,123 @@
+import { wrapPathInSvg } from '@holochain-open-dev/elements';
 import {
-	AgentPubKeyMap,
 	HashType,
 	HoloHashMap,
-	RecordBag,
 	ZomeMock,
-	decodeEntry,
-	entryState,
-	fakeCreateAction,
-	fakeCreateLinkAction,
-	fakeDeleteEntry,
-	fakeDeleteLinkAction,
-	fakeEntry,
-	fakeRecord,
-	fakeUpdateEntry,
 	hash,
-	pickBy,
-	retype,
 } from '@holochain-open-dev/utils';
 import {
-	ActionHash,
 	AgentPubKey,
 	AppClient,
-	Delete,
 	EntryHash,
-	Link,
-	NewEntryAction,
-	Record,
-	SignedActionHashed,
-	decodeHashFromBase64,
+	EntryHashB64,
 	encodeHashToBase64,
-	fakeActionHash,
-	fakeAgentPubKey,
-	fakeDnaHash,
-	fakeEntryHash,
 } from '@holochain/client';
-import { encode } from '@msgpack/msgpack';
+import { mdiEarth } from '@mdi/js';
 
-import { NotificationsClient } from './notifications-client.js';
-import { Notification } from './types.js';
+import {
+	Notification,
+	NotificationContents,
+	NotificationStatus,
+	NotificationsStatusChanges,
+} from './types.js';
 
 export class NotificationsZomeMock extends ZomeMock implements AppClient {
 	constructor(myPubKey?: AgentPubKey) {
 		super('notifications_test', 'notifications', myPubKey, 100);
 	}
 	/** Notification */
-	notifications = new HoloHashMap<
-		ActionHash,
-		{
-			deletes: Array<SignedActionHashed<Delete>>;
-			revisions: Array<Record>;
-		}
+	notifications = new HoloHashMap<EntryHash, Notification>();
+	notificationsStatusChanges = new HoloHashMap<
+		EntryHash,
+		NotificationsStatusChanges
 	>();
-	notificationsForRecipient = new HoloHashMap<ActionHash, Link[]>();
-	readNotificationsByRecipient = new HoloHashMap<ActionHash, Array<Link>>();
 
-	async create_notification(notification: Notification): Promise<Record> {
+	async send_notification(notification: Notification): Promise<void> {
+		notification.timestamp = Date.now() * 1000;
 		const entryHash = hash(notification, HashType.ENTRY);
-		const record = await fakeRecord(
-			await fakeCreateAction(entryHash),
-			fakeEntry(notification),
-		);
-
-		this.notifications.set(record.signed_action.hashed.hash, {
-			deletes: [],
-			revisions: [record],
-		});
-
-		const recipient = notification.recipient_profile_hash;
-
-		const existingRecipients =
-			this.notificationsForRecipient.get(recipient) || [];
-		this.notificationsForRecipient.set(recipient, [
-			...existingRecipients,
-			{
-				base: recipient,
-				target: record.signed_action.hashed.hash,
-				author: this.myPubKey,
-				timestamp: Date.now() * 1000,
-				zome_index: 0,
-				link_type: 0,
-				tag: new Uint8Array(),
-				create_link_hash: await fakeActionHash(),
-			},
-		]);
-
-		return record;
+		this.notifications.set(entryHash, notification);
 	}
 
-	async get_notification(
-		notificationHash: ActionHash,
-	): Promise<Record | undefined> {
-		const notification = this.notifications.get(notificationHash);
-		return notification ? notification.revisions[0] : undefined;
-	}
-
-	async get_all_deletes_for_notification(
-		notificationHash: ActionHash,
-	): Promise<Array<SignedActionHashed<Delete>> | undefined> {
-		const notification = this.notifications.get(notificationHash);
-		return notification ? notification.deletes : undefined;
-	}
-
-	async get_oldest_delete_for_notification(
-		notificationHash: ActionHash,
-	): Promise<SignedActionHashed<Delete> | undefined> {
-		const notification = this.notifications.get(notificationHash);
-		return notification ? notification.deletes[0] : undefined;
-	}
-	async delete_notification(
-		original_notification_hash: ActionHash,
-	): Promise<ActionHash> {
-		const record = await fakeRecord(
-			await fakeDeleteEntry(original_notification_hash),
-		);
-
-		this.notifications
-			.get(original_notification_hash)
-			.deletes.push(record.signed_action as SignedActionHashed<Delete>);
-
-		return record.signed_action.hashed.hash;
-	}
-
-	async get_notifications_for_recipient(
-		recipient_prolife_hash: ActionHash,
-	): Promise<Array<Link>> {
-		return this.notificationsForRecipient.get(recipient_prolife_hash) || [];
-	}
-
-	async mark_notifications_as_read(input: {
-		notifications_hashes: ActionHash[];
-		my_profile_hash: ActionHash;
-	}) {
-		const readNotifications =
-			this.readNotificationsByRecipient.get(input.my_profile_hash) || [];
-
-		const link = {
-			base: input.my_profile_hash,
-			target: input.my_profile_hash,
-			author: this.myPubKey,
+	async change_notifications_status(
+		status_changes: Record<EntryHashB64, NotificationStatus>,
+	) {
+		const notificationsStatusChanges: NotificationsStatusChanges = {
+			status_changes,
 			timestamp: Date.now() * 1000,
-			zome_index: 0,
-			link_type: 0,
-			tag: encode(input.notifications_hashes),
-			create_link_hash: await fakeActionHash(),
 		};
-		this.readNotificationsByRecipient.set(input.my_profile_hash, [
-			...readNotifications,
-			link,
-		]);
+
+		const entryHash = hash(notificationsStatusChanges, HashType.ENTRY);
+		this.notificationsStatusChanges.set(entryHash, notificationsStatusChanges);
+
 		this.emitSignal({
-			type: 'LinkCreated',
-			action: {
-				hashed: {
-					content: await fakeCreateLinkAction(
-						retype(input.my_profile_hash, HashType.ENTRY),
-						input.my_profile_hash,
-						1,
-						encode(input.notifications_hashes),
-					),
-					hash: link.create_link_hash,
-				},
-			},
-			link_type: 'ReadNotifications',
+			type: 'EntryCreated',
 		});
 	}
 
-	async dismiss_notifications(input: {
-		notifications_hashes: ActionHash[];
-		my_profile_hash: ActionHash;
-	}) {
-		const notifications_hashes = input.notifications_hashes;
-		const undismissedNotifications =
-			this.notificationsForRecipient.get(input.my_profile_hash) || [];
+	async query_notifications_and_status(): Promise<
+		Record<
+			EntryHashB64,
+			{ notification: Notification; status: NotificationStatus }
+		>
+	> {
+		const result: Record<
+			EntryHashB64,
+			{ notification: Notification; status: NotificationStatus }
+		> = {};
 
-		const filteredNotifications = undismissedNotifications.filter(
-			link =>
-				!notifications_hashes.find(
-					n => encodeHashToBase64(n) === encodeHashToBase64(link.target),
-				),
-		);
-
-		const dismissedNotifications = undismissedNotifications.filter(link =>
-			notifications_hashes.find(
-				n => encodeHashToBase64(n) === encodeHashToBase64(link.target),
-			),
-		);
-
-		this.notificationsForRecipient.set(
-			input.my_profile_hash,
-			filteredNotifications,
-		);
-		for (const link of dismissedNotifications) {
-			this.emitSignal({
-				type: 'LinkDeleted',
-				action: {
-					hashed: {
-						content: await fakeDeleteLinkAction(link.create_link_hash),
-						hash: await fakeActionHash(),
-					},
-				},
-				create_link_action: {
-					hashed: {
-						content: await fakeCreateLinkAction(
-							link.base,
-							link.target,
-							link.link_type,
-							link.tag,
-						),
-					},
-				},
-				link_type: 'RecipientToNotifications',
-			});
+		for (const [hash, notification] of Array.from(
+			this.notifications.entries(),
+		)) {
+			result[encodeHashToBase64(hash)] = {
+				notification,
+				status: 'Unread',
+			};
 		}
+
+		const sortedNotificationStatusChanges = Array.from(
+			this.notificationsStatusChanges.entries(),
+		).sort((t1, t2) => t1[1].timestamp - t2[1].timestamp);
+
+		for (const [
+			hash,
+			notificationsStatusChanges,
+		] of sortedNotificationStatusChanges) {
+			for (const [notificationHash, status] of Object.entries(
+				notificationsStatusChanges.status_changes,
+			)) {
+				if (result[notificationHash]) {
+					result[notificationHash].status = status;
+				}
+			}
+		}
+
+		return result;
 	}
 
-	async get_undismissed_notifications(
-		myProfileHash: ActionHash,
-	): Promise<Array<Link>> {
-		return this.notificationsForRecipient.get(myProfileHash);
+	async query_notifications_with_status(
+		notificationStatus: NotificationStatus,
+	) {
+		const notifications = await this.query_notifications_and_status();
+
+		const result: Record<EntryHashB64, Notification> = {};
+
+		for (const [hash, n] of Object.entries(notifications)) {
+			if (n.status === notificationStatus) {
+				result[hash] = n.notification;
+			}
+		}
+
+		return result;
 	}
 
-	async get_dismissed_notifications(
-		myProfileHash: ActionHash,
-	): Promise<Array<Link>> {
-		return [];
+	async get_notification_contents(
+		notification: Notification,
+	): Promise<NotificationContents> {
+		return {
+			title: 'Hello world!',
+			body: 'This is an example notification',
+			icon_src: wrapPathInSvg(mdiEarth),
+			url_path_to_navigate_to_on_click: '',
+		};
 	}
-
-	async get_read_notifications(
-		myProfileHash: ActionHash,
-	): Promise<Array<Link>> {
-		return this.readNotificationsByRecipient.get(myProfileHash) || [];
-	}
-}
-
-export async function sampleNotification(
-	client: NotificationsClient,
-	partialNotification: Partial<Notification> = {},
-): Promise<Notification> {
-	return {
-		...{
-			zome_name: 'example',
-			notification_type: 'type1',
-			notification_group: 'Your notifications',
-			persistent: false,
-			recipient_profile_hash: await fakeActionHash(),
-			timestamp: Date.now() * 1000,
-			content: encode({
-				body: 'Hello world!',
-			}),
-		},
-		...partialNotification,
-	};
 }
