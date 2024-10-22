@@ -42,9 +42,13 @@ test('notifications and their status get synchronized across devices for the sam
 
 		// Alice creates a Notification
 		await alice.store.client.sendNotification(
-			await sampleNotification(alice.store.client, {
-				recipient_profile_hash: bobProfile.actionHash,
-			}),
+			bobProfile.actionHash,
+			'example',
+			'type1',
+			'group1',
+			{
+				hello: 'world!',
+			},
 		);
 
 		// Wait for the created entry to be propagated to the other node.
@@ -115,9 +119,13 @@ test('notifications and their status get synchronized across devices for the sam
 
 		// Alice creates a Notification
 		await alice.store.client.sendNotification(
-			await sampleNotification(alice.store.client, {
-				recipient_profile_hash: bobProfile.actionHash,
-			}),
+			bobProfile.actionHash,
+			'example',
+			'type1',
+			'group1',
+			{
+				hello: 'world!',
+			},
 		);
 
 		// Wait for the created entry to be propagated to the other node.

@@ -14,6 +14,7 @@ import {
 	SignedActionHashed,
 	encodeHashToBase64,
 } from '@holochain/client';
+import { encode } from '@msgpack/msgpack';
 
 import {
 	Notification,
@@ -32,8 +33,20 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	}
 	/** Notification */
 
-	async sendNotification(notification: Notification): Promise<void> {
-		await this.callZome('send_notification', notification);
+	async sendNotification(
+		recipientProfileHash: ActionHash,
+		zomeName: string,
+		notificationType: string,
+		notificationGroup: string,
+		content: any,
+	): Promise<void> {
+		await this.callZome('send_notification', {
+			zome_name: zomeName,
+			notification_type: notificationType,
+			notification_group: notificationGroup,
+			content: encode(content),
+			recipient_profile_hash: recipientProfileHash,
+		});
 	}
 
 	async markNotificationsAsRead(notificationsHashes: EntryHash[]) {
@@ -71,7 +84,10 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 			role_name: this.roleName,
 			zome_name: notification.zome_name,
 			fn_name: 'get_notification_contents',
-			payload: notification,
+			payload: {
+				locale: 'en',
+				notification,
+			},
 		});
 	}
 }

@@ -12,6 +12,9 @@ integrity:
     - name: profiles_integrity
       hash: ~
       bundled: <NIX PACKAGE>
+    - name: example_integrity
+      hash: ~
+      bundled: <NIX PACKAGE>
 coordinator:
   zomes:
     - name: notifications
@@ -24,3 +27,8 @@ coordinator:
       bundled: <NIX PACKAGE>
       dependencies:
         - name: profiles_integrity
+    - name: example
+      hash: ~
+      bundled: <NIX PACKAGE>
+      dependencies:
+        - name: example_integrity

@@ -10,7 +10,14 @@ import {
 	joinAsyncMap,
 } from '@holochain-open-dev/signals';
 import { EntryRecord, mapValues } from '@holochain-open-dev/utils';
-import { ActionHash, Delete, SignedActionHashed } from '@holochain/client';
+import {
+	ActionHash,
+	Delete,
+	EntryHash,
+	EntryHashB64,
+	SignedActionHashed,
+	decodeHashFromBase64,
+} from '@holochain/client';
 import { consume } from '@lit/context';
 import { msg } from '@lit/localize';
 import {
@@ -30,20 +37,13 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { notificationsStoreContext } from '../context.js';
 import { NotificationsStore } from '../notifications-store.js';
-import { Notification, NotificationContents } from '../types.js';
+import { NotificationContents } from '../types.js';
 
 interface NotificationGroup {
 	group: string;
 	timestamp: number;
 	title: string;
-	notifications: Array<NotificationInfo>;
-}
-
-interface NotificationInfo {
-	record: EntryRecord<Notification>;
-	deletes: Array<SignedActionHashed<Delete>>;
-	title: string;
-	contents: NotificationContents;
+	notifications: Array<[EntryHashB64, NotificationContents]>;
 }
 
 /**
@@ -64,11 +64,11 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 
 	renderNotificationGroup(
 		read: boolean,
-		persistent: boolean,
 		notificationGroup: NotificationGroup,
 		last: boolean,
 	) {
-		const singleNotification = notificationGroup.notifications.length === 1;
+		const singleNotification =
+			Object.keys(notificationGroup.notifications).length === 1;
 		return html`<div
 				class="row"
 				style=${styleMap({
@@ -85,15 +85,14 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 						notificationGroup.notifications[
 							notificationGroup.notifications.length - 1
 						];
-					this.notificationsStore.notificationsConfig.types[
-						lastNotification.record.entry.notification_type
-					].onClick(notificationGroup.group);
+					window.location.href =
+						lastNotification[1].url_path_to_navigate_to_on_click;
 				}}
 			>
 				${singleNotification
 					? html`<sl-icon
 							style="font-size: 1.3rem; padding: 0 8px;"
-							src="${notificationGroup.notifications[0].contents.iconSrc}"
+							src="${notificationGroup.notifications[0][1].icon_src}"
 						></sl-icon>`
 					: html``}
 				<div
@@ -107,9 +106,9 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 						n => html`
 							<div class="row" style="gap: 8px; align-items: center">
 								${!singleNotification
-									? html`<sl-icon src="${n.contents.iconSrc}"></sl-icon>`
+									? html`<sl-icon src="${n[1].icon_src}"></sl-icon>`
 									: html``}
-								<span>${n.contents.body}</span>
+								<span>${n[1].body}</span>
 							</div>
 						`,
 					)}
@@ -121,26 +120,22 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 					style="align-items: end; flex: 1; align-self: stretch"
 				>
 					<div style="flex: 1;">
-						${persistent
-							? html``
-							: html`
-									<sl-icon-button
-										.src=${wrapPathInSvg(mdiClose)}
-										id="dismiss-single-notification"
-										@click=${(e: Event) => {
-											this.notificationsStore.client.dismissNotifications(
-												notificationGroup.notifications.map(
-													n => n.record.actionHash,
-												),
-											);
-											e.stopPropagation();
-										}}
-									></sl-icon-button>
-								`}
+						<sl-icon-button
+							.src=${wrapPathInSvg(mdiClose)}
+							id="dismiss-single-notification"
+							@click=${(e: Event) => {
+								this.notificationsStore.client.dismissNotifications(
+									notificationGroup.notifications.map(([hash, _]) =>
+										decodeHashFromBase64(hash),
+									),
+								);
+								e.stopPropagation();
+							}}
+						></sl-icon-button>
 					</div>
 					<sl-relative-time
 						style="color: grey; text-align: right"
-						.date=${new Date(notificationGroup.timestamp)}
+						.date=${new Date(notificationGroup.timestamp / 1000)}
 					></sl-relative-time>
 				</div>
 			</div>
@@ -150,43 +145,6 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 				: html``} `;
 	}
 
-	notificationInfo(
-		notificationHash: ActionHash,
-	): AsyncResult<NotificationInfo> {
-		const record = this.notificationsStore.notifications
-			.get(notificationHash)
-			.entry.get();
-		const deletes = this.notificationsStore.notifications
-			.get(notificationHash)
-			.deletes.get();
-
-		if (record.status !== 'completed') return record;
-		if (deletes.status !== 'completed') return deletes;
-
-		const contents = this.notificationsStore.notificationsConfig.types[
-			record.value.entry.notification_type
-		]
-			.contents(record.value)
-			.get();
-		const title = this.notificationsStore.notificationsConfig.types[
-			record.value.entry.notification_type
-		]
-			.title(record.value.entry.notification_group)
-			.get();
-		if (contents.status !== 'completed') return contents;
-		if (title.status !== 'completed') return title;
-
-		return {
-			status: 'completed',
-			value: {
-				record: record.value,
-				deletes: deletes.value,
-				title: title.value,
-				contents: contents.value,
-			},
-		};
-	}
-
 	getNotificationsGroups() {
 		const unreadNotifications =
 			this.notificationsStore.unreadNotifications.get();
@@ -194,115 +152,137 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		if (unreadNotifications.status !== 'completed') return unreadNotifications;
 		if (readNotifications.status !== 'completed') return readNotifications;
 
-		const unreadMapResult = joinAsyncMap(
-			mapValues(unreadNotifications.value, (_n, key) =>
-				this.notificationInfo(key),
-			),
-		);
-		const readMapResult = joinAsyncMap(
-			mapValues(readNotifications.value, (_n, key) =>
-				this.notificationInfo(key),
-			),
-		);
-		if (unreadMapResult.status !== 'completed') return unreadMapResult;
-		if (readMapResult.status !== 'completed') return readMapResult;
+		const notificationsContents: Record<EntryHashB64, NotificationContents> =
+			{};
+
+		for (const [notificationHash, notification] of Object.entries(
+			unreadNotifications.value,
+		)) {
+			const contents = this.notificationsStore
+				.notificationContents(
+					decodeHashFromBase64(notificationHash),
+					notification,
+				)
+				.get();
+
+			if (contents.status !== 'completed') return contents;
+
+			notificationsContents[notificationHash] = contents.value;
+		}
+
+		for (const [notificationHash, notification] of Object.entries(
+			readNotifications.value,
+		)) {
+			const contents = this.notificationsStore
+				.notificationContents(
+					decodeHashFromBase64(notificationHash),
+					notification,
+				)
+				.get();
+
+			if (contents.status !== 'completed') return contents;
+
+			notificationsContents[notificationHash] = contents.value;
+		}
 
 		const notifications: Record<
 			string,
 			Record<
 				string,
-				Array<{
-					read: boolean;
-					notificationInfo: NotificationInfo;
-				}>
+				Record<
+					EntryHashB64,
+					{
+						read: boolean;
+						timestamp: number;
+						contents: NotificationContents;
+					}
+				>
 			>
 		> = {};
 
-		for (const [hash, info] of Array.from(unreadMapResult.value.entries())) {
-			if (!notifications[info.record.entry.notification_type]) {
-				notifications[info.record.entry.notification_type] = {};
+		for (const [hash, notification] of Object.entries(
+			unreadNotifications.value,
+		)) {
+			const contents = notificationsContents[hash];
+			if (!notifications[notification.notification_type]) {
+				notifications[notification.notification_type] = {};
 			}
 			if (
-				!notifications[info.record.entry.notification_type][
-					info.record.entry.notification_group
+				!notifications[notification.notification_type][
+					notification.notification_group
 				]
 			) {
-				notifications[info.record.entry.notification_type][
-					info.record.entry.notification_group
-				] = [];
+				notifications[notification.notification_type][
+					notification.notification_group
+				] = {};
 			}
 
-			notifications[info.record.entry.notification_type][
-				info.record.entry.notification_group
-			].push({
+			notifications[notification.notification_type][
+				notification.notification_group
+			][hash] = {
 				read: false,
-				notificationInfo: info,
-			});
+				timestamp: notification.timestamp,
+				contents,
+			};
 		}
 
-		for (const [hash, info] of Array.from(readMapResult.value.entries())) {
-			if (!notifications[info.record.entry.notification_type]) {
-				notifications[info.record.entry.notification_type] = {};
+		for (const [hash, notification] of Object.entries(
+			readNotifications.value,
+		)) {
+			const contents = notificationsContents[hash];
+			if (!notifications[notification.notification_type]) {
+				notifications[notification.notification_type] = {};
 			}
 			if (
-				!notifications[info.record.entry.notification_type][
-					info.record.entry.notification_group
+				!notifications[notification.notification_type][
+					notification.notification_group
 				]
 			) {
-				notifications[info.record.entry.notification_type][
-					info.record.entry.notification_group
-				] = [];
+				notifications[notification.notification_type][
+					notification.notification_group
+				] = {};
 			}
 
-			notifications[info.record.entry.notification_type][
-				info.record.entry.notification_group
-			].push({
+			notifications[notification.notification_type][
+				notification.notification_group
+			][hash] = {
 				read: true,
-				notificationInfo: info,
-			});
+				timestamp: notification.timestamp,
+				contents,
+			};
 		}
 
-		const unreadPersistent: Array<NotificationGroup> = [];
-		const readPersistent: Array<NotificationGroup> = [];
-		const unreadNonPersistent: Array<NotificationGroup> = [];
-		const readNonPersistent: Array<NotificationGroup> = [];
+		const unreadGroups: Array<NotificationGroup> = [];
+		const readGroups: Array<NotificationGroup> = [];
 
 		for (const [notificationType, groups] of Object.entries(notifications)) {
 			for (const [group, notifications] of Object.entries(groups)) {
-				const persistent = notifications.some(
-					n =>
-						n.notificationInfo.record.entry.persistent &&
-						n.notificationInfo.deletes.length === 0,
-				);
-				const unread = notifications.some(n => !n.read);
-				const timestamps = notifications.map(
-					n => n.notificationInfo.record.action.timestamp,
-				);
+				const unread = Object.values(notifications).some(n => !n.read);
+				const timestamps = Object.values(notifications).map(n => n.timestamp);
 				timestamps.sort((t1, t2) => t2 - t1);
 				const notificationsGroup: NotificationGroup = {
 					group,
-					notifications: notifications.map(n => n.notificationInfo),
-					title: notifications[0].notificationInfo.title,
+					notifications: Object.entries(notifications)
+						.sort((t1, t2) => t2[1].timestamp - t1[1].timestamp)
+						.map(
+							([hash, n]) =>
+								[hash, n.contents] as [string, NotificationContents],
+						),
+					title: Object.values(notifications)[0].contents.title,
 					timestamp: timestamps[0],
 				};
-				if (persistent && unread) unreadPersistent.push(notificationsGroup);
-				if (persistent && !unread) readPersistent.push(notificationsGroup);
-				if (!persistent && unread) unreadNonPersistent.push(notificationsGroup);
-				if (!persistent && !unread) readNonPersistent.push(notificationsGroup);
+				if (unread) unreadGroups.push(notificationsGroup);
+				if (!unread) readGroups.push(notificationsGroup);
 			}
 		}
-		unreadPersistent.sort((a, b) => b.timestamp - a.timestamp);
-		unreadNonPersistent.sort((a, b) => b.timestamp - a.timestamp);
-		readPersistent.sort((a, b) => b.timestamp - a.timestamp);
-		readNonPersistent.sort((a, b) => b.timestamp - a.timestamp);
+		unreadGroups.sort((a, b) => b.timestamp - a.timestamp);
+		readGroups.sort((a, b) => b.timestamp - a.timestamp);
 
 		return {
 			status: 'completed' as const,
 			value: {
-				unreadPersistent,
-				readPersistent,
-				unreadNonPersistent,
-				readNonPersistent,
+				unreadGroups,
+				readGroups,
 			},
 		};
 	}
@@ -314,7 +294,9 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 		]);
 		if (result.status !== 'completed') return 3;
 
-		return result.value[0].size + result.value[1].size;
+		return (
+			Object.keys(result.value[0]).length + Object.keys(result.value[1]).length
+		);
 	}
 
 	render() {
@@ -338,6 +320,10 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 									effect="pulse"
 									style="height: 16px; min-width: 250px;"
 								></sl-skeleton>
+								<sl-skeleton
+									effect="pulse"
+									style="height: 16px; width: 32px;"
+								></sl-skeleton>
 							</div>
 							${i < count - 1 ? html`<sl-divider></sl-divider>` : html``}
 						`,
@@ -349,110 +335,64 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 					.error=${result.error}
 				></display-error>`;
 			case 'completed':
-				const {
-					unreadPersistent,
-					readPersistent,
-					unreadNonPersistent,
-					readNonPersistent,
-				} = result.value;
+				const { unreadGroups, readGroups } = result.value;
 
-				const nonPersistentNotificationsCount =
-					unreadNonPersistent.length + readNonPersistent.length;
-				const persistentNotificationsCount =
-					unreadPersistent.length + readPersistent.length;
+				const notificationsCount = unreadGroups.length + readGroups.length;
 
-				return nonPersistentNotificationsCount > 0 ||
-					persistentNotificationsCount > 0
+				return notificationsCount > 0
 					? html`
 							<div class="column" style="flex: 1">
 								<div class="column">
-									${unreadPersistent.map((n, i) =>
-										this.renderNotificationGroup(
-											false,
-											true,
-											n,
-											i === unreadPersistent.length - 1,
-										),
-									)}
-									${unreadPersistent.length > 0 && readPersistent.length > 0
-										? html`<sl-divider style="--spacing: 0"></sl-divider>`
-										: html``}
-									${readPersistent.map((n, i) =>
-										this.renderNotificationGroup(
-											true,
-											true,
-											n,
-											i === readPersistent.length - 1,
-										),
-									)}
-								</div>
-								<div class="column">
-									${nonPersistentNotificationsCount > 0
-										? html`
-												${persistentNotificationsCount > 0
-													? html`
-															<sl-divider style="--spacing: 0"></sl-divider>
-														`
-													: html``}
-												<div class="row" style="justify-content: end">
-													<sl-button
-														variant="text"
-														@click=${() =>
-															this.notificationsStore.client.dismissNotifications(
-																[
-																	...Array.from([] as ActionHash[]).concat(
-																		...unreadNonPersistent.map(group =>
-																			group.notifications.map(
-																				n => n.record.actionHash,
-																			),
-																		),
-																	),
-																	...Array.from([] as ActionHash[]).concat(
-																		...readNonPersistent.map(group =>
-																			group.notifications.map(
-																				n => n.record.actionHash,
-																			),
-																		),
-																	),
-																],
-															)}
-														size="small"
-													>
-														<sl-icon
-															slot="prefix"
-															.src=${wrapPathInSvg(mdiNotificationClearAll)}
-														></sl-icon>
-														${msg('Dismiss')}</sl-button
-													>
-												</div>
+									<div class="row" style="justify-content: end">
+										<sl-button
+											variant="text"
+											@click=${() =>
+												this.notificationsStore.client.dismissNotifications([
+													...Array.from([] as ActionHash[]).concat(
+														...unreadGroups.map(group =>
+															group.notifications.map(([hash, _]) =>
+																decodeHashFromBase64(hash),
+															),
+														),
+													),
+													...Array.from([] as ActionHash[]).concat(
+														...readGroups.map(group =>
+															group.notifications.map(([hash, _]) =>
+																decodeHashFromBase64(hash),
+															),
+														),
+													),
+												])}
+											size="small"
+										>
+											<sl-icon
+												slot="prefix"
+												.src=${wrapPathInSvg(mdiNotificationClearAll)}
+											></sl-icon>
+											${msg('Dismiss')}</sl-button
+										>
+									</div>
 
-												<sl-divider style="--spacing: 0"></sl-divider>
-												<div class="column">
-													${unreadNonPersistent.map((n, i) =>
-														this.renderNotificationGroup(
-															false,
-															false,
-															n,
-															i === unreadNonPersistent.length - 1,
-														),
-													)}
-													${unreadNonPersistent.length > 0 &&
-													readNonPersistent.length > 0
-														? html`<sl-divider
-																style="--spacing: 0"
-															></sl-divider>`
-														: html``}
-													${readNonPersistent.map((n, i) =>
-														this.renderNotificationGroup(
-															true,
-															false,
-															n,
-															i === readNonPersistent.length - 1,
-														),
-													)}
-												</div>
-											`
-										: html``}
+									<sl-divider style="--spacing: 0"></sl-divider>
+									<div class="column">
+										${unreadGroups.map((n, i) =>
+											this.renderNotificationGroup(
+												false,
+												n,
+												i === unreadGroups.length - 1,
+											),
+										)}
+										${unreadGroups.length > 0 && readGroups.length > 0
+											? html`<sl-divider style="--spacing: 0"></sl-divider>`
+											: html``}
+										${readGroups.map((n, i) =>
+											this.renderNotificationGroup(
+												true,
+												n,
+												i === readGroups.length - 1,
+											),
+										)}
+									</div>
 								</div>
 							</div>
 						`

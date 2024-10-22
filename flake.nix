@@ -27,6 +27,8 @@
       imports = [
         ./zomes/integrity/notifications/zome.nix
         ./zomes/coordinator/notifications/zome.nix
+        ./zomes/integrity/example/zome.nix
+        ./zomes/coordinator/example/zome.nix
         # Just for testing purposes
         ./workdir/dna.nix
         ./workdir/happ.nix

@@ -6,6 +6,7 @@ import {
 } from '@holochain-open-dev/profiles';
 import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import { SignalWatcher, joinAsync } from '@holochain-open-dev/signals';
+import { decodeHashFromBase64 } from '@holochain/client';
 import { consume } from '@lit/context';
 import { localized, msg } from '@lit/localize';
 import { mdiBell } from '@mdi/js';
@@ -70,7 +71,9 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 						hoist
 						@sl-hide=${() =>
 							this.notificationsStore.client.markNotificationsAsRead(
-								Array.from(unreadNotifications.keys()),
+								Object.keys(unreadNotifications).map(hash =>
+									decodeHashFromBase64(hash),
+								),
 							)}
 					>
 						<div slot="trigger" style="position: relative;">
@@ -81,17 +84,19 @@ export class MyNotificationsIconButton extends SignalWatcher(LitElement) {
 								.src=${wrapPathInSvg(mdiBell)}
 							>
 							</sl-icon-button>
-							${unreadNotifications.size + readNotifications.size > 0
+							${Object.keys(unreadNotifications).length +
+								Object.keys(readNotifications).length >
+							0
 								? html`
 										<sl-badge
 											style="position: absolute; left: 16px; top: 0px; z-index: 1000"
 											pill
-											.variant=${unreadNotifications.size > 0
+											.variant=${Object.keys(unreadNotifications).length > 0
 												? 'primary'
 												: 'neutral'}
-											.pulse=${unreadNotifications.size > 0}
-											>${unreadNotifications.size +
-											readNotifications.size}</sl-badge
+											.pulse=${Object.keys(unreadNotifications).length > 0}
+											>${Object.keys(unreadNotifications).length +
+											Object.keys(readNotifications).length}</sl-badge
 										>
 									`
 								: html``}

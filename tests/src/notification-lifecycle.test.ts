@@ -35,14 +35,22 @@ test('create notifications, read it, and dismiss it', async () => {
 
 		// Alice creates a Notification
 		await alice.store.client.sendNotification(
-			await sampleNotification(alice.store.client, {
-				recipient_profile_hash: bobProfile.actionHash,
-			}),
+			bobProfile.actionHash,
+			'example',
+			'type1',
+			'group1',
+			{
+				hello: 'world!',
+			},
 		);
 		await alice.store.client.sendNotification(
-			await sampleNotification(alice.store.client, {
-				recipient_profile_hash: bobProfile.actionHash,
-			}),
+			bobProfile.actionHash,
+			'example',
+			'type1',
+			'group1',
+			{
+				hello: 'world!',
+			},
 		);
 
 		// Wait for the created entry to be propagated to the other node.
@@ -148,14 +156,22 @@ test('create notifications and dismiss it directly', async () => {
 
 		// Alice creates a Notification
 		await alice.store.client.sendNotification(
-			await sampleNotification(alice.store.client, {
-				recipient_profile_hash: bobProfile.actionHash,
-			}),
+			bobProfile.actionHash,
+			'example',
+			'type1',
+			'group1',
+			{
+				hello: 'world!',
+			},
 		);
 		await alice.store.client.sendNotification(
-			await sampleNotification(alice.store.client, {
-				recipient_profile_hash: bobProfile.actionHash,
-			}),
+			bobProfile.actionHash,
+			'example',
+			'type1',
+			'group1',
+			{
+				hello: 'world!',
+			},
 		);
 
 		// Wait for the created entry to be propagated to the other node.

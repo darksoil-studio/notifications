@@ -1,6 +1,7 @@
 import { ProfilesStore } from '@holochain-open-dev/profiles';
 import {
 	AsyncComputed,
+	AsyncSignal,
 	AsyncState,
 	Signal,
 	deletedLinksSignal,
@@ -95,13 +96,18 @@ export class NotificationsStore {
 		return signal;
 	}
 
-	_notificationContents = new HoloHashMap<EntryHash, NotificationContents>();
-	async notificationContents(
+	private _notificationContents = new HoloHashMap<
+		EntryHash,
+		AsyncSignal<NotificationContents>
+	>();
+	notificationContents(
 		notificationHash: EntryHash,
 		notification: Notification,
 	) {
 		if (!this._notificationContents.has(notificationHash)) {
-			const contents = await this.client.getNotificationContents(notification);
+			const contents = fromPromise(() =>
+				this.client.getNotificationContents(notification),
+			);
 			this._notificationContents.set(notificationHash, contents);
 		}
 		return this._notificationContents.get(notificationHash);
