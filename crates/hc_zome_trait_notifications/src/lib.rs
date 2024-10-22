@@ -5,8 +5,8 @@ use std::collections::BTreeMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NotificationType {
-	name: String,
-	description: String,
+	pub name: String,
+	pub description: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
