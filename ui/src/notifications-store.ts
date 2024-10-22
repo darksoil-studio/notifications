@@ -109,7 +109,8 @@ export class NotificationsStore {
 
 	readNotifications = this.buildQueryNotificationsWithStatusSignal('Read');
 
-	dismissedNotifications = this.buildQueryNotificationsWithStatusSignal('Read');
+	dismissedNotifications =
+		this.buildQueryNotificationsWithStatusSignal('Dismissed');
 	// notifications = new LazyHoloHashMap((notificationHash: ActionHash) => ({
 	// 	entry: immutableEntrySignal(() =>
 	// 		this.client.getNotification(notificationHash),

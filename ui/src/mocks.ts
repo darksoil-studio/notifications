@@ -66,25 +66,23 @@ export class NotificationsZomeMock extends ZomeMock implements AppClient {
 			revisions: [record],
 		});
 
-		await Promise.all(
-			notification.recipients_profiles_hashes.map(async recipient => {
-				const existingRecipients =
-					this.notificationsForRecipient.get(recipient) || [];
-				this.notificationsForRecipient.set(recipient, [
-					...existingRecipients,
-					{
-						base: recipient,
-						target: record.signed_action.hashed.hash,
-						author: this.myPubKey,
-						timestamp: Date.now() * 1000,
-						zome_index: 0,
-						link_type: 0,
-						tag: new Uint8Array(),
-						create_link_hash: await fakeActionHash(),
-					},
-				]);
-			}),
-		);
+		const recipient = notification.recipient_profile_hash;
+
+		const existingRecipients =
+			this.notificationsForRecipient.get(recipient) || [];
+		this.notificationsForRecipient.set(recipient, [
+			...existingRecipients,
+			{
+				base: recipient,
+				target: record.signed_action.hashed.hash,
+				author: this.myPubKey,
+				timestamp: Date.now() * 1000,
+				zome_index: 0,
+				link_type: 0,
+				tag: new Uint8Array(),
+				create_link_hash: await fakeActionHash(),
+			},
+		]);
 
 		return record;
 	}
@@ -241,10 +239,12 @@ export async function sampleNotification(
 ): Promise<Notification> {
 	return {
 		...{
+			zome_name: 'example',
 			notification_type: 'type1',
 			notification_group: 'Your notifications',
 			persistent: false,
-			recipients_profiles_hashes: [await fakeActionHash()],
+			recipient_profile_hash: await fakeActionHash(),
+			timestamp: Date.now() * 1000,
 			content: encode({
 				body: 'Hello world!',
 			}),

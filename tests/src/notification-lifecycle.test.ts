@@ -124,17 +124,15 @@ test('create notifications and dismiss it directly', async () => {
 	await runScenario(async scenario => {
 		const { alice, bob } = await setup(scenario);
 
-		const aliceProfile =
-			await alice.store.client.profilesStore.client.createProfile({
-				nickname: 'alice',
-				fields: {},
-			});
+		const aliceProfile = await alice.profilesStore.client.createProfile({
+			nickname: 'alice',
+			fields: {},
+		});
 
-		const bobProfile =
-			await bob.store.client.profilesStore.client.createProfile({
-				nickname: 'bob',
-				fields: {},
-			});
+		const bobProfile = await bob.profilesStore.client.createProfile({
+			nickname: 'bob',
+			fields: {},
+		});
 
 		// Wait for the created entry to be propagated to the other node.
 		await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);

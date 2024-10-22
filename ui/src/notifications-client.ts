@@ -55,9 +55,7 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	async changeNotificationsStatus(
 		statusChanges: Record<EntryHashB64, NotificationStatus>,
 	) {
-		return this.callZome('change_notifications_status', {
-			status_changes: statusChanges,
-		});
+		return this.callZome('change_notifications_status', statusChanges);
 	}
 
 	async queryNotificationsWithStatus(

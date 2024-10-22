@@ -66,8 +66,8 @@ export async function setup(scenario: Scenario) {
 	await scenario.shareAllAgents();
 
 	// Prevent race condition when two zome calls are made instantly at the beginning of the lifecycle that cause a ChainHeadMoved error because they trigger 2 parallel init workflows
-	await aliceStore.client.changeNotificationsStatus({});
-	await bobStore.client.changeNotificationsStatus({});
+	await aliceStore.client.queryNotificationsWithStatus('Unread');
+	await bobStore.client.queryNotificationsWithStatus('Unread');
 
 	return {
 		alice: {
