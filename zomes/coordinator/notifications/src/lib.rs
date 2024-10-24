@@ -7,6 +7,7 @@ pub mod encrypted_message;
 pub mod notification;
 pub mod notifications_settings;
 pub mod profiles;
+pub mod synchronize;
 pub mod utils;
 
 #[hdk_extern]
