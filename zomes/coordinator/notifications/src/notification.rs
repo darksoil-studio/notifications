@@ -22,7 +22,7 @@ fn scheduled_synchronize_with_other_agents_for_my_profile(_: Option<Schedule>) -
 		error!("Failed to synchronize with other agents: {err:?}");
 	}
 
-	Some(Schedule::Persisted("*/30 * * * * * *".into())) // Every three minutes
+	Some(Schedule::Persisted("*/30 * * * * * *".into())) // Every 30 seconds
 }
 
 pub fn synchronize_with_other_agents_for_my_profile() -> ExternResult<()> {
