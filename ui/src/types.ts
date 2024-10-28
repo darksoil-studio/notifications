@@ -60,5 +60,5 @@ export interface NotificationContents {
 	title: string;
 	body: string;
 	icon_src: string;
-	url_path_to_navigate_to_on_click: string;
+	url_path_to_navigate_to_on_click: string | undefined;
 }

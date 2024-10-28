@@ -85,8 +85,10 @@ export class MyNotifications extends SignalWatcher(LitElement) {
 						notificationGroup.notifications[
 							notificationGroup.notifications.length - 1
 						];
-					window.location.href =
-						lastNotification[1].url_path_to_navigate_to_on_click;
+					const url = lastNotification[1].url_path_to_navigate_to_on_click;
+					if (url) {
+						window.location.href = url;
+					}
 				}}
 			>
 				${singleNotification
