@@ -1,44 +1,21 @@
 { inputs, ... }:
 
 {
-  perSystem = { inputs', self', system, ... }: {
-    packages.notifications =
+  perSystem = { inputs', self', system, ... }: rec {
+    builders.notifications = { linked_devices_coordinator_zome_name }:
       inputs.hc-infra.outputs.builders.${system}.rustZome {
         workspacePath = inputs.self.outPath;
         crateCargoToml = ./Cargo.toml;
+        cargoArtifacts = inputs'.hc-infra.packages.zomeCargoArtifacts;
+        zomeEnvironmentVars = {
+          LINKED_DEVICES_COORDINATOR_ZOME_NAME =
+            linked_devices_coordinator_zome_name;
+        };
       };
 
-    # Test only this zome and its integrity in isolation
-    checks.notifications =
-      inputs.hc-infra.outputs.builders.${system}.sweettest {
-        workspacePath = inputs.self.outPath;
-        dna = (inputs.hc-infra.outputs.builders.${system}.dna {
-          dnaManifest = builtins.toFile "dna.yaml" ''
-            ---
-            manifest_version: "1"
-            name: test_dna
-            integrity:
-              network_seed: ~
-              properties: ~
-              origin_time: 1709638576394039
-              zomes: 
-                - name: notifications_integrity
-            coordinator:
-              zomes:
-                - name: notifications
-                  hash: ~
-                  dependencies: 
-                    - name: notifications_integrity
-                  dylib: ~
-          '';
-          zomes = {
-            notifications = self'.packages.notifications;
-            notifications_integrity = self'.packages.notifications_integrity;
-          };
-        });
-        crateCargoToml = ./Cargo.toml;
-      };
-
+    packages.notifications = builders.notifications {
+      linked_devices_coordinator_zome_name = "linked_devices";
+    };
   };
 }
 

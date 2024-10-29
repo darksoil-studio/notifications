@@ -1,4 +1,7 @@
-import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';
+import {
+	LinkedDevicesClient,
+	LinkedDevicesStore,
+} from '@darksoil-studio/linked-devices';
 import { AppWebsocket } from '@holochain/client';
 import { Scenario } from '@holochain/tryorama';
 import { dirname } from 'path';
@@ -43,40 +46,28 @@ export async function setup(scenario: Scenario) {
 	// 	types: {},
 	// };
 
-	const aliceProfilesStore = new ProfilesStore(
-		new ProfilesClient(alice.appWs as any, 'notifications_test', 'profiles'),
+	const aliceLinkedDevicesStore = new LinkedDevicesStore(
+		new LinkedDevicesClient(alice.appWs as any, 'notifications_test'),
 	);
 
 	const aliceStore = new NotificationsStore(
-		new NotificationsClient(
-			alice.appWs as any,
-			'notifications_test',
-			'notifications',
-		),
+		new NotificationsClient(alice.appWs as any, 'notifications_test'),
 	);
 
-	const bobProfilesStore = new ProfilesStore(
-		new ProfilesClient(bob.appWs as any, 'notifications_test', 'profiles'),
+	const bobLinkedDevicesStore = new LinkedDevicesStore(
+		new LinkedDevicesClient(bob.appWs as any, 'notifications_test'),
 	);
 
 	const bobStore = new NotificationsStore(
-		new NotificationsClient(
-			bob.appWs as any,
-			'notifications_test',
-			'notifications',
-		),
+		new NotificationsClient(bob.appWs as any, 'notifications_test'),
 	);
 
-	const bob2ProfilesStore = new ProfilesStore(
-		new ProfilesClient(bob.appWs as any, 'notifications_test', 'profiles'),
+	const bob2LinkedDeviceStore = new LinkedDevicesStore(
+		new LinkedDevicesClient(bob2.appWs as any, 'notifications_test'),
 	);
 
 	const bob2Store = new NotificationsStore(
-		new NotificationsClient(
-			bob2.appWs as any,
-			'notifications_test',
-			'notifications',
-		),
+		new NotificationsClient(bob2.appWs as any, 'notifications_test'),
 	);
 
 	// Shortcut peer discovery through gossip and register all agents in every
@@ -92,17 +83,17 @@ export async function setup(scenario: Scenario) {
 		alice: {
 			player: alice,
 			store: aliceStore,
-			profilesStore: aliceProfilesStore,
+			linkedDevicesStore: aliceLinkedDevicesStore,
 		},
 		bob: {
 			player: bob,
 			store: bobStore,
-			profilesStore: bobProfilesStore,
+			linkedDevicesStore: bobLinkedDevicesStore,
 		},
 		bob2: {
 			player: bob2,
 			store: bob2Store,
-			profilesStore: bob2ProfilesStore,
+			linkedDevicesStore: bob2LinkedDeviceStore,
 			startUp: async () => {
 				await bob2.conductor.startUp();
 				const port = await bob2.conductor.attachAppInterface();

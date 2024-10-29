@@ -1,6 +1,6 @@
 import { AsyncSignal } from '@holochain-open-dev/signals';
 import { ActionCommittedSignal, EntryRecord } from '@holochain-open-dev/utils';
-import { ActionHash, EntryHashB64 } from '@holochain/client';
+import { ActionHash, AgentPubKey, EntryHashB64 } from '@holochain/client';
 
 export type NotificationsSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -15,7 +15,7 @@ export interface Notification {
 
 	notification_group: string;
 
-	recipient_profile_hash: ActionHash;
+	recipient: AgentPubKey;
 	timestamp: number;
 
 	content: Uint8Array;

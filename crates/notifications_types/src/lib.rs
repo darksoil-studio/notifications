@@ -8,7 +8,7 @@ pub struct Notification {
 	pub zome_name: ZomeName,
 	pub notification_type: String,
 	pub notification_group: String,
-	pub recipient_profile_hash: ActionHash,
+	pub recipient: AgentPubKey,
 	pub timestamp: Timestamp,
 	pub content: SerializedBytes,
 }
@@ -39,6 +39,6 @@ pub struct SendNotificationInput {
 	pub zome_name: ZomeName,
 	pub notification_type: String,
 	pub notification_group: String,
-	pub recipient_profile_hash: ActionHash,
+	pub recipient: AgentPubKey,
 	pub content: SerializedBytes,
 }

@@ -6,12 +6,10 @@ use notifications_types::*;
 
 use crate::{
 	encrypted_message::create_encrypted_message,
-	profiles::{get_agent_profile_hash, get_agents_for_profile, get_my_profile_hash},
+	linked_devices::{get_all_agents_for, query_my_linked_devices},
 	utils::create_relaxed,
 	NotificationsRemoteSignal,
 };
-
-// pub const MAX_TAG_SIZE: usize = 1000;
 
 #[hdk_extern]
 pub fn send_notification(input: SendNotificationInput) -> ExternResult<()> {
@@ -20,12 +18,11 @@ pub fn send_notification(input: SendNotificationInput) -> ExternResult<()> {
 		zome_name: input.zome_name,
 		notification_type: input.notification_type,
 		notification_group: input.notification_group,
-		recipient_profile_hash: input.recipient_profile_hash,
+		recipient: input.recipient.clone(),
 		content: input.content,
 	};
-	let recipient = notification.recipient_profile_hash.clone();
 
-	let agents = get_agents_for_profile(recipient)?;
+	let agents = get_all_agents_for(input.recipient.clone())?;
 	send_remote_signal(
 		NotificationsRemoteSignal::Notification(notification.clone()),
 		agents.clone(),
@@ -74,11 +71,7 @@ pub fn change_notifications_status(
 		notifications_status_change.clone(),
 	))?;
 
-	let Some(my_profile_hash) = get_my_profile_hash()? else {
-		return Ok(());
-	};
-
-	let agents = get_agents_for_profile(my_profile_hash)?;
+	let agents = query_my_linked_devices()?;
 
 	send_remote_signal(
 		NotificationsRemoteSignal::NotificationsStatusChanges(notifications_status_change.clone()),
@@ -99,11 +92,10 @@ pub fn change_notifications_status(
 pub fn receive_change_notifications_status(
 	notifications_status_changes: NotificationsStatusChanges,
 ) -> ExternResult<()> {
-	let caller = agent_info()?.agent_latest_pubkey;
-	let my_profile_hash = get_my_profile_hash()?;
-	let caller_profile_hash = get_agent_profile_hash(caller)?;
+	let caller = call_info()?.provenance;
+	let linked_devices = query_my_linked_devices()?;
 
-	if caller_profile_hash.ne(&my_profile_hash) {
+	if !linked_devices.contains(&caller) {
 		return Err(wasm_error!(WasmErrorInner::Guest(format!(
 			"Only agents with the same profile can send change notifications status"
 		))));

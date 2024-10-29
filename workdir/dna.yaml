@@ -15,6 +15,9 @@ integrity:
     - name: example_integrity
       hash: ~
       bundled: <NIX PACKAGE>
+    - name: linked_devices_integrity
+      hash: ~
+      bundled: <NIX PACKAGE>
 coordinator:
   zomes:
     - name: notifications
@@ -32,3 +35,8 @@ coordinator:
       bundled: <NIX PACKAGE>
       dependencies:
         - name: example_integrity
+    - name: linked_devices
+      hash: ~
+      bundled: <NIX PACKAGE>
+      dependencies:
+        - name: linked_devices_integrity

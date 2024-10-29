@@ -1,3 +1,4 @@
+import { LinkedDevicesStore } from '@darksoil-studio/linked-devices';
 import { toPromise } from '@holochain-open-dev/signals';
 import { EntryRecord } from '@holochain-open-dev/utils';
 import { decodeHashFromBase64 } from '@holochain/client';
@@ -11,18 +12,7 @@ test('notifications and their status get synchronized across devices for the sam
 	await runScenario(async scenario => {
 		const { alice, bob, bob2 } = await setup(scenario);
 
-		const aliceProfile = await alice.profilesStore.client.createProfile({
-			nickname: 'alice',
-			fields: {},
-		});
-
-		const bobProfile = await bob.profilesStore.client.createProfile({
-			nickname: 'bob',
-			fields: {},
-		});
-		await bob.profilesStore.client.linkAgentWithMyProfile(
-			bob2.player.agentPubKey,
-		);
+		await linkDevices(bob.linkedDevicesStore, bob2.linkedDevicesStore);
 
 		// Wait for the created entry to be propagated to the other node.
 		await dhtSync(
@@ -41,7 +31,7 @@ test('notifications and their status get synchronized across devices for the sam
 
 		// Alice creates a Notification
 		await alice.store.client.sendNotification(
-			bobProfile.actionHash,
+			bob.player.agentPubKey,
 			'example',
 			'type1',
 			'group1',
@@ -86,18 +76,7 @@ test('notifications and their status get synchronized across devices for the sam
 	await runScenario(async scenario => {
 		const { alice, bob, bob2 } = await setup(scenario);
 
-		const aliceProfile = await alice.profilesStore.client.createProfile({
-			nickname: 'alice',
-			fields: {},
-		});
-
-		const bobProfile = await bob.profilesStore.client.createProfile({
-			nickname: 'bob',
-			fields: {},
-		});
-		await bob.profilesStore.client.linkAgentWithMyProfile(
-			bob2.player.agentPubKey,
-		);
+		await linkDevices(bob.linkedDevicesStore, bob2.linkedDevicesStore);
 
 		// Wait for the created entry to be propagated to the other node.
 		await dhtSync(
@@ -118,7 +97,7 @@ test('notifications and their status get synchronized across devices for the sam
 
 		// Alice creates a Notification
 		await alice.store.client.sendNotification(
-			bobProfile.actionHash,
+			bob.player.agentPubKey,
 			'example',
 			'type1',
 			'group1',
@@ -174,4 +153,23 @@ async function waitUntil(condition: () => Promise<boolean>, timeout: number) {
 	if (timeout <= 0) throw new Error('timeout');
 	await pause(1000);
 	return waitUntil(condition, timeout - (Date.now() - start));
+}
+async function linkDevices(
+	store1: LinkedDevicesStore,
+	store2: LinkedDevicesStore,
+) {
+	const store1Passcode = [1, 3, 7, 2];
+	const store2Passcode = [9, 3, 8, 4];
+
+	await store1.client.prepareLinkDevices(store1Passcode);
+	await store2.client.prepareLinkDevices(store2Passcode);
+
+	await store1.client.initLinkDevices(
+		store2.client.client.myPubKey,
+		store2Passcode,
+	);
+	await store2.client.requestLinkDevices(
+		store1.client.client.myPubKey,
+		store1Passcode,
+	);
 }

@@ -4,9 +4,9 @@ use notifications_integrity::*;
 use notifications_types::{Notification, NotificationsStatusChanges};
 
 pub mod encrypted_message;
+pub mod linked_devices;
 pub mod notification;
 pub mod notifications_settings;
-pub mod profiles;
 pub mod synchronize;
 pub mod utils;
 

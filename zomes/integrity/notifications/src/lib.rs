@@ -1,7 +1,7 @@
 use hdi::prelude::*;
 use notifications_types::*;
 
-pub mod profiles;
+pub mod linked_devices;
 
 pub mod notification;
 pub use notification::*;

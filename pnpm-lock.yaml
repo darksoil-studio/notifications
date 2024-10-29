@@ -92,9 +92,9 @@ importers:
 
   tests:
     dependencies:
-      '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912#path:ui(@types/react@18.3.10)
+      '@darksoil-studio/linked-devices':
+        specifier: github:darksoil-studio/linked-devices#ab51b8a7c3a2dae77506e44711e42c4024c473f0&path:ui
+        version: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0#path:ui(@types/react@18.3.10)
       '@holochain-open-dev/signals':
         specifier: ^0.300.9
         version: 0.300.9(@types/react@18.3.10)
@@ -366,6 +366,10 @@ packages:
 
   '@dabh/diagnostics@2.0.3':
     resolution: {integrity: sha512-hrlQOIi7hAfzsMqlGSFyVucrx38O+j6wiGOf//H2ecvIEqYN4ADBSS2iLMh5UFyDunCNniUIPk/q3riFv45xRA==}
+
+  '@darksoil-studio/linked-devices@https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0}
+    version: 0.1.0
 
   '@docsearch/css@3.6.2':
     resolution: {integrity: sha512-vKNZepO2j7MrYBTZIGXvlUOIR+v9KRf70FApRgovWrj3GTs1EITz/Xb0AOlm1xsQBp16clVZj1SY/qaOJbQtZw==}
@@ -3332,6 +3336,23 @@ snapshots:
       colorspace: 1.1.4
       enabled: 2.0.0
       kuler: 2.0.0
+
+  '@darksoil-studio/linked-devices@https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0#path:ui(@types/react@18.3.10)':
+    dependencies:
+      '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.10)
+      '@holochain-open-dev/signals': 0.300.9(@types/react@18.3.10)
+      '@holochain-open-dev/utils': 0.300.3
+      '@holochain/client': 0.17.1
+      '@lit/context': 1.1.2
+      '@lit/localize': 0.12.2
+      '@mdi/js': 7.4.47
+      '@msgpack/msgpack': 2.8.0
+      '@shoelace-style/shoelace': 2.17.1(@types/react@18.3.10)
+      lit: 3.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
 
   '@docsearch/css@3.6.2': {}
 

@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use hdi::prelude::*;
-use profiles_types::validate_profile_for_agent;
+use linked_devices_types::validate_agents_have_linked_devices;
 
-use crate::profiles::profiles_zome_name;
+use crate::linked_devices::linked_devices_integrity_zome_name;
 
 #[derive(Serialize, Clone, Deserialize, Debug)]
 #[serde(tag = "type")]
@@ -58,7 +58,7 @@ pub fn validate_create_link_profile_to_notifications_settings(
 				"No action hash associated with link".to_string()
 			)))?;
 	let record = must_get_valid_record(target_action_hash)?;
-	let _notification: crate::NotificationsSettings = record
+	let _notification_settings: crate::NotificationsSettings = record
 		.entry()
 		.to_app_option()
 		.map_err(|e| wasm_error!(e))?
@@ -73,25 +73,30 @@ pub fn validate_create_link_profile_to_notifications_settings(
 				"No action hash associated with link".to_string()
 			)))?;
 
-	let result = validate_profile_for_agent(
-		action.author,
-		action_hash,
-		profile_hash,
-		&profiles_zome_name(),
-	)?;
+	let profile_record = must_get_valid_record(profile_hash)?;
+	if action.author.eq(profile_record.action().author()) {
+		return Ok(ValidateCallbackResult::Valid);
+	}
 
-	let ValidateCallbackResult::Valid = result else {
-		return Ok(ValidateCallbackResult::Invalid(String::from(
-			"Only agents with the same associated profile can mark their notifications as read.",
-		)));
-	};
-
-	Ok(ValidateCallbackResult::Valid)
+	if let Some(linked_devices_integrity_zome_name) = linked_devices_integrity_zome_name() {
+		validate_agents_have_linked_devices(
+			&action.author,
+			&action_hash,
+			profile_record.signed_action.hashed.content.author(),
+			profile_record.action_address(),
+			linked_devices_integrity_zome_name,
+		)
+	} else {
+		Ok(ValidateCallbackResult::Invalid(String::from(
+			"Only agents with the same associated profile can .",
+		)))
+	}
 }
+
 pub fn validate_delete_link_profile_to_notifications_settings(
 	action_hash: ActionHash,
 	action: DeleteLink,
-	_original_action: CreateLink,
+	original_action: CreateLink,
 	base_address: AnyLinkableHash,
 	_target: AnyLinkableHash,
 	_tag: LinkTag,
@@ -103,18 +108,21 @@ pub fn validate_delete_link_profile_to_notifications_settings(
 				"No action hash associated with link".to_string()
 			)))?;
 
-	let result = validate_profile_for_agent(
-		action.author,
-		action_hash,
-		profile_hash,
-		&profiles_zome_name(),
-	)?;
+	if action.author.eq(&original_action.author) {
+		return Ok(ValidateCallbackResult::Valid);
+	}
 
-	let ValidateCallbackResult::Valid = result else {
-		return Ok(ValidateCallbackResult::Invalid(String::from(
+	if let Some(linked_devices_integrity_zome_name) = linked_devices_integrity_zome_name() {
+		validate_agents_have_linked_devices(
+			&action.author,
+			&action_hash,
+			&original_action.author,
+			&action.link_add_address,
+			linked_devices_integrity_zome_name,
+		)
+	} else {
+		Ok(ValidateCallbackResult::Invalid(String::from(
 			"Only agents with the same associated profile can mark their notifications as read.",
-		)));
-	};
-
-	Ok(ValidateCallbackResult::Valid)
+		)))
+	}
 }

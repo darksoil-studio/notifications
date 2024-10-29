@@ -12,8 +12,13 @@
           # This overrides all the "bundled" properties for the DNA manifest
           notifications_integrity = self'.packages.notifications_integrity;
           notifications = self'.packages.notifications;
+
           example_integrity = self'.packages.example_integrity;
           example = self'.packages.example;
+
+          linked_devices_integrity =
+            inputs'.linked-devices.packages.linked_devices_integrity;
+          linked_devices = inputs'.linked-devices.packages.linked_devices;
         };
       };
   };

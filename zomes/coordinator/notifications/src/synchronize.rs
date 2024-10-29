@@ -6,8 +6,8 @@ use notifications_types::{
 
 use crate::{
 	encrypted_message::{commit_my_pending_encrypted_messages, create_encrypted_message},
+	linked_devices::query_my_linked_devices,
 	notification::{query_notifications, query_notifications_status_changes},
-	profiles::{get_agents_for_profile, get_my_profile_hash},
 };
 
 #[hdk_extern(infallible)]
@@ -23,13 +23,9 @@ fn scheduled_synchronize_with_other_agents_for_my_profile(_: Option<Schedule>) -
 }
 
 pub fn synchronize_with_other_agents_for_my_profile() -> ExternResult<()> {
-	let Some(my_profile_hash) = get_my_profile_hash()? else {
-		return Ok(());
-	};
-
 	let my_pub_key = agent_info()?.agent_latest_pubkey;
 
-	let agents = get_agents_for_profile(my_profile_hash)?;
+	let agents = query_my_linked_devices()?;
 	let other_agents = agents.into_iter().filter(|a| a.ne(&my_pub_key));
 
 	let notifications = query_notifications()?;

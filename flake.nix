@@ -8,6 +8,7 @@
     hc-infra.url = "github:holochain-open-dev/infrastructure";
     scaffolding.url = "github:holochain-open-dev/templates";
 
+    linked-devices.url = "github:darksoil-studio/linked-devices";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
   };
 
@@ -32,6 +33,7 @@
         # Just for testing purposes
         ./workdir/dna.nix
         ./workdir/happ.nix
+        inputs.hc-infra.outputs.flakeModules.builders
       ];
 
       systems = builtins.attrNames inputs.holonix.devShells;

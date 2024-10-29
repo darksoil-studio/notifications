@@ -3,8 +3,8 @@ use notifications_integrity::{EntryTypes, LinkTypes};
 use notifications_types::NotificationsEncryptedMessage;
 
 use crate::{
+	linked_devices::query_my_linked_devices,
 	notification::{query_notifications, query_notifications_status_changes},
-	profiles::{get_agent_profile_hash, get_my_profile_hash},
 	utils::{create_link_relaxed, create_relaxed, delete_link_relaxed},
 };
 
@@ -41,7 +41,8 @@ pub fn commit_my_pending_encrypted_messages() -> ExternResult<()> {
 		GetLinksInputBuilder::try_new(my_pub_key.clone(), LinkTypes::AgentEncryptedMessage)?
 			.build(),
 	)?;
-	let my_profile_hash = get_my_profile_hash()?;
+	let my_linked_devices = query_my_linked_devices()?;
+
 	let notifications = query_notifications()?;
 	let notifications_status_changes = query_notifications_status_changes()?;
 	let notifications_entry_hashes: Vec<EntryHash> = notifications
@@ -85,11 +86,9 @@ pub fn commit_my_pending_encrypted_messages() -> ExternResult<()> {
 				if !notifications_status_changes_entry_hashes
 					.contains(&notifications_status_changes_hash)
 				{
-					let caller_profile_hash = get_agent_profile_hash(link.author)?;
-
-					if caller_profile_hash.ne(&my_profile_hash) {
+					if !my_linked_devices.contains(&link.author) {
 						return Err(wasm_error!(WasmErrorInner::Guest(format!(
-							"Only agents with the same profile can send change notifications status"
+							"Only linked devices agents can send change notifications status"
 						))));
 					}
 					create_relaxed(EntryTypes::NotificationsStatusChanges(

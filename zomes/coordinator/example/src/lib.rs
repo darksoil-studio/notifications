@@ -22,7 +22,7 @@ impl NotificationsZomeTrait for ExampleNotifications {
 			title: String::from("Hiii"),
 			body: String::from("aaaa"),
 			icon_src: String::from("aaaa"),
-			url_path_to_navigate_to_on_click: String::from("/someurl"),
+			url_path_to_navigate_to_on_click: Some(String::from("/someurl")),
 		})
 	}
 }

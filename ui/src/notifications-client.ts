@@ -3,6 +3,7 @@ import { toPromise } from '@holochain-open-dev/signals';
 import { EntryRecord, ZomeClient } from '@holochain-open-dev/utils';
 import {
 	ActionHash,
+	AgentPubKey,
 	AppClient,
 	CreateLink,
 	Delete,
@@ -34,7 +35,7 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 	/** Notification */
 
 	async sendNotification(
-		recipientProfileHash: ActionHash,
+		recipient: AgentPubKey,
 		zomeName: string,
 		notificationType: string,
 		notificationGroup: string,
@@ -45,7 +46,7 @@ export class NotificationsClient extends ZomeClient<NotificationsSignal> {
 			notification_type: notificationType,
 			notification_group: notificationGroup,
 			content: encode(content),
-			recipient_profile_hash: recipientProfileHash,
+			recipient,
 		});
 	}
 
