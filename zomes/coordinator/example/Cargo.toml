@@ -15,3 +15,4 @@ serde = { workspace = true }
 example_integrity = { path = "../../integrity/example" }
 hc_zome_trait_notifications = { path = "../../../crates/hc_zome_trait_notifications" }
 hc_zome_traits = { git = "https://github.com/holochain-open-dev/zome-traits", branch = "main" }
+md-icons = "0.3"

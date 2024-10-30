@@ -21,7 +21,10 @@ impl NotificationsZomeTrait for ExampleNotifications {
 		Ok(NotificationContents {
 			title: String::from("Hiii"),
 			body: String::from("aaaa"),
-			icon_src: String::from("aaaa"),
+			icon_src: format!(
+				"data:image/svg+xml;charset=utf-8,{}",
+				md_icons::filled::ICON_NOTIFICATIONS
+			),
 			url_path_to_navigate_to_on_click: Some(String::from("/someurl")),
 		})
 	}

@@ -93,8 +93,8 @@ importers:
   tests:
     dependencies:
       '@darksoil-studio/linked-devices':
-        specifier: github:darksoil-studio/linked-devices#ab51b8a7c3a2dae77506e44711e42c4024c473f0&path:ui
-        version: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0#path:ui(@types/react@18.3.10)
+        specifier: github:darksoil-studio/linked-devices#7ba584d160e76afc69169a87460d434888d83182&path:ui
+        version: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/7ba584d160e76afc69169a87460d434888d83182#path:ui(@types/react@18.3.10)
       '@holochain-open-dev/signals':
         specifier: ^0.300.9
         version: 0.300.9(@types/react@18.3.10)
@@ -119,12 +119,15 @@ importers:
 
   ui:
     dependencies:
+      '@darksoil-studio/linked-devices':
+        specifier: github:darksoil-studio/linked-devices#7ba584d160e76afc69169a87460d434888d83182&path:ui
+        version: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/7ba584d160e76afc69169a87460d434888d83182#path:ui(@types/react@18.3.10)
       '@holochain-open-dev/elements':
         specifier: ^0.300.1
         version: 0.300.1(@types/react@18.3.10)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912#path:ui(@types/react@18.3.10)
+        specifier: github:holochain-open-dev/profiles#cfebe3288b8eca35b47482fbd4341395521653b5&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/cfebe3288b8eca35b47482fbd4341395521653b5#path:ui(@types/react@18.3.10)
       '@holochain-open-dev/signals':
         specifier: ^0.300.6
         version: 0.300.7(@types/react@18.3.10)
@@ -367,8 +370,8 @@ packages:
   '@dabh/diagnostics@2.0.3':
     resolution: {integrity: sha512-hrlQOIi7hAfzsMqlGSFyVucrx38O+j6wiGOf//H2ecvIEqYN4ADBSS2iLMh5UFyDunCNniUIPk/q3riFv45xRA==}
 
-  '@darksoil-studio/linked-devices@https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0}
+  '@darksoil-studio/linked-devices@https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/7ba584d160e76afc69169a87460d434888d83182#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/7ba584d160e76afc69169a87460d434888d83182}
     version: 0.1.0
 
   '@docsearch/css@3.6.2':
@@ -716,12 +719,12 @@ packages:
   '@holochain-open-dev/elements@0.300.1':
     resolution: {integrity: sha512-i0BYvrM+aKFlyiNQ02mkqTElLxQ4AFM0nBs4whXrb/p7XU/SQm0dApieEGMsTgtZu8cI/ZgmPzi6qQSduXXLPA==}
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912}
-    version: 0.300.0
-
   '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/43e97c82887cc3eb91ef92c9ab01b93529693b68#path:ui':
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/43e97c82887cc3eb91ef92c9ab01b93529693b68}
+    version: 0.300.0
+
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/cfebe3288b8eca35b47482fbd4341395521653b5#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/cfebe3288b8eca35b47482fbd4341395521653b5}
     version: 0.300.0
 
   '@holochain-open-dev/signals@0.300.7':
@@ -3337,7 +3340,7 @@ snapshots:
       enabled: 2.0.0
       kuler: 2.0.0
 
-  '@darksoil-studio/linked-devices@https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/ab51b8a7c3a2dae77506e44711e42c4024c473f0#path:ui(@types/react@18.3.10)':
+  '@darksoil-studio/linked-devices@https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/7ba584d160e76afc69169a87460d434888d83182#path:ui(@types/react@18.3.10)':
     dependencies:
       '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.10)
       '@holochain-open-dev/signals': 0.300.9(@types/react@18.3.10)
@@ -3586,10 +3589,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/2fdcdf6ea7aafba0aef71fe43f03ccf19e54c912#path:ui(@types/react@18.3.10)':
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/43e97c82887cc3eb91ef92c9ab01b93529693b68#path:ui(@types/react@18.3.10)':
     dependencies:
       '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.10)
-      '@holochain-open-dev/signals': 0.300.9(@types/react@18.3.10)
+      '@holochain-open-dev/signals': 0.300.7(@types/react@18.3.10)
       '@holochain-open-dev/utils': 0.300.3
       '@holochain/client': 0.17.1
       '@lit/context': 1.1.2
@@ -3603,10 +3606,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/43e97c82887cc3eb91ef92c9ab01b93529693b68#path:ui(@types/react@18.3.10)':
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/cfebe3288b8eca35b47482fbd4341395521653b5#path:ui(@types/react@18.3.10)':
     dependencies:
+      '@darksoil-studio/linked-devices': https://codeload.github.com/darksoil-studio/linked-devices/tar.gz/7ba584d160e76afc69169a87460d434888d83182#path:ui(@types/react@18.3.10)
       '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.10)
-      '@holochain-open-dev/signals': 0.300.7(@types/react@18.3.10)
+      '@holochain-open-dev/signals': 0.300.9(@types/react@18.3.10)
       '@holochain-open-dev/utils': 0.300.3
       '@holochain/client': 0.17.1
       '@lit/context': 1.1.2

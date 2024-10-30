@@ -241,9 +241,9 @@
               },
               "parameters": [
                 {
-                  "name": "recipientProfileHash",
+                  "name": "recipient",
                   "type": {
-                    "text": "ActionHash"
+                    "text": "AgentPubKey"
                   }
                 },
                 {

@@ -6,6 +6,7 @@
     holonix.url = "github:holochain/holonix/main-0.3";
 
     hc-infra.url = "github:holochain-open-dev/infrastructure";
+    playground.url = "github:darksoil-studio/holochain-playground";
     scaffolding.url = "github:holochain-open-dev/templates";
 
     linked-devices.url = "github:darksoil-studio/linked-devices";
@@ -44,7 +45,10 @@
             inputs'.holonix.devShells.default
           ];
 
-          packages = [ inputs'.scaffolding.packages.hc-scaffold-zome-template ];
+          packages = [
+            inputs'.scaffolding.packages.hc-scaffold-zome-template
+            inputs'.playground.packages.hc-playground
+          ];
         };
 
         packages.scaffold = pkgs.symlinkJoin {

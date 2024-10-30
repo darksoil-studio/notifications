@@ -754,6 +754,7 @@ dependencies = [
  "hc_zome_trait_notifications",
  "hc_zome_traits",
  "hdk",
+ "md-icons",
  "serde",
 ]
 
@@ -1485,6 +1486,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b955cdeb2a02b9117f121ce63aa52d08ade45de53e48fe6a38b39c10f6f709"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "md-icons"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92a8a34ce0ef8669a642689265130eeb3b3522e1b092b43a5f769dd2d7e514a5"
+dependencies = [
+ "md-icons-helper",
+]
+
+[[package]]
+name = "md-icons-helper"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "834ea50ceffebd87377a1e6f2f0bdfe3355289c3903a412feca280709661d392"
+dependencies = [
+ "regex",
 ]
 
 [[package]]

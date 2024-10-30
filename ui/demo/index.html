@@ -32,6 +32,12 @@
 
 		<script type="module">
 			import {
+				LinkedDevicesClient,
+				LinkedDevicesStore,
+				linkedDevicesStoreContext,
+			} from '@darksoil-studio/linked-devices';
+			import '@darksoil-studio/linked-devices/dist/elements/link-devices-recipient.js';
+			import {
 				sharedStyles,
 				wrapPathInSvg,
 			} from '@holochain-open-dev/elements';
@@ -41,7 +47,6 @@
 				ProfilesStore,
 				profilesStoreContext,
 			} from '@holochain-open-dev/profiles';
-			import '@holochain-open-dev/profiles/dist/elements/link-agent-recipient.js';
 			import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
 			import {
 				Signal,
@@ -84,6 +89,15 @@
 					);
 					new ContextProvider(this, profilesStoreContext, this.profilesStore);
 
+					const linkedDevicesStore = new LinkedDevicesStore(
+						new LinkedDevicesClient(appClient, 'notifications_test'),
+					);
+					new ContextProvider(
+						this,
+						linkedDevicesStoreContext,
+						linkedDevicesStore,
+					);
+
 					this._notificationsStore = new NotificationsStore(
 						new NotificationsClient(appClient, 'notifications_test'),
 						//	{
@@ -123,7 +137,7 @@
 						);
 						if (otherAgentLink) {
 							console.log(otherAgentLink);
-							this.peer = otherAgentLink.target;
+							this.peer = otherAgentLink.author;
 							this.requestUpdate();
 							clearInterval(interval);
 						}
@@ -132,12 +146,12 @@
 
 				renderContent() {
 					if (this.linkAgent)
-						return html`<link-agent-recipient
-							@agent-linked=${() => {
+						return html`<link-devices-recipient
+							@device-linked=${() => {
 								this.linkAgent = false;
 								this.requestUpdate();
 							}}
-						></link-agent-recipient>`;
+						></link-devices-recipient>`;
 
 					const result = joinAsync([
 						this._notificationsStore.unreadNotifications.get(),
