@@ -3,9 +3,8 @@
   "private": true,
   "scripts": {
     "start": "AGENTS=2 pnpm network",
-    "network": "hc s clean && pnpm build:happ && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) UI_PORT=8888 concurrently -k \"pnpm -F @darksoil-studio/notifications start\" \"pnpm launch\" \"hc playground\" \"pnpm local-services\"",
-    "launch": "echo pass | WEBKIT_DISABLE_DMABUF_RENDERER=1 RUST_LOG=warn hc launch --piped -n $AGENTS workdir/notifications_test-debug.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:$BOOTSTRAP_PORT webrtc ws://127.0.0.1:$SIGNAL_PORT",
-    "local-services": "hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT",
+    "network": "pnpm build:happ && UI_PORT=8888 concurrently -k \"pnpm -F @darksoil-studio/notifications start\" \"pnpm launch\" \"hc playground\"",
+    "launch": "concurrently-repeat  \"RUST_LOG=warn hc pilot workdir/notifications_test-debug.happ --ui-port $UI_PORT\" $AGENTS",
     "test": "pnpm build:happ && pnpm -F tests test",
     "build:happ": "nix build --no-update-lock-file -L .#notifications_test_app.meta.debug -o workdir/notifications_test-debug.happ"
   },
@@ -13,13 +12,13 @@
     "@eslint/js": "^9.11.1",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "concurrently": "^6.5.1",
+    "concurrently-repeat": "^0.0.1",
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
     "gh-pages": "^3.2.3",
-    "new-port-cli": "^1.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2",
-    "typescript-eslint": "^7.18.0"
+    "typescript-eslint": "^8.0.0"
   },
   "type": "module",
   "engines": {

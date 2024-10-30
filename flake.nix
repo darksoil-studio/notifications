@@ -8,6 +8,7 @@
     hc-infra.url = "github:holochain-open-dev/infrastructure";
     playground.url = "github:darksoil-studio/holochain-playground";
     scaffolding.url = "github:holochain-open-dev/templates";
+    p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard";
 
     linked-devices.url = "github:darksoil-studio/linked-devices";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
@@ -48,6 +49,7 @@
           packages = [
             inputs'.scaffolding.packages.hc-scaffold-zome-template
             inputs'.playground.packages.hc-playground
+            inputs'.p2p-shipyard.packages.hc-pilot
           ];
         };
 
